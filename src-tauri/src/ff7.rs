@@ -1,67 +1,143 @@
-use std::time::Duration;
-use std::thread;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use sysinfo::{System, Pid};
-use lazy_static::lazy_static;
-use parking_lot::Mutex;
+use serde::Serialize;
+use crate::memory::*;
 
-struct FF7ProcessScanner {
-    process: Option<Pid>,
-    is_scanning: Arc<AtomicBool>,
+#[derive(Serialize)]
+struct FF7BasicData {
+    current_module: u16,
+    game_moment: u16,
+    field_id: u16,
+    field_fps: f64,
+    battle_fps: f64,
+    world_fps: f64,
+    in_game_time: u32,
+    disc_id: u8,
+    menu_visibility: u16,
+    menu_locks: u16,
+    field_movement_disabled: u8,
+    field_menu_access_enabled: u8,
+    party_bitmask: u16,
+    gil: u32,
+    battle_count: u16,
+    battle_escape_count: u16,
+    field_battle_check: u32,
+    game_obj_ptr: u32,
+    battle_swirl_check: u8,
+    instant_atb_check: u16,
 }
 
-impl FF7ProcessScanner {
-    fn new() -> Self {
-        FF7ProcessScanner {
-            process: None,
-            is_scanning: Arc::new(AtomicBool::new(false)),
+#[derive(Serialize)]
+struct FieldModel {
+    x: i32,
+    y: i32,
+    z: i32,
+    direction: u8,
+}
+
+#[derive(Serialize)]
+struct BattleCharObj {
+    hp: u16,
+    max_hp: u16,
+    mp: u16,
+    max_mp: u16,
+    atb: u16,
+    limit: u8,
+}
+
+#[derive(Serialize)]
+pub struct FF7Data {
+    basic: FF7BasicData,
+    field_models: Vec<FieldModel>,
+    battle_chars: Vec<BattleCharObj>,
+}
+
+macro_rules! read_memory {
+    ($($field:ident: $read_fn:ident($addr:expr)),* $(,)?) => {
+        {
+            let mut data = FF7BasicData {
+                $($field: 0 as _,)*
+            };
+            $(
+                data.$field = $read_fn($addr)
+                    .map_err(|e| format!("Failed to read {}: {}", stringify!($field), e))?;
+            )*
+            data
+        }
+    };
+}
+
+fn read_field_models() -> Result<Vec<FieldModel>, String> {
+    let mut models: Vec<FieldModel> = Vec::new();
+    for i in 0..16 {
+        let model_ptr = read_memory_int(0xcff738);
+        if let Ok(model_ptr) = model_ptr {
+            let base_address = model_ptr + i * 400;
+            let x = read_memory_signed_int(base_address + 4);
+            let y = read_memory_signed_int(base_address + 8);
+            let z = read_memory_signed_int(base_address + 0xc);
+            let direction = read_memory_byte(base_address + 0x1c);
+            let model = FieldModel {
+                x: x.unwrap_or(0),
+                y: y.unwrap_or(0),
+                z: z.unwrap_or(0),
+                direction: direction.unwrap_or(0),
+            };
+            models.push(model);
         }
     }
 
-    fn start_scanning(&mut self) {
-        let is_scanning = self.is_scanning.clone();
-        is_scanning.store(true, Ordering::SeqCst);
+    Ok(models)
+}
 
-        thread::spawn(move || {
-            let mut local_system = System::new_all();
-            while is_scanning.load(Ordering::SeqCst) {
-                local_system.refresh_processes();
-
-                if let Some((&pid, _)) = local_system.processes().iter().find(|(_, process)| process.name() == "ff7_en.exe") {
-                    SCANNER.lock().process = Some(pid);
-                    // println!("Found ff7_en.exe process with PID: {}", pid);
-                } else {
-                    SCANNER.lock().process = None;
-                    // println!("No ff7_en.exe process found");
-                }
-
-                thread::sleep(Duration::from_millis(200));
-            }
-        });
+fn read_battle_chars() -> Result<Vec<BattleCharObj>, String> {
+    let mut chars: Vec<BattleCharObj> = Vec::new();
+    let ally_ptr_base = 0x9ab0dc;
+    let char_obj_length = 104;
+    let ally_limit_ptr_base = 0x9a8dc2;
+    let ally_limit_length = 52;
+    for i in 0..3 {
+        let char = BattleCharObj {
+            hp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x2c)?,
+            max_hp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x30)?,
+            mp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x28)?,
+            max_mp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x2a)?,
+            atb: read_memory_short(ally_ptr_base + i * char_obj_length)?,
+            limit: read_memory_byte(ally_limit_ptr_base + i * ally_limit_length)?,
+        };
+        chars.push(char);
     }
-
-    fn get_pid(&self) -> Option<Pid> {
-        self.process
-    }
-
-    // fn is_scanning(&self) -> bool {
-    //     self.is_scanning.load(Ordering::SeqCst)
-    // }
+    Ok(chars)
 }
 
-lazy_static! {
-    static ref SCANNER: Mutex<FF7ProcessScanner> = Mutex::new(FF7ProcessScanner::new());
-}
+pub fn read_data() -> Result<FF7Data, String> {
+    let basic = read_memory!(
+        current_module: read_memory_short(0xcbf9dc),
+        game_moment: read_memory_short(0xdc08dc),
+        field_id: read_memory_short(0xcc15d0),
+        field_fps: read_memory_float(0xcff890),
+        battle_fps: read_memory_float(0x9ab090),
+        world_fps: read_memory_float(0xde6938),
+        in_game_time: read_memory_int(0xdc08b8),
+        disc_id: read_memory_byte(0xdc08dc),
+        menu_visibility: read_memory_short(0xdc08f8),
+        menu_locks: read_memory_short(0xdc08fa),
+        field_movement_disabled: read_memory_byte(0xcc0dba),
+        field_menu_access_enabled: read_memory_byte(0xcc0dbc),
+        party_bitmask: read_memory_short(0xdc0dde),
+        gil: read_memory_int(0xdc08b4),
+        battle_count: read_memory_short(0xdc08f4),
+        battle_escape_count: read_memory_short(0xdc08f6),
+        field_battle_check: read_memory_int(0x60b40a),
+        game_obj_ptr: read_memory_int(0xdb2bb8),
+        battle_swirl_check: read_memory_byte(0x4027e5),
+        instant_atb_check: read_memory_short(0x433abd),
+    );
+    let field_models = read_field_models()?;
+    let battle_chars = read_battle_chars()?;
+    let data = FF7Data {
+        basic,
+        field_models,
+        battle_chars,
+    };
 
-pub fn initialize() {
-    SCANNER.lock().start_scanning();
+    Ok(data)
 }
-
-pub fn get_pid() -> Option<Pid> {
-    SCANNER.lock().get_pid()
-}
-
-// pub fn is_scanning() -> bool {
-//     SCANNER.lock().is_scanning()
-// }

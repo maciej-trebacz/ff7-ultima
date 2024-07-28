@@ -316,8 +316,7 @@ export function useFF7() {
     }
   }
 
-  // Wait for a specific state in the gameState object to be equal to a value
-  const waitForStateValue = async (address: number, value: number, type: DataType) => {
+  const waitForMemoryValue = async (address: number, value: number, type: DataType) => {
     return new Promise(resolve => {
       const intervalId = setInterval(async () => {
         try {
@@ -364,7 +363,7 @@ export function useFF7() {
     });
 
     // Wait for the battle to start
-    await waitForStateValue(0xcbf9dc, GameModule.Battle, DataType.Byte);
+    await waitForMemoryValue(0xcbf9dc, GameModule.Battle, DataType.Byte);
 
     // Reset the game module variable
     await invoke("write_memory_byte", {
@@ -451,7 +450,7 @@ export function useFF7() {
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {
-        console.log("Error: ", e);
+        console.warn("Could not read FF7 data: ", e);
         setConnected(false);
       }
     }, 125);
