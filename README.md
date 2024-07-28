@@ -28,6 +28,8 @@ Real-time editor for Final Fantasy VII
   * [ ] set specific battle flags
 * [x] No battles / max battles for both field and world
 * [x] Enter battle for specific battle formation id
+  * [x] Field
+  * [ ] World
 * [x] Disable battle swirl
 * [ ] Teleport to specific field
 * [ ] Teleport to specific place on the world map ?

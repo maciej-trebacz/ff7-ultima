@@ -1,164 +1,126 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import { getCurrent } from "@tauri-apps/api/webview";
 import "./App.css";
+import { useState } from "react";
 import { useFF7 } from "./useFF7";
-import { getCurrent as getCurrentWindow } from "@tauri-apps/api/window";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [battleId, setBattleId] = useState("");
 
-  const {
-    connected,
-    gameState,
-    setSpeed,
-    toggleMenuAccess,
-    toggleMovement,
-    enableAllMenus,
-    enableAllPartyMembers,
-    disableBattles,
-    enableBattles,
-    maxBattles,
-    endBattle,
-    patchWindowUnfocus,
-    unpatchWindowUnfocus,
-    skipFMV,
-    startBattle,
-    disableBattleSwirl,
-    enableBattleSwirl,
-    enableInstantATB,
-    disableInstantATB,
-  } = useFF7();
-
-  async function greet() {
-    try {
-      const readTest = await invoke("read_ff7_data");
-      console.log({ readTest });
-    } catch (e) {
-      console.log("Error: ", e);
-    }
-  }
-
-  useEffect(() => {
-    getCurrentWindow().show();
-  }, []);
+  const ff7 = useFF7();
+  const state = ff7.gameState;
 
   return (
     <div className="container">
-      Connected: {connected ? "Yes" : "No"}
+      Connected: {ff7.connected ? "Yes" : "No"}
       <br />
       <br />
-      Game Moment: {gameState.gameMoment}
+      Game Moment: {state.gameMoment}
       <br />
-      Field FPS: {gameState.fieldFps}
+      Field FPS: {state.fieldFps}
       <br />
-      Battle FPS: {gameState.battleFps}
+      Battle FPS: {state.battleFps}
       <br />
-      World FPS: {gameState.worldFps}
+      World FPS: {state.worldFps}
       <br />
-      Current Module: {gameState.currentModule}
+      Current Module: {state.currentModule}
       <br />
-      Field ID: {gameState.fieldId}
+      Field ID: {state.fieldId}
       <br />
-      In Game Time: {gameState.inGameTime}
+      In Game Time: {state.inGameTime}
       <br />
-      DISC ID: {gameState.discId}
+      DISC ID: {state.discId}
       <br />
-      Menu Visibility: {gameState.menuVisibility}
+      Menu Visibility: {state.menuVisibility}
       <br />
-      Menu Locks: {gameState.menuLocks}{" "}
-      <button className="btn btn-primary" onClick={() => enableAllMenus()}>
+      Menu Locks: {state.menuLocks}{" "}
+      <button className="btn btn-primary" onClick={() => ff7.enableAllMenus()}>
         Enable All
       </button>
       <br />
-      Field Movement Disabled: {gameState.fieldMovementDisabled}{" "}
-      <button className="btn btn-primary" onClick={() => toggleMovement()}>
+      Field Movement Disabled: {state.fieldMovementDisabled}{" "}
+      <button className="btn btn-primary" onClick={() => ff7.toggleMovement()}>
         Toggle
       </button>
       <br />
-      Field Menu Access Enabled: {gameState.fieldMenuAccessEnabled}{" "}
-      <button className="btn btn-primary" onClick={() => toggleMenuAccess()}>
+      Field Menu Access Enabled: {state.fieldMenuAccessEnabled}{" "}
+      <button className="btn btn-primary" onClick={() => ff7.toggleMenuAccess()}>
         Toggle
       </button>
       <br />
-      Party Bitmask: {gameState.partyBitmask}{" "}
+      Party Bitmask: {state.partyBitmask}{" "}
       <button
         className="btn btn-primary"
-        onClick={() => enableAllPartyMembers()}
+        onClick={() => ff7.enableAllPartyMembers()}
       >
         Enable All
       </button>
       <br />
-      GIL: {gameState.gil}
+      GIL: {state.gil}
       <br />
-      Battle Count: {gameState.battleCount}
+      Battle Count: {state.battleCount}
       <br />
-      Battle Escape Count: {gameState.battleEscapeCount}
+      Battle Escape Count: {state.battleEscapeCount}
       <br />
       <br />
       Speed: 
-      <button className="btn btn-primary" onClick={() => setSpeed(0.25)}>
+      <button className="btn btn-primary" onClick={() => ff7.setSpeed(0.25)}>
         0.25x
       </button>
-      <button className="btn btn-primary" onClick={() => setSpeed(0.5)}>
+      <button className="btn btn-primary" onClick={() => ff7.setSpeed(0.5)}>
         0.5x
       </button>
-      <button className="btn btn-primary" onClick={() => setSpeed(1)}>
+      <button className="btn btn-primary" onClick={() => ff7.setSpeed(1)}>
         1x
       </button>
-      <button className="btn btn-primary" onClick={() => setSpeed(2)}>
+      <button className="btn btn-primary" onClick={() => ff7.setSpeed(2)}>
         2x
       </button>
-      <button className="btn btn-primary" onClick={() => setSpeed(4)}>
+      <button className="btn btn-primary" onClick={() => ff7.setSpeed(4)}>
         4x
       </button>
       <br />
-      <button className="btn btn-primary" onClick={() => endBattle()}>
+      <button className="btn btn-primary" onClick={() => ff7.endBattle()}>
         End Battle
       </button>
-      <button className="btn btn-primary" onClick={() => disableBattles()}>
+      <button className="btn btn-primary" onClick={() => ff7.disableBattles()}>
         Disable Battles
       </button>
-      <button className="btn btn-primary" onClick={() => enableBattles()}>
+      <button className="btn btn-primary" onClick={() => ff7.enableBattles()}>
         Enable Battles
       </button>
-      <button className="btn btn-primary" onClick={() => maxBattles()}>
+      <button className="btn btn-primary" onClick={() => ff7.maxBattles()}>
         Max Battles
       </button>
-      Status: {gameState.battlesDisabled ? "Battles Disabled" : gameState.maxBattlesEnabled ? "Max Battles Enabled" : "Battles Enabled"}
+      Status: {state.battlesDisabled ? "Battles Disabled" : state.maxBattlesEnabled ? "Max Battles Enabled" : "Battles Enabled"}
       <br />
-      <button className="btn btn-primary" onClick={() => disableBattleSwirl()}>
+      <button className="btn btn-primary" onClick={() => ff7.disableBattleSwirl()}>
         Disable Battle Swirl
       </button>
-      <button className="btn btn-primary" onClick={() => enableBattleSwirl()}>
+      <button className="btn btn-primary" onClick={() => ff7.enableBattleSwirl()}>
         Enable Battle Swirl
       </button>
-      Status: {gameState.battleSwirlDisabled ? "Disabled" : "Enabled"}
+      Status: {state.battleSwirlDisabled ? "Disabled" : "Enabled"}
       <br />
-      <button className="btn btn-primary" onClick={() => enableInstantATB()}>
+      <button className="btn btn-primary" onClick={() => ff7.enableInstantATB()}>
         Enable Instant ATB
       </button>
-      <button className="btn btn-primary" onClick={() => disableInstantATB()}>
+      <button className="btn btn-primary" onClick={() => ff7.disableInstantATB()}>
         Disable Instant ATB
       </button>
-      Status: {gameState.instantATBEnabled ? "Enabled" : "Disabled"}
+      Status: {state.instantATBEnabled ? "Enabled" : "Disabled"}
       <br />
       Battle ID: <input type="number" value={battleId} onChange={(e) => setBattleId(e.target.value)} />
-      <button className="btn btn-primary" onClick={() => startBattle(parseInt(battleId))}>
+      <button className="btn btn-primary" onClick={() => ff7.startBattle(parseInt(battleId))}>
         Start Battle
       </button>
       <br />
-      <button className="btn btn-primary" onClick={() => patchWindowUnfocus()}>
+      <button className="btn btn-primary" onClick={() => ff7.patchWindowUnfocus()}>
         Patch Window Unfocus
       </button>
-      <button className="btn btn-primary" onClick={() => unpatchWindowUnfocus()}>
+      <button className="btn btn-primary" onClick={() => ff7.unpatchWindowUnfocus()}>
         Unpatch Window Unfocus
       </button>
       <br />
-      <button className="btn btn-primary" onClick={() => skipFMV()}>
+      <button className="btn btn-primary" onClick={() => ff7.skipFMV()}>
         Skip FMV
       </button>
       <br /><br />
@@ -168,7 +130,7 @@ function App() {
             <div className="card">
               <div className="card-body">
                 <p className="card-text">
-                  {gameState.fieldModels.map((model, i) => (
+                  {state.fieldModels.map((model, i) => (
                     <div key={i}>
                       <h5 className="card-title">Field Model {i}</h5>
                       <div>X: {model.x}</div>
@@ -190,7 +152,7 @@ function App() {
             <div className="card">
               <div className="card-body">
                 <p className="card-text">
-                  {gameState.battlePartyChars.map((char, i) => (
+                  {state.battlePartyChars.map((char, i) => (
                     <div key={i}>
                       <h5 className="card-title">Battle Char {i}</h5>
                       <div>HP: {char.hp} / {char.max_hp}</div>
