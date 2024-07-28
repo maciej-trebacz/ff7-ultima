@@ -6,7 +6,7 @@ import { useFF7State } from "./state";
 import { GameModule } from "./types";
 
 export function useFF7() {
-  const { connected, gameState } = useFF7State();
+  const { connected, gameState, hacks, setHacks } = useFF7State();
 
   const getFieldObjPtr = async () => {
     const fieldObjPtr = await readMemory(0xCBF9D8, DataType.Int);
@@ -24,6 +24,12 @@ export function useFF7() {
     const gfxFunctionPtrs = await readMemory(gameState.gameObjPtr + 0x934, DataType.Int);
     return readMemory(gfxFunctionPtrs + 0x4, DataType.Int);
   };
+
+  if (hacks.skipIntro && gameState.currentModule === GameModule.Intro) {
+    setTimeout(async () => {
+      await writeMemory(0xf4f448, 0x01, DataType.Byte);
+    }, 0);
+  }
 
   const ff7 = {
     connected,
@@ -204,6 +210,13 @@ export function useFF7() {
     disableInstantATB: async () => {
       await writeMemory(0x433abd, [0x66, 0x8b, 0x0d, 0x00, 0xad, 0x9a, 0x00, 0x99, 0xf7, 0xf9], DataType.Buffer);
     },
+    enableSkipIntro: async () => {
+      setHacks({ ...hacks, skipIntro: true });
+    },
+    disableSkipIntro: async () => {
+      setHacks({ ...hacks, skipIntro: false });
+    },
+    introDisabled: hacks.skipIntro,
   };
 
   return ff7;

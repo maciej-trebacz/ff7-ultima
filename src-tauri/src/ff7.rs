@@ -117,7 +117,7 @@ pub fn read_data() -> Result<FF7Data, String> {
         battle_fps: read_memory_float(0x9ab090),
         world_fps: read_memory_float(0xde6938),
         in_game_time: read_memory_int(0xdc08b8),
-        disc_id: read_memory_byte(0xdc08dc),
+        disc_id: read_memory_byte(0xdc0bdc),
         menu_visibility: read_memory_short(0xdc08f8),
         menu_locks: read_memory_short(0xdc08fa),
         field_movement_disabled: read_memory_byte(0xcc0dba),

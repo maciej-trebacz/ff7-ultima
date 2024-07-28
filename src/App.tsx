@@ -123,6 +123,14 @@ function App() {
       <button className="btn btn-primary" onClick={() => ff7.skipFMV()}>
         Skip FMV
       </button>
+      <br />
+      <button className="btn btn-primary" onClick={() => ff7.enableSkipIntro()}>
+        Enable Skip Intro
+      </button>
+      <button className="btn btn-primary" onClick={() => ff7.disableSkipIntro()}>
+        Disable Skip Intro
+      </button>
+      Intro Disabled: {ff7.introDisabled ? "Yes" : "No"}
       <br /><br />
       <div className="container">
         <div className="row">

@@ -6,6 +6,9 @@ import { GameModule, FieldModel, BattleCharObj } from "./types";
 
 export const useFF7State = function() {
   const [connected, setConnected] = useState(false);
+  const [hacks, setHacks] = useState({
+    skipIntro: false,
+  });
   const [gameState, setGameState] = useState({
     currentModule: 0,
     gameMoment: 0,
@@ -78,5 +81,7 @@ export const useFF7State = function() {
   return {
     connected,
     gameState,
+    hacks,
+    setHacks,
   }
 }
