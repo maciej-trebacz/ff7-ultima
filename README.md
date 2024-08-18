@@ -5,7 +5,7 @@ Real-time editor for Final Fantasy VII
 ## TODO
 
 * [x] Test Rust's ability to connect to a process and read/write its memory
-* [ ] Read basic game state information
+* Read basic game state information
   * [x] Game Moment
   * [x] Battle / escape counts
   * [x] Field model coordinates
@@ -31,9 +31,12 @@ Real-time editor for Final Fantasy VII
   * [x] Field
   * [ ] World
 * [x] Disable battle swirl
+* [ ] Remember last used hacks
+* [ ] Auto-apply hacks on game start
 * [ ] Teleport to specific field
 * [ ] Teleport to specific place on the world map ?
 * [x] Skip FMVs
+* [x] Skip intro
 * [ ] No EXP gain
 * [x] Disable pause when unfocused
 * [ ] Save/load game state

@@ -1,7 +1,7 @@
 {
-  "productName": "ff7-comet",
-  "version": "0.0.0",
-  "identifier": "org.m4v3r.ff7-comet",
+  "productName": "ff7-ultima",
+  "version": "0.5.0",
+  "identifier": "org.m4v3r.ff7-ultima",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -11,9 +11,9 @@
   "app": {
     "windows": [
       {
-        "title": "Comet - FF7 real-time game editor",
-        "width": 800,
-        "height": 600,
+        "title": "Ultima - FF7 Real-time Game Editor",
+        "width": 400,
+        "height": 690,
         "theme": "Dark",
         "visible": true
       }
@@ -23,7 +23,7 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
     "targets": "nsis",
     "icon": [
       "icons/32x32.png",

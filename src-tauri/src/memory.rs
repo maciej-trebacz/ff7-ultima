@@ -1,4 +1,7 @@
 use process_memory::{DataMember, Memory, Pid, TryIntoProcessHandle};
+use winapi::um::memoryapi::VirtualProtectEx;
+use winapi::um::winnt::{MEMORY_BASIC_INFORMATION, PAGE_READWRITE, PVOID};
+use std::ptr;
 use crate::process;
 
 fn get_process_handle() -> Result<process_memory::ProcessHandle, String> {
@@ -82,4 +85,25 @@ pub fn write_memory_byte(address: u32, new_value: u8) -> Result<(), String> {
 
 pub fn write_memory_float(address: u32, new_value: f64) -> Result<(), String> {
   write_memory::<f64>(address, new_value)
+}
+
+pub fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
+    let handle = get_process_handle()?;
+    let mut old_protect = 0;
+
+    let result = unsafe {
+        VirtualProtectEx(
+            handle.0,
+            address as PVOID,
+            size,
+            PAGE_READWRITE,
+            &mut old_protect,
+        )
+    };
+
+    if result == 0 {
+        Err("Failed to change memory protection".to_string())
+    } else {
+        Ok(())
+    }
 }

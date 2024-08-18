@@ -19,20 +19,27 @@ impl ProcessScanner {
         }
     }
 
-    fn start_scanning(&mut self, name: &str) {
+    fn start_scanning(&mut self, names: Vec<String>) {
         let is_scanning = self.is_scanning.clone();
         is_scanning.store(true, Ordering::SeqCst);
-        let name = name.to_string();
 
         thread::spawn(move || {
             let mut local_system = System::new_all();
             while is_scanning.load(Ordering::SeqCst) {
                 local_system.refresh_processes();
 
-                if let Some((&pid, _)) = local_system.processes().iter().find(|(_, process)| process.name() == name) {
-                    SCANNER.lock().process = Some(pid);
-                } else {
-                    SCANNER.lock().process = None;
+                let found_process = local_system.processes().iter().find_map(|(&pid, process)| {
+                    let process_name = process.name().to_lowercase();
+                    if names.iter().any(|name| name.to_lowercase() == process_name.to_lowercase()) {
+                        Some(pid)
+                    } else {
+                        None
+                    }
+                });
+
+                match found_process {
+                    Some(pid) => SCANNER.lock().process = Some(pid),
+                    None => SCANNER.lock().process = None,
                 }
 
                 thread::sleep(Duration::from_millis(200));
@@ -49,8 +56,8 @@ lazy_static! {
     static ref SCANNER: Mutex<ProcessScanner> = Mutex::new(ProcessScanner::new());
 }
 
-pub fn initialize(name: &str) {
-    SCANNER.lock().start_scanning(name);
+pub fn initialize(names: Vec<String>) {
+    SCANNER.lock().start_scanning(names);
 }
 
 pub fn get_pid() -> Option<Pid> {

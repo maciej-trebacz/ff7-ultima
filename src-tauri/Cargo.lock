@@ -750,8 +750,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ff7-meteor"
-version = "0.0.0"
+name = "ff7-ultima"
+version = "0.5.0"
 dependencies = [
  "lazy_static",
  "parking_lot",
@@ -762,6 +762,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-shell",
+ "winapi",
  "windows-hotkeys",
 ]
 

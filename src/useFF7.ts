@@ -1,6 +1,6 @@
 "use strict";
 
-import { DataType, readMemory, writeMemory } from "./memory";
+import { DataType, readMemory, writeMemory, setMemoryProtection } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
 import { GameModule } from "./types";
@@ -35,6 +35,24 @@ export function useFF7() {
     connected,
     gameState,
     setSpeed: async (speed: number) => {
+      const ffnxCheck = await readMemory(0x41b965, DataType.Byte);
+      if (ffnxCheck === 0xE9) {
+        const baseAddress = await readMemory(0x41b966, DataType.Int) + 0x41B96A;
+        const addrFps30 = await readMemory(baseAddress + 0xa, DataType.Int);
+        const addrFps15 = await readMemory(baseAddress + 0xa6, DataType.Int);
+
+        // FFnx replaces FF7's built-in FPS limiter with a custom one
+        // so we have to use a different method to set the speed
+        await setMemoryProtection(addrFps15, 16);
+
+        // Field & World
+        await writeMemory(addrFps30, 30 * speed, DataType.Float);
+
+        // Battle
+        await writeMemory(addrFps15, 15 * speed, DataType.Float);
+        return;
+      }
+
       const setFps = async (address: number, defaultFps: number) => {
         await writeMemory(address, 10000000 / (defaultFps * speed), DataType.Float);
       };
@@ -114,6 +132,9 @@ export function useFF7() {
         return;
       }
 
+      // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
+      await writeMemory(0x74a561, 0x80, DataType.Byte);
+
       // Check if window already was unfocused (tick function pointer is out of program memory)
       await waitFor(async () => {
         const tickFunctionPtr = await readMemory(gameState.gameObjPtr + 0xa00, DataType.Int);
@@ -125,9 +146,6 @@ export function useFF7() {
 
       // Add a RET instruction at the beginning of this function
       await writeMemory(gfxFlipPtr + 0x260, 0xc3, DataType.Byte);
-
-      // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
-      await writeMemory(0x74a561, 0x80, DataType.Byte);
     },
     unpatchWindowUnfocus: async () => {
       if (!gameState.gameObjPtr) {
@@ -139,6 +157,9 @@ export function useFF7() {
 
       // Remove the RET instruction at the beginning of this function
       await writeMemory(gfxFlipPtr + 0x260, 0x51, DataType.Byte);
+
+      // Remove the global focus flag
+      await writeMemory(0x74a561, 0, DataType.Byte);
     },
     skipFMV: async () => {
       const isMoviePlaying = await readMemory(0x9a1010, DataType.Byte);
@@ -185,7 +206,12 @@ export function useFF7() {
           await writeMemory(fieldObjPtr + 1, 0, DataType.Byte);
           break;
         case GameModule.World:
-          console.log("World battle not implemented yet");
+          await writeMemory(0xe3a88c, battleId, DataType.Int);
+          await writeMemory(0xe2bbc8, 0, DataType.Int);
+          await writeMemory(0x969950, 0, DataType.Int);
+          await writeMemory(0xe3a884, 1, DataType.Int);
+          await writeMemory(0xe045e4, 3, DataType.Int);
+          
           break;
         default:
           return;
@@ -217,6 +243,51 @@ export function useFF7() {
       setHacks({ ...hacks, skipIntro: false });
     },
     introDisabled: hacks.skipIntro,
+    togglePHS: async (index: number) => {
+      let bitmask = gameState.partyBitmask;
+      if (index === -1) {
+        bitmask = bitmask & 1 ? 0 : 0xffff;
+      } else if (bitmask & (1 << index)) {
+        bitmask &= ~(1 << index);
+      } else {
+        bitmask |= 1 << index;
+      }
+      await writeMemory(0xdc0dde, bitmask, DataType.Short);
+    },
+    partyMemberEnabled: (index: number) => {
+      let bitmask = gameState.partyBitmask;
+      return Boolean(bitmask & (1 << index));
+    },
+    toggleMenuVisibility: async (index: number) => {
+      let menuVisibility = gameState.menuVisibility;
+      if (index === -1) {
+        menuVisibility = menuVisibility & 1 ? 0 : 0xffff;
+      } else if (menuVisibility & (1 << index)) {
+        menuVisibility &= ~(1 << index);
+      } else {
+        menuVisibility |= 1 << index;
+      }
+      await writeMemory(0xdc08f8, menuVisibility, DataType.Short);
+    },
+    menuVisibilityEnabled: (index: number) => {
+      let menuVisibility = gameState.menuVisibility;
+      return Boolean(menuVisibility & (1 << index));
+    },
+    toggleMenuLock: async (index: number) => {
+      let menuLocks = gameState.menuLocks;
+      if (index === -1) {
+        menuLocks = menuLocks & 1 ? 0 : 0xffff;
+      } else if (menuLocks & (1 << index)) {
+        menuLocks &= ~(1 << index);
+      } else {
+        menuLocks |= 1 << index;
+      }
+      await writeMemory(0xdc08fa, menuLocks, DataType.Short);
+    },
+    menuLockEnabled: (index: number) => {
+      let menuLocks = gameState.menuLocks;
+      return Boolean(menuLocks & (1 << index));
+    },
   };
 
   return ff7;

@@ -23,6 +23,8 @@ struct FF7BasicData {
     game_obj_ptr: u32,
     battle_swirl_check: u8,
     instant_atb_check: u16,
+    unfocus_patch_check: u8,
+    ffnx_check: u8,
 }
 
 #[derive(Serialize)]
@@ -130,6 +132,8 @@ pub fn read_data() -> Result<FF7Data, String> {
         game_obj_ptr: read_memory_int(0xdb2bb8),
         battle_swirl_check: read_memory_byte(0x4027e5),
         instant_atb_check: read_memory_short(0x433abd),
+        unfocus_patch_check: read_memory_byte(0x74a561),
+        ffnx_check: read_memory_byte(0x41b965),
     );
     let field_models = read_field_models()?;
     let battle_chars = read_battle_chars()?;

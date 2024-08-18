@@ -54,8 +54,14 @@ fn read_ff7_data() -> Result<ff7::FF7Data, String> {
     ff7::read_data()
 }
 
+#[tauri::command]
+fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
+    memory::set_memory_protection(address, size)
+}
+
 fn main() {
-    process::initialize("ff7_en.exe");
+    let process_names = vec!["ff7.exe".to_string(), "ff7_en.exe".to_string()];
+    process::initialize(process_names);
     println!("FF7 scanner started");
 
     tauri::Builder::default()
@@ -70,6 +76,7 @@ fn main() {
             write_memory_int,
             write_memory_float,
             write_memory_buffer,
+            set_memory_protection,
             read_ff7_data
         ])
         .run(tauri::generate_context!())

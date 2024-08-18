@@ -3,6 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { GameModule, FieldModel, BattleCharObj } from "./types";
+import { DataType, readMemory } from "./memory";
 
 export const useFF7State = function() {
   const [connected, setConnected] = useState(false);
@@ -33,6 +34,9 @@ export const useFF7State = function() {
     instantATBEnabled: false,
     fieldModels: [] as FieldModel[],
     battlePartyChars: [] as BattleCharObj[],
+    speed: '',
+    unfocusPatchEnabled: false,
+    isFFnx: false,
   });
 
   useEffect(() => {
@@ -42,6 +46,16 @@ export const useFF7State = function() {
         const basic: any = ff7Data.basic;
         const fieldModels: any = ff7Data.field_models;
         const battlePartyChars: any = ff7Data.battle_chars;
+        const isFFnx: any = basic.ffnx_check === 0xE9;
+        let speed = Math.floor((10000000 / basic.field_fps) as number / 30 * 100) / 100;
+        if (isFFnx) {
+          // TODO: Refactor
+          const baseAddress = await readMemory(0x41b966, DataType.Int) + 0x41B96A;
+          const addrFieldFps = await readMemory(baseAddress + 0xa, DataType.Int);
+          const fieldFps = await readMemory(addrFieldFps, DataType.Float);
+          speed = Math.floor(fieldFps / 30 * 100) / 100;
+        }
+        
         setGameState({
           currentModule: basic.current_module as number,
           gameMoment: basic.game_moment as number,
@@ -64,6 +78,9 @@ export const useFF7State = function() {
           gameObjPtr: basic.game_obj_ptr as number,
           battleSwirlDisabled: basic.battle_swirl_check === 0x00,
           instantATBEnabled: basic.instant_atb_check === 0x45C7,
+          speed: '' + speed,
+          unfocusPatchEnabled: basic.unfocus_patch_check === 0x80,
+          isFFnx,
           fieldModels,
           battlePartyChars,
         });

@@ -1,4 +1,3 @@
-import "./App.css";
 import { useState } from "react";
 import { useFF7 } from "./useFF7";
 

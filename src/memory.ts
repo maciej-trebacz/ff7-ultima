@@ -35,3 +35,11 @@ export function writeMemory(address: number, newValue: number | number[], type: 
     });
   });
 }
+
+export function setMemoryProtection(address: number, size: number): Promise<void> {
+  return new Promise((resolve) => {
+    invoke("set_memory_protection", { address, size }).then(() => {
+      resolve();
+    });
+  });
+}
