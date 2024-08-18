@@ -288,6 +288,27 @@ export function useFF7() {
       let menuLocks = gameState.menuLocks;
       return Boolean(menuLocks & (1 << index));
     },
+    setGameMoment: async (gameMoment: number) => {
+      await writeMemory(0xdc08dc, gameMoment, DataType.Short);
+    },
+    setGP: async (gp: number) => {
+      await writeMemory(0xdc0a26, gp, DataType.Short);
+    },
+    setDisc: async (disc: number) => {
+      await writeMemory(0xdc0bdc, disc, DataType.Byte);
+    },
+    setGil: async (gil: number) => {
+      await writeMemory(0xdc08b4, gil, DataType.Int);
+    },
+    setBattleCount: async (battleCount: number) => {
+      await writeMemory(0xdc08f4, battleCount, DataType.Short);
+    },
+    setBattleEscapeCount: async (battleEscapeCount: number) => {
+      await writeMemory(0xdc08f6, battleEscapeCount, DataType.Short);
+    },
+    setInGameTime: async (inGameTime: number) => {
+      await writeMemory(0xdc08b8, inGameTime, DataType.Int);
+    },
   };
 
   return ff7;

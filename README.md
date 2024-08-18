@@ -16,6 +16,7 @@ Real-time editor for Final Fantasy VII
     * [ ] Enemy stats
     * [ ] Status flags
   * [ ] RNG info (seed, joker, animation index, etc.)
+  * [ ] Edit basic game info
 * Speedhack
   * [x] Field
   * [x] World
@@ -29,7 +30,8 @@ Real-time editor for Final Fantasy VII
 * [x] No battles / max battles for both field and world
 * [x] Enter battle for specific battle formation id
   * [x] Field
-  * [ ] World
+  * [x] World
+  * [ ] Dropdown for picking a battle using friendly formation names
 * [x] Disable battle swirl
 * [ ] Remember last used hacks
 * [ ] Auto-apply hacks on game start

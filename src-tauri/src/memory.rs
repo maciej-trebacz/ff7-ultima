@@ -71,6 +71,14 @@ pub fn read_memory_float(address: u32) -> Result<f64, String> {
   read_memory::<f64>(address)
 }
 
+pub fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> {
+  let mut buffer = Vec::new();
+  for i in 0..size {
+    buffer.push(read_memory_byte(address + i as u32)?);
+  }
+  Ok(buffer)
+}
+
 pub fn write_memory_int(address: u32, new_value: u32) -> Result<(), String> {
   write_memory::<u32>(address, new_value)
 }

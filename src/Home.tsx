@@ -7,10 +7,21 @@ import { formatTime } from "./util";
 import GroupButton from "./components/GroupButton";
 import { useState } from "react";
 
+enum Tabs {
+  Info = "info",
+  Field = "field",
+  World = "world",
+  Battle = "battle",
+}
+
 function Home() {
   const ff7 = useFF7();
   const state = ff7.gameState;
   const [battleId, setBattleId] = useState("");
+  const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.Info);
+  const [editInfoModalOpen, setEditInfoModalOpen] = useState(false);
+  const [editInfoModalTitle, setEditInfoModalTitle] = useState("");
+  const [editInfoModalValue, setEditInfoModalValue] = useState("");
 
   const gameModuleAsString = GameModule[state.currentModule];
 
@@ -26,26 +37,109 @@ function Home() {
     (document.getElementById('start_battle_modal') as any)?.close();
   };
 
+  const onBattleModalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      closeStartBattleModal();
+    } else if (e.key === "Enter") {
+      ff7.startBattle(parseInt(battleId));
+      closeStartBattleModal();
+    }
+  };
+
+  const onEditInfoModalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      (document.getElementById('edit_info_modal') as any)?.close();
+    } else if (e.key === "Enter") {
+      submitValue();
+    }
+  };
+
+  const submitValue = () => {
+    if (editInfoModalTitle === "Game Moment") {
+      ff7.setGameMoment(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "Party GP") {
+      ff7.setGP(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "Current Disc") {
+      ff7.setDisc(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "Party Gil") {
+      ff7.setGil(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "Battles Fought") {
+      ff7.setBattleCount(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "Battles Escaped") {
+      ff7.setBattleEscapeCount(parseInt(editInfoModalValue));
+    } else if (editInfoModalTitle === "In Game Time") {
+      ff7.setInGameTime(parseInt(editInfoModalValue));
+    }
+    setEditInfoModalOpen(false);
+    (document.getElementById('edit_info_modal') as any)?.close();
+  }
+
+  const openEditInfoModal = (title: string, value: string) => {
+    (document.getElementById('edit_info_modal') as any)?.showModal();
+    setEditInfoModalTitle(title);
+    setEditInfoModalValue(value);
+    setTimeout(() => {
+      (document.getElementById('edit-input-id') as any)?.focus();
+      (document.getElementById('edit-input-id') as any)?.select();
+    }, 50)
+  }
+
   return (
     <div className="w-full h-full flex text-sm select-none">
       <div className="flex-1 p-3">
-        <h2 className="uppercase border-b">Info</h2>
+        {/* <h2 className="uppercase border-b">Info</h2> */}
+        <div role="tablist" className="tabs tabs-bordered">
+          <a role="tab" className={`tab ${currentTab === Tabs.Info ? "tab-active" : ""}`} onClick={() => setCurrentTab(Tabs.Info)}>Info</a>
+          <a role="tab" className={`tab ${currentTab === Tabs.Field ? "tab-active" : ""}`} onClick={() => setCurrentTab(Tabs.Field)}>Field</a>
+          <a role="tab" className={`tab ${currentTab === Tabs.World ? "tab-active" : ""}`} onClick={() => setCurrentTab(Tabs.World)}>World</a>
+          <a role="tab" className={`tab ${currentTab === Tabs.Battle ? "tab-active" : ""}`} onClick={() => setCurrentTab(Tabs.Battle)}>Battle</a>
+        </div>
+
+        {currentTab === Tabs.Info && (
         <div>
           <div className="flex gap-1">
             <div className="flex-1">
               <Row label="Module">{gameModuleAsString}</Row>
-              <Row label="Game Moment">{state.gameMoment}</Row>
-              <Row label="Field ID">{state.fieldId}</Row>
-              <Row label="In Game Time">{formatTime(state.inGameTime)}</Row>
+              <Row label="Party Gil" onRowClick={() => openEditInfoModal("Party Gil", state.gil.toString())}>{state.gil}</Row>
+              <Row label="Current Disc" onRowClick={() => openEditInfoModal("Current Disc", state.discId.toString())}>{state.discId}</Row>
+              <Row label="In Game Time" onRowClick={() => openEditInfoModal("In Game Time", formatTime(state.inGameTime))}>{formatTime(state.inGameTime)}</Row>
             </div>
             <div className="flex-1">
-              <Row label="Current Disc">{state.discId}</Row>
-              <Row label="Party Gil">{state.gil}</Row>
-              <Row label="Battles Fought">{state.battleCount}</Row>
-              <Row label="Battles Escaped">{state.battleEscapeCount}</Row>
+              <Row label="Game Moment" onRowClick={() => openEditInfoModal("Game Moment", state.gameMoment.toString())}>{state.gameMoment}</Row>
+              <Row label="Party GP" onRowClick={() => openEditInfoModal("Party GP", state.gp.toString())}>{state.gp}</Row>
+              <Row label="Battles Fought" onRowClick={() => openEditInfoModal("Battles Fought", state.battleCount.toString())}>{state.battleCount}</Row>
+              <Row label="Battles Escaped" onRowClick={() => openEditInfoModal("Battles Escaped", state.battleEscapeCount.toString())}>{state.battleEscapeCount}</Row>
             </div>
           </div>
         </div>
+        )}
+
+        {currentTab === Tabs.Field && (
+        <div>
+          <div className="flex gap-1">
+            <div className="flex-1">
+              <Row label="Field ID">{state.fieldId} {state.fieldId > 0 && <span className="text-zinc-400">({state.fieldName})</span>}</Row>
+              <Row label="Step Fraction">{state.stepFraction}</Row>
+            </div>
+            <div className="flex-1">
+              <Row label="Step ID">{state.stepId}</Row>
+              <Row label="Danger Value">{state.dangerValue}</Row>
+            </div>
+          </div>
+        </div>
+        )}
+
+        {currentTab === Tabs.Battle && (
+        <div>
+          <div className="flex gap-1">
+            <div className="flex-1">
+              <Row label="Battle ID">{(state.battleId > 0 && state.battleId < 0xffff) ? state.battleId : "-"}</Row> 
+            </div>
+            <div className="flex-1">
+            </div>
+          </div>
+        </div>
+        )}
 
         <h2 className="uppercase border-b mt-4">Hacks</h2>
         <div>
@@ -150,12 +244,12 @@ function Home() {
                   <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">✕</button>
                 </form>
                 <h3 className="font-bold text-lg mb-2 mt-0">Start Battle</h3>
-                <input id="battle-id" className="p-2 w-full mb-2" placeholder="Enter battle id" value={battleId} onChange={(e) => setBattleId(e.target.value)} />
+                <input id="battle-id" className="p-2 w-full mb-2" placeholder="Enter battle id" value={battleId} onChange={(e) => setBattleId(e.target.value)} onKeyUp={onBattleModalKeyDown} />
                 <div className="flex gap-2 w-full">
                   <button className="btn btn-primary btn-sm w-full" onClick={() => { ff7.startBattle(parseInt(battleId)); closeStartBattleModal(); }}>Start</button>
                 </div>
               </div>
-            </dialog>            
+            </dialog>
           </div>
           <div className="flex-1 py-1">
             <button className="btn btn-primary btn-sm w-full" onClick={() => ff7.endBattle()}>End Battle</button>
@@ -164,6 +258,19 @@ function Home() {
             <button className="btn btn-primary btn-sm w-full" onClick={() => ff7.skipFMV()}>Skip FMV</button>
           </div>
         </div>
+      
+        <dialog id="edit_info_modal" className="modal">
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">✕</button>
+            </form>
+            <h3 className="font-bold text-lg mb-2 mt-0">{editInfoModalTitle}</h3>
+            <input id="edit-input-id" className="p-2 w-full mb-2" placeholder="Enter a value" value={editInfoModalValue} onChange={(e) => setEditInfoModalValue(e.target.value)} onKeyUp={onEditInfoModalKeyDown} />
+            <div className="flex gap-2 w-full">
+              <button className="btn btn-primary btn-sm w-full" onClick={() => { submitValue(); }}>Start</button>
+            </div>
+          </div>
+        </dialog>      
       </div>
     </div>
   );

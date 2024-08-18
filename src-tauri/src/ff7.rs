@@ -17,6 +17,7 @@ struct FF7BasicData {
     field_menu_access_enabled: u8,
     party_bitmask: u16,
     gil: u32,
+    gp: u16,
     battle_count: u16,
     battle_escape_count: u16,
     field_battle_check: u32,
@@ -25,6 +26,10 @@ struct FF7BasicData {
     instant_atb_check: u16,
     unfocus_patch_check: u8,
     ffnx_check: u8,
+    step_id: u32,
+    step_fraction: u32,
+    danger_value: u32,
+    battle_id: u16,
 }
 
 #[derive(Serialize)]
@@ -46,10 +51,17 @@ struct BattleCharObj {
 }
 
 #[derive(Serialize)]
+pub struct FieldData {
+    field_id: u16,
+    field_name: Vec<u8>,
+}
+
+#[derive(Serialize)]
 pub struct FF7Data {
     basic: FF7BasicData,
     field_models: Vec<FieldModel>,
     battle_chars: Vec<BattleCharObj>,
+    field_data: FieldData,
 }
 
 macro_rules! read_memory {
@@ -110,6 +122,17 @@ fn read_battle_chars() -> Result<Vec<BattleCharObj>, String> {
     Ok(chars)
 }
 
+pub fn read_field_data() -> Result<FieldData, String> {
+    let field_id = read_memory_short(0xcc15d0)?;
+    let field_name = read_memory_buffer(0xcc1ef0, 16)?;
+    let data = FieldData {
+        field_id,
+        field_name,
+    };
+
+    Ok(data)
+}
+
 pub fn read_data() -> Result<FF7Data, String> {
     let basic = read_memory!(
         current_module: read_memory_short(0xcbf9dc),
@@ -126,6 +149,7 @@ pub fn read_data() -> Result<FF7Data, String> {
         field_menu_access_enabled: read_memory_byte(0xcc0dbc),
         party_bitmask: read_memory_short(0xdc0dde),
         gil: read_memory_int(0xdc08b4),
+        gp: read_memory_short(0xdc0a26),
         battle_count: read_memory_short(0xdc08f4),
         battle_escape_count: read_memory_short(0xdc08f6),
         field_battle_check: read_memory_int(0x60b40a),
@@ -134,13 +158,19 @@ pub fn read_data() -> Result<FF7Data, String> {
         instant_atb_check: read_memory_short(0x433abd),
         unfocus_patch_check: read_memory_byte(0x74a561),
         ffnx_check: read_memory_byte(0x41b965),
+        step_id: read_memory_int(0xcc165c),
+        step_fraction: read_memory_int(0xcc1664),
+        danger_value: read_memory_int(0xcc1668),
+        battle_id: read_memory_short(0x9aad3c),
     );
     let field_models = read_field_models()?;
     let battle_chars = read_battle_chars()?;
+    let field_data = read_field_data()?;
     let data = FF7Data {
         basic,
         field_models,
         battle_chars,
+        field_data,
     };
 
     Ok(data)

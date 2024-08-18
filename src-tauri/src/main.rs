@@ -25,6 +25,11 @@ fn read_memory_float(address: u32) -> Result<f64, String> {
 }
 
 #[tauri::command]
+fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> {
+    memory::read_memory_buffer(address, size)
+}
+
+#[tauri::command]
 fn write_memory_byte(address: u32, new_value: u8) -> Result<(), String> {
     memory::write_memory_byte(address, new_value)
 }
@@ -71,6 +76,7 @@ fn main() {
             read_memory_short,
             read_memory_int,
             read_memory_float,
+            read_memory_buffer,
             write_memory_byte,
             write_memory_short,
             write_memory_int,
