@@ -3,6 +3,7 @@
 mod ff7;
 mod memory;
 mod process;
+mod addresses;
 
 #[tauri::command]
 fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -64,6 +65,11 @@ fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
     memory::set_memory_protection(address, size)
 }
 
+#[tauri::command]
+fn get_ff7_addresses() -> addresses::FF7Addresses {
+    addresses::FF7Addresses::new()
+}
+
 fn main() {
     let process_names = vec!["ff7.exe".to_string(), "ff7_en.exe".to_string()];
     process::initialize(process_names);
@@ -83,7 +89,8 @@ fn main() {
             write_memory_float,
             write_memory_buffer,
             set_memory_protection,
-            read_ff7_data
+            read_ff7_data,
+            get_ff7_addresses
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

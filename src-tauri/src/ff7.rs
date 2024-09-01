@@ -1,5 +1,6 @@
 use serde::Serialize;
 use crate::memory::*;
+use crate::addresses::FF7Addresses;
 
 #[derive(Serialize)]
 struct FF7BasicData {
@@ -64,114 +65,97 @@ pub struct FF7Data {
     field_data: FieldData,
 }
 
-macro_rules! read_memory {
-    ($($field:ident: $read_fn:ident($addr:expr)),* $(,)?) => {
-        {
-            let mut data = FF7BasicData {
-                $($field: 0 as _,)*
-            };
-            $(
-                data.$field = $read_fn($addr)
-                    .map_err(|e| format!("Failed to read {}: {}", stringify!($field), e))?;
-            )*
-            data
-        }
-    };
+fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
+    Ok(FF7BasicData {
+        current_module: read_memory_short(addresses.current_module)?,
+        game_moment: read_memory_short(addresses.game_moment)?,
+        field_id: read_memory_short(addresses.field_id)?,
+        field_fps: read_memory_float(addresses.field_fps)?,
+        battle_fps: read_memory_float(addresses.battle_fps)?,
+        world_fps: read_memory_float(addresses.world_fps)?,
+        in_game_time: read_memory_int(addresses.in_game_time)?,
+        disc_id: read_memory_byte(addresses.disc_id)?,
+        menu_visibility: read_memory_short(addresses.menu_visibility)?,
+        menu_locks: read_memory_short(addresses.menu_locks)?,
+        field_movement_disabled: read_memory_byte(addresses.field_movement_disabled)?,
+        field_menu_access_enabled: read_memory_byte(addresses.field_menu_access_enabled)?,
+        party_bitmask: read_memory_short(addresses.party_bitmask)?,
+        gil: read_memory_int(addresses.gil)?,
+        gp: read_memory_short(addresses.gp)?,
+        battle_count: read_memory_short(addresses.battle_count)?,
+        battle_escape_count: read_memory_short(addresses.battle_escape_count)?,
+        field_battle_check: read_memory_int(addresses.field_battle_check)?,
+        game_obj_ptr: read_memory_int(addresses.game_obj_ptr)?,
+        battle_swirl_check: read_memory_byte(addresses.battle_swirl_check)?,
+        instant_atb_check: read_memory_short(addresses.instant_atb_check)?,
+        unfocus_patch_check: read_memory_byte(addresses.unfocus_patch_check)?,
+        ffnx_check: read_memory_byte(addresses.ffnx_check)?,
+        step_id: read_memory_int(addresses.step_id)?,
+        step_fraction: read_memory_int(addresses.step_fraction)?,
+        danger_value: read_memory_int(addresses.danger_value)?,
+        battle_id: read_memory_short(addresses.battle_id)?,
+    })
 }
 
-fn read_field_models() -> Result<Vec<FieldModel>, String> {
+fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String> {
     let mut models: Vec<FieldModel> = Vec::new();
-    for i in 0..16 {
-        let model_ptr = read_memory_int(0xcff738);
-        if let Ok(model_ptr) = model_ptr {
-            let base_address = model_ptr + i * 400;
-            let x = read_memory_signed_int(base_address + 4);
-            let y = read_memory_signed_int(base_address + 8);
-            let z = read_memory_signed_int(base_address + 0xc);
-            let direction = read_memory_byte(base_address + 0x1c);
-            let model = FieldModel {
-                x: x.unwrap_or(0),
-                y: y.unwrap_or(0),
-                z: z.unwrap_or(0),
-                direction: direction.unwrap_or(0),
-            };
-            models.push(model);
-        }
+    
+    let model_ptr = read_memory_int(addresses.field_models_ptr)?;
+    if model_ptr == 0 {
+        return Ok(models);
     }
 
+    for i in 0..16 {
+        let base_address = model_ptr + i * 400;
+        let model = FieldModel {
+            x: read_memory_signed_int(base_address + 4)?,
+            y: read_memory_signed_int(base_address + 8)?,
+            z: read_memory_signed_int(base_address + 0xc)?,
+            direction: read_memory_byte(base_address + 0x1c)?,
+        };
+        models.push(model);
+    }
     Ok(models)
 }
 
-fn read_battle_chars() -> Result<Vec<BattleCharObj>, String> {
+fn read_battle_chars(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {
     let mut chars: Vec<BattleCharObj> = Vec::new();
-    let ally_ptr_base = 0x9ab0dc;
     let char_obj_length = 104;
-    let ally_limit_ptr_base = 0x9a8dc2;
     let ally_limit_length = 52;
     for i in 0..3 {
         let char = BattleCharObj {
-            hp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x2c)?,
-            max_hp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x30)?,
-            mp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x28)?,
-            max_mp: read_memory_short(ally_ptr_base + i * char_obj_length + 0x2a)?,
-            atb: read_memory_short(ally_ptr_base + i * char_obj_length)?,
-            limit: read_memory_byte(ally_limit_ptr_base + i * ally_limit_length)?,
+            hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
+            max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
+            mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
+            max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
+            atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
+            limit: read_memory_byte(addresses.ally_limit_ptr_base + i * ally_limit_length)?,
         };
         chars.push(char);
     }
     Ok(chars)
 }
 
-pub fn read_field_data() -> Result<FieldData, String> {
-    let field_id = read_memory_short(0xcc15d0)?;
-    let field_name = read_memory_buffer(0xcc1ef0, 16)?;
-    let data = FieldData {
+fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
+    let field_id = read_memory_short(addresses.field_id)?;
+    let field_name = read_memory_buffer(addresses.field_name, 16)?;
+    Ok(FieldData {
         field_id,
         field_name,
-    };
-
-    Ok(data)
+    })
 }
 
 pub fn read_data() -> Result<FF7Data, String> {
-    let basic = read_memory!(
-        current_module: read_memory_short(0xcbf9dc),
-        game_moment: read_memory_short(0xdc08dc),
-        field_id: read_memory_short(0xcc15d0),
-        field_fps: read_memory_float(0xcff890),
-        battle_fps: read_memory_float(0x9ab090),
-        world_fps: read_memory_float(0xde6938),
-        in_game_time: read_memory_int(0xdc08b8),
-        disc_id: read_memory_byte(0xdc0bdc),
-        menu_visibility: read_memory_short(0xdc08f8),
-        menu_locks: read_memory_short(0xdc08fa),
-        field_movement_disabled: read_memory_byte(0xcc0dba),
-        field_menu_access_enabled: read_memory_byte(0xcc0dbc),
-        party_bitmask: read_memory_short(0xdc0dde),
-        gil: read_memory_int(0xdc08b4),
-        gp: read_memory_short(0xdc0a26),
-        battle_count: read_memory_short(0xdc08f4),
-        battle_escape_count: read_memory_short(0xdc08f6),
-        field_battle_check: read_memory_int(0x60b40a),
-        game_obj_ptr: read_memory_int(0xdb2bb8),
-        battle_swirl_check: read_memory_byte(0x4027e5),
-        instant_atb_check: read_memory_short(0x433abd),
-        unfocus_patch_check: read_memory_byte(0x74a561),
-        ffnx_check: read_memory_byte(0x41b965),
-        step_id: read_memory_int(0xcc165c),
-        step_fraction: read_memory_int(0xcc1664),
-        danger_value: read_memory_int(0xcc1668),
-        battle_id: read_memory_short(0x9aad3c),
-    );
-    let field_models = read_field_models()?;
-    let battle_chars = read_battle_chars()?;
-    let field_data = read_field_data()?;
-    let data = FF7Data {
+    let addresses = FF7Addresses::new();
+    let basic = read_basic_data(&addresses)?;
+    let field_models = read_field_models(&addresses)?;
+    let battle_chars = read_battle_chars(&addresses)?;
+    let field_data = read_field_data(&addresses)?;
+    
+    Ok(FF7Data {
         basic,
         field_models,
         battle_chars,
         field_data,
-    };
-
-    Ok(data)
+    })
 }

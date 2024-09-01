@@ -26,7 +26,7 @@ where
 fn read_memory<T: Copy>(address: u32) -> Result<T, String> {
     access_memory(address, |value| {
         unsafe {
-            value.read().map_err(|_| "Could not read memory".to_string())
+            value.read().map_err(|_| format!("Could not read memory at address 0x{:08X}", address))
         }
     })
 }
