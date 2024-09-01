@@ -4,8 +4,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { GameModule, FieldModel, BattleCharObj } from "./types";
 import { DataType, readMemory } from "./memory";
+import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
 export const useFF7State = function() {
+  const { addresses, isLoading, error } = useFF7Addresses();
   const [connected, setConnected] = useState(false);
   const [hacks, setHacks] = useState({
     skipIntro: false,
@@ -46,7 +48,11 @@ export const useFF7State = function() {
   });
 
   useEffect(() => {
-    const intervalId = setInterval(async () => {
+    if (isLoading || error || !addresses) {
+      return;
+    }
+
+    const updateGameState = async () => {
       try {
         const ff7Data: any = await invoke("read_ff7_data");
         const basic: any = ff7Data.basic;
@@ -56,8 +62,7 @@ export const useFF7State = function() {
         const isFFnx: any = basic.ffnx_check === 0xE9;
         let speed = Math.floor((10000000 / basic.field_fps) as number / 30 * 100) / 100;
         if (isFFnx) {
-          // TODO: Refactor
-          const baseAddress = await readMemory(0x41b966, DataType.Int) + 0x41B96A;
+          const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
           const addrFieldFps = await readMemory(baseAddress + 0xa, DataType.Int);
           const fieldFps = await readMemory(addrFieldFps, DataType.Float);
           speed = Math.floor(fieldFps / 30 * 100) / 100;
@@ -105,16 +110,19 @@ export const useFF7State = function() {
         console.warn("Could not read FF7 data: ", e);
         setConnected(false);
       }
-    }, 125);
+    };
+
+    const intervalId = setInterval(updateGameState, 125);
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [addresses, isLoading, error]);
 
   return {
     connected,
     gameState,
     hacks,
     setHacks,
-  }
-}
+    addresses,
+  };
+};

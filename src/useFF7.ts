@@ -4,12 +4,13 @@ import { DataType, readMemory, writeMemory, setMemoryProtection } from "./memory
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
 import { GameModule } from "./types";
+import { FF7Addresses } from "./ff7Addresses";
 
-export function useFF7() {
+export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
 
   const getFieldObjPtr = async () => {
-    const fieldObjPtr = await readMemory(0xCBF9D8, DataType.Int);
+    const fieldObjPtr = await readMemory(addresses.field_obj_ptr, DataType.Int);
     if (fieldObjPtr === 0) {
       return 0;
     }
@@ -27,7 +28,7 @@ export function useFF7() {
 
   if (hacks.skipIntro && gameState.currentModule === GameModule.Intro) {
     setTimeout(async () => {
-      await writeMemory(0xf4f448, 0x01, DataType.Byte);
+      await writeMemory(addresses.intro_skip, 0x01, DataType.Byte);
     }, 0);
   }
 
@@ -35,14 +36,12 @@ export function useFF7() {
     connected,
     gameState,
     setSpeed: async (speed: number) => {
-      const ffnxCheck = await readMemory(0x41b965, DataType.Byte);
+      const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
       if (ffnxCheck === 0xE9) {
-        const baseAddress = await readMemory(0x41b966, DataType.Int) + 0x41B96A;
+        const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
         const addrFps30 = await readMemory(baseAddress + 0xa, DataType.Int);
         const addrFps15 = await readMemory(baseAddress + 0xa6, DataType.Int);
 
-        // FFnx replaces FF7's built-in FPS limiter with a custom one
-        // so we have to use a different method to set the speed
         await setMemoryProtection(addrFps15, 16);
 
         // Field & World
@@ -58,63 +57,57 @@ export function useFF7() {
       };
 
       // Set FPS for each module
-      // Field
-      await setFps(0xcff890, 30);
-      // Battle
-      await setFps(0x9ab090, 15);
-      // World
-      await setFps(0xde6938, 30);
+      await setFps(addresses.field_fps, 30);
+      await setFps(addresses.battle_fps, 15);
+      await setFps(addresses.world_fps, 30);
 
       // Remove FPS init code for each module so it doesn't get reset on module init
-      // Field
       await writeMemory(0x60e434, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
-      // World
       await writeMemory(0x74bd02, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
-      // Battle
       await writeMemory(0x41b6d8, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
     },
     toggleMenuAccess: async () => {
-      await writeMemory(0xcc0dbc, gameState.fieldMenuAccessEnabled ? 0 : 1, DataType.Byte);
+      await writeMemory(addresses.field_menu_access_enabled, gameState.fieldMenuAccessEnabled ? 0 : 1, DataType.Byte);
     },
     toggleMovement: async () => {
-      await writeMemory(0xcc0dba, gameState.fieldMovementDisabled ? 0 : 1, DataType.Byte);
+      await writeMemory(addresses.field_movement_disabled, gameState.fieldMovementDisabled ? 0 : 1, DataType.Byte);
     },
     enableAllMenus: async () => {
-      await writeMemory(0xdc08f8, 0xffff, DataType.Short);
-      await writeMemory(0xdc08fa, 0, DataType.Short);
+      await writeMemory(addresses.menu_visibility, 0xffff, DataType.Short);
+      await writeMemory(addresses.menu_locks, 0, DataType.Short);
     },
     enableAllPartyMembers: async () => {
-      await writeMemory(0xdc0dde, 0x7ff, DataType.Short);
+      await writeMemory(addresses.party_bitmask, 0x7ff, DataType.Short);
     },
     disableBattles: async () => {
       // Field
-      await writeMemory(0x60b40a, [0xe9, 0xe0, 0x02, 0x00, 0x00, 0x90], DataType.Buffer);
+      await writeMemory(addresses.field_battle_disable, [0xe9, 0xe0, 0x02, 0x00, 0x00, 0x90], DataType.Buffer);
 
       // World
-      await writeMemory(0x7675f6, 0, DataType.Byte);
+      await writeMemory(addresses.world_battle_disable, 0, DataType.Byte);
     },
     enableBattles: async () => {
       // Field
-      await writeMemory(0x60b40a, [0x0f, 0x83, 0xdf, 0x02, 0x00, 0x00], DataType.Buffer);
+      await writeMemory(addresses.field_battle_disable, [0x0f, 0x83, 0xdf, 0x02, 0x00, 0x00], DataType.Buffer);
 
       // World
-      await writeMemory(0x767758, 0x0a, DataType.Byte);
-      await writeMemory(0x7675f6, 0x01, DataType.Byte);
+      await writeMemory(addresses.world_battle_enable, 0x0a, DataType.Byte);
+      await writeMemory(addresses.world_battle_disable, 0x01, DataType.Byte);
     },
     maxBattles: async () => {
-      await writeMemory(0x60b40a, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
+      await writeMemory(addresses.field_battle_disable, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
 
       // World
-      await writeMemory(0x767758, 0x0f, DataType.Byte);
-      await writeMemory(0x7675f6, 0x10, DataType.Byte);
+      await writeMemory(addresses.world_battle_enable, 0x0f, DataType.Byte);
+      await writeMemory(addresses.world_battle_disable, 0x10, DataType.Byte);
     },
     endBattle: async () => {
       if (gameState.currentModule === GameModule.Battle) {
         const checkForBattleEnd = async () => {
           try {
-            const battleMode = await readMemory(0x9aad64, DataType.Byte);
+            const battleMode = await readMemory(addresses.battle_mode, DataType.Byte);
             if (battleMode > 5) {
-              await writeMemory(0x9ab0c2, 0x08, DataType.Byte);
+              await writeMemory(addresses.battle_end_check, 0x08, DataType.Byte);
             } else if (!connected || gameState.currentModule !== GameModule.Battle) {
               return;
             } else {
@@ -133,7 +126,7 @@ export function useFF7() {
       }
 
       // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
-      await writeMemory(0x74a561, 0x80, DataType.Byte);
+      await writeMemory(addresses.sound_buffer_focus, 0x80, DataType.Byte);
 
       // Check if window already was unfocused (tick function pointer is out of program memory)
       await waitFor(async () => {
@@ -159,14 +152,14 @@ export function useFF7() {
       await writeMemory(gfxFlipPtr + 0x260, 0x51, DataType.Byte);
 
       // Remove the global focus flag
-      await writeMemory(0x74a561, 0, DataType.Byte);
+      await writeMemory(addresses.sound_buffer_focus, 0, DataType.Byte);
     },
     skipFMV: async () => {
-      const isMoviePlaying = await readMemory(0x9a1010, DataType.Byte);
+      const isMoviePlaying = await readMemory(addresses.movie_is_playing, DataType.Byte);
       if (isMoviePlaying === 0) {
         return;
       }
-      await writeMemory(0x9a1014, 0x01, DataType.Byte);
+      await writeMemory(addresses.movie_skip, 0x01, DataType.Byte);
 
       // Check if we're skipping the intro FMV
       if (gameState.fieldId === 116) {
@@ -195,22 +188,22 @@ export function useFF7() {
           await writeMemory(fieldObjPtr + 1, 2, DataType.Byte); // Battle game module
           await writeMemory(fieldObjPtr + 2, battleId, DataType.Short);
           await writeMemory(fieldObjPtr + 38, 0, DataType.Short);
-          await writeMemory(0xcbf6b8, 1, DataType.Byte);
+          await writeMemory(addresses.battle_module_field, 1, DataType.Byte);
 
           // Wait for the battle to start
           await waitFor(async () => {
-            return (await readMemory(0xcbf9dc, DataType.Byte)) === GameModule.Battle;
+            return (await readMemory(addresses.current_module, DataType.Byte)) === GameModule.Battle;
           });
 
           // Reset the game module variable
           await writeMemory(fieldObjPtr + 1, 0, DataType.Byte);
           break;
         case GameModule.World:
-          await writeMemory(0xe3a88c, battleId, DataType.Int);
-          await writeMemory(0xe2bbc8, 0, DataType.Int);
-          await writeMemory(0x969950, 0, DataType.Int);
-          await writeMemory(0xe3a884, 1, DataType.Int);
-          await writeMemory(0xe045e4, 3, DataType.Int);
+          await writeMemory(addresses.battle_id_world, battleId, DataType.Int);
+          await writeMemory(addresses.world_battle_flag1, 0, DataType.Int);
+          await writeMemory(addresses.world_battle_flag2, 0, DataType.Int);
+          await writeMemory(addresses.world_battle_flag3, 1, DataType.Int);
+          await writeMemory(addresses.world_battle_flag4, 3, DataType.Int);
           
           break;
         default:
@@ -218,23 +211,22 @@ export function useFF7() {
       }
     },
     disableBattleSwirl: async () => {
-      await writeMemory(0x402712, 0x00, DataType.Byte);
-      await writeMemory(0x4027e5, 0x00, DataType.Byte);
+      await writeMemory(addresses.battle_swirl_disable1, 0x00, DataType.Byte);
+      await writeMemory(addresses.battle_swirl_disable2, 0x00, DataType.Byte);
     },
     enableBattleSwirl: async () => {
-      await writeMemory(0x402712, 0x2e, DataType.Byte);
-      await writeMemory(0x4027e5, 0x4e, DataType.Byte);
+      await writeMemory(addresses.battle_swirl_disable1, 0x2e, DataType.Byte);
+      await writeMemory(addresses.battle_swirl_disable2, 0x4e, DataType.Byte);
     },
     enableInstantATB: async () => {
-      await writeMemory(0x433abd, [0xc7, 0x45, 0xfc, 0xff, 0xff, 0x00, 0x00, 0x90, 0x90, 0x90], DataType.Buffer); // mov [ebp-04],0000FFFF and 3 nops
-      const atbIncreasePtrBase = 0x9a8b12;
+      await writeMemory(addresses.instant_atb_set, [0xc7, 0x45, 0xfc, 0xff, 0xff, 0x00, 0x00, 0x90, 0x90, 0x90], DataType.Buffer); // mov [ebp-04],0000FFFF and 3 nops
       const charObjLength = 68;
       for (let i = 0; i < 3; i++) {
-        await writeMemory(atbIncreasePtrBase + i * charObjLength, 0xffff, DataType.Short);
+        await writeMemory(addresses.atb_increase_ptr_base + i * charObjLength, 0xffff, DataType.Short);
       }
     },
     disableInstantATB: async () => {
-      await writeMemory(0x433abd, [0x66, 0x8b, 0x0d, 0x00, 0xad, 0x9a, 0x00, 0x99, 0xf7, 0xf9], DataType.Buffer);
+      await writeMemory(addresses.instant_atb_set, [0x66, 0x8b, 0x0d, 0x00, 0xad, 0x9a, 0x00, 0x99, 0xf7, 0xf9], DataType.Buffer);
     },
     enableSkipIntro: async () => {
       setHacks({ ...hacks, skipIntro: true });
@@ -252,7 +244,7 @@ export function useFF7() {
       } else {
         bitmask |= 1 << index;
       }
-      await writeMemory(0xdc0dde, bitmask, DataType.Short);
+      await writeMemory(addresses.party_bitmask, bitmask, DataType.Short);
     },
     partyMemberEnabled: (index: number) => {
       let bitmask = gameState.partyBitmask;
@@ -267,7 +259,7 @@ export function useFF7() {
       } else {
         menuVisibility |= 1 << index;
       }
-      await writeMemory(0xdc08f8, menuVisibility, DataType.Short);
+      await writeMemory(addresses.menu_visibility, menuVisibility, DataType.Short);
     },
     menuVisibilityEnabled: (index: number) => {
       let menuVisibility = gameState.menuVisibility;
@@ -282,32 +274,32 @@ export function useFF7() {
       } else {
         menuLocks |= 1 << index;
       }
-      await writeMemory(0xdc08fa, menuLocks, DataType.Short);
+      await writeMemory(addresses.menu_locks, menuLocks, DataType.Short);
     },
     menuLockEnabled: (index: number) => {
       let menuLocks = gameState.menuLocks;
       return Boolean(menuLocks & (1 << index));
     },
     setGameMoment: async (gameMoment: number) => {
-      await writeMemory(0xdc08dc, gameMoment, DataType.Short);
+      await writeMemory(addresses.game_moment, gameMoment, DataType.Short);
     },
     setGP: async (gp: number) => {
-      await writeMemory(0xdc0a26, gp, DataType.Short);
+      await writeMemory(addresses.gp, gp, DataType.Short);
     },
     setDisc: async (disc: number) => {
-      await writeMemory(0xdc0bdc, disc, DataType.Byte);
+      await writeMemory(addresses.disc_id, disc, DataType.Byte);
     },
     setGil: async (gil: number) => {
-      await writeMemory(0xdc08b4, gil, DataType.Int);
+      await writeMemory(addresses.gil, gil, DataType.Int);
     },
     setBattleCount: async (battleCount: number) => {
-      await writeMemory(0xdc08f4, battleCount, DataType.Short);
+      await writeMemory(addresses.battle_count, battleCount, DataType.Short);
     },
     setBattleEscapeCount: async (battleEscapeCount: number) => {
-      await writeMemory(0xdc08f6, battleEscapeCount, DataType.Short);
+      await writeMemory(addresses.battle_escape_count, battleEscapeCount, DataType.Short);
     },
     setInGameTime: async (inGameTime: number) => {
-      await writeMemory(0xdc08b8, inGameTime, DataType.Int);
+      await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
   };
 

@@ -2,10 +2,11 @@
 
 import Row from "./components/Row";
 import { GameModule } from "./types";
-import { useFF7 } from "./useFF7";
 import { formatTime } from "./util";
 import GroupButton from "./components/GroupButton";
 import { useState } from "react";
+import { useFF7 } from "./useFF7";
+import { useFF7Context } from "./FF7Context";
 
 enum Tabs {
   Info = "info",
@@ -15,7 +16,17 @@ enum Tabs {
 }
 
 function Home() {
-  const ff7 = useFF7();
+  const addresses = useFF7Context();
+
+  if (!addresses) {
+    return <div>FF7 addresses not available</div>;
+  }
+  const ff7 = useFF7(addresses);
+
+  if (!ff7.gameState) {
+    return <div>FF7 game state not available</div>;
+  }
+
   const state = ff7.gameState;
   const [battleId, setBattleId] = useState("");
   const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.Info);
