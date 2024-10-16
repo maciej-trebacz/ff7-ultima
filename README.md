@@ -4,6 +4,9 @@ Real-time editor for Final Fantasy VII
 
 ## TODO
 
+* Sector 5 (Aeris' house) crashes the app
+* End Battle doesn't work
+
 * [x] Test Rust's ability to connect to a process and read/write its memory
 * Read basic game state information
   * [x] Game Moment
@@ -31,8 +34,9 @@ Real-time editor for Final Fantasy VII
 * [x] Enter battle for specific battle formation id
   * [x] Field
   * [x] World
-  * [ ] Dropdown for picking a battle using friendly formation names
+  * [x] Dropdown for picking a battle using friendly formation names
 * [x] Disable battle swirl
+* [x] Invincibility in battle
 * [ ] Remember last used hacks
 * [ ] Auto-apply hacks on game start
 * [ ] Teleport to specific field

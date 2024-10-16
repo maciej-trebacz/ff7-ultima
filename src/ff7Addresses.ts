@@ -30,6 +30,7 @@ export interface FF7Addresses {
   danger_value: number;
   battle_id: number;
   field_models_ptr: number;
+  field_data_ptr: number;
   ally_ptr_base: number;
   ally_limit_ptr_base: number;
   field_name: number;
@@ -53,6 +54,9 @@ export interface FF7Addresses {
   instant_atb_set: number;
   atb_increase_ptr_base: number;
   intro_skip: number;
+  code_cave: number;
+  battle_init_chars_fn: number;
+  battle_init_chars_call: number;
 }
 
 export function useFF7Addresses() {

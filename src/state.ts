@@ -38,6 +38,8 @@ export const useFF7State = function() {
     instantATBEnabled: false,
     fieldModels: [] as FieldModel[],
     battlePartyChars: [] as BattleCharObj[],
+    battleAllies: [] as BattleCharObj[],
+    battleEnemies: [] as BattleCharObj[],
     speed: '',
     unfocusPatchEnabled: false,
     isFFnx: false,
@@ -45,6 +47,7 @@ export const useFF7State = function() {
     stepFraction: 0,
     dangerValue: 0,
     battleId: 0,
+    invincibilityEnabled: false,
   });
 
   useEffect(() => {
@@ -56,8 +59,9 @@ export const useFF7State = function() {
       try {
         const ff7Data: any = await invoke("read_ff7_data");
         const basic: any = ff7Data.basic;
-        const fieldModels: any = ff7Data.field_models;
         const battlePartyChars: any = ff7Data.battle_chars;
+        const battleAllies: any = ff7Data.battle_allies;
+        const battleEnemies: any = ff7Data.battle_enemies;
         const fieldData: any = ff7Data.field_data;
         const isFFnx: any = basic.ffnx_check === 0xE9;
         let speed = Math.floor((10000000 / basic.field_fps) as number / 30 * 100) / 100;
@@ -70,6 +74,20 @@ export const useFF7State = function() {
 
         let fieldName = fieldData.field_name.map((char: number) => String.fromCharCode(char)).join('');
         fieldName = fieldName.split('\\')[0];
+        if (fieldData.field_name[0] === 0x00) {
+          fieldName = 'N/A';
+        }
+
+        const fieldModels: any = ff7Data.field_data.field_model_names.map((name: any, idx: number) => {
+          const nameTrimmed = name.indexOf(fieldName) !== -1 ? name.substring(fieldName.length) : name;
+          return {
+            name: nameTrimmed.split('.')[0],
+            x: ff7Data.field_models[idx].x,
+            y: ff7Data.field_models[idx].y,
+            z: ff7Data.field_models[idx].z,
+            direction: ff7Data.field_models[idx].direction,
+          }
+        });
         
         setGameState({
           currentModule: basic.current_module as number,
@@ -104,6 +122,9 @@ export const useFF7State = function() {
           battleId: basic.battle_id as number,
           fieldModels,
           battlePartyChars,
+          battleAllies,
+          battleEnemies,
+          invincibilityEnabled: !(basic.invincibility_check === 0x774e),
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

@@ -30,7 +30,11 @@ impl ProcessScanner {
 
                 let found_process = local_system.processes().iter().find_map(|(&pid, process)| {
                     let process_name = process.name().to_lowercase();
-                    if names.iter().any(|name| name.to_lowercase() == process_name.to_lowercase()) {
+                    let process_status = process.status();
+                    let process_memory = process.memory();
+
+                    // Return the PID only if the process is healthy (when the game crashes its reported memory usage falls down below 1MB)
+                    if names.iter().any(|name| name.to_lowercase() == process_name.to_lowercase() && process_status == sysinfo::ProcessStatus::Run && process_memory > 1024768) {
                         Some(pid)
                     } else {
                         None
@@ -61,5 +65,6 @@ pub fn initialize(names: Vec<String>) {
 }
 
 pub fn get_pid() -> Option<Pid> {
-    SCANNER.lock().get_pid()
+    let pid = SCANNER.lock().get_pid();
+    return pid;
 }

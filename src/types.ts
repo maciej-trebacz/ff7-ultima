@@ -23,6 +23,7 @@ export enum GameModule {
 }
 
 export interface FieldModel {
+  name: string,
   x: number,
   y: number,
   z: number,
@@ -30,10 +31,12 @@ export interface FieldModel {
 }
 
 export interface BattleCharObj {
+  status: number,
   hp: number,
   max_hp: number,
   mp: number,
   max_mp: number,
   atb: number,
   limit: number,
+  name: string,
 }

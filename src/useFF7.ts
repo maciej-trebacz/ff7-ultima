@@ -1,10 +1,11 @@
 "use strict";
 
-import { DataType, readMemory, writeMemory, setMemoryProtection } from "./memory";
+import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
 import { GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
+import { statuses } from "./ff7Statuses";
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
@@ -134,6 +135,7 @@ export function useFF7(addresses: FF7Addresses) {
         return tickFunctionPtr <= 0xffffff;
       });
 
+      debugger; 
       // Find the function responsible for halting the game when unfocused
       const gfxFlipPtr = await getGfxFlipPtr();
 
@@ -300,6 +302,51 @@ export function useFF7(addresses: FF7Addresses) {
     },
     setInGameTime: async (inGameTime: number) => {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
+    },
+    setHP: async (hp: number, index: number) => {
+      await writeMemory(addresses.ally_ptr_base + index * 104 + 0x2c, hp, DataType.Short);
+    },
+    setMP: async (mp: number, index: number) => {
+      await writeMemory(addresses.ally_ptr_base + index * 104 + 0x28, mp, DataType.Short);
+    },
+    setStatus: async (status: number, index: number) => {
+      await writeMemory(addresses.ally_ptr_base + index * 104, status, DataType.Int);
+    },
+    enableInvincibility: async () => {
+      // Function to write state flags for all allies
+      const code = [0xE8, 0xC4, 0x37, 0x1B, 0x00, 0x53, 0xBB, 0xDC, 0xB0, 0x9A, 0x00, 0xC6, 0x43, 0x05, 0x07, 
+                    0xC6, 0x43, 0x6D, 0x07, 0xC6, 0x83, 0xD5, 0x00, 0x00, 0x00, 0x07, 0x5B, 0xC3];
+      await writeMemory(addresses.code_cave, code, DataType.Buffer);
+      await writeMemory(addresses.battle_init_chars_call, 0xfffe3f85, DataType.Int);
+
+      // Set state flags for all allies immediately
+      let flags = 0;
+      for (let i = 0; i < 3; i++) {
+        flags = await readMemory(addresses.ally_ptr_base + i * 104 + 5, DataType.Byte);
+        flags |= 0x07;
+        await writeMemory(addresses.ally_ptr_base + i * 104 + 5, flags, DataType.Byte);
+      }
+    },
+    disableInvincibility: async () => {
+      await writeMemory(addresses.battle_init_chars_call, 0x19774e, DataType.Int);
+
+      // Set state flags for all allies immediately
+      let flags = 0;
+      for (let i = 0; i < 3; i++) {
+        flags = await readMemory(addresses.ally_ptr_base + i * 104 + 5, DataType.Byte);
+        flags &= 0xf8;
+        await writeMemory(addresses.ally_ptr_base + i * 104 + 5, flags, DataType.Byte);
+      }
+    },
+    toggleStatus: async (status: number, index: number) => {
+      // Add Dual Drain because these two should be used together
+      if (status === statuses.Dual) {
+        status |= 0x8000000;
+      }
+
+      let statusFlags = await readMemory(addresses.ally_ptr_base + index * 104, DataType.Int);
+      statusFlags ^= status;
+      await writeMemory(addresses.ally_ptr_base + index * 104, statusFlags, DataType.Int);
     },
   };
 

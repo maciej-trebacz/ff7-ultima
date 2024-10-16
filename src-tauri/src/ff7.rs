@@ -1,6 +1,7 @@
 use serde::Serialize;
 use crate::memory::*;
 use crate::addresses::FF7Addresses;
+use crate::ff7text::decode_text;
 
 #[derive(Serialize)]
 struct FF7BasicData {
@@ -31,6 +32,7 @@ struct FF7BasicData {
     step_fraction: u32,
     danger_value: u32,
     battle_id: u16,
+    invincibility_check: u16,
 }
 
 #[derive(Serialize)]
@@ -43,6 +45,8 @@ struct FieldModel {
 
 #[derive(Serialize)]
 struct BattleCharObj {
+    name: String,
+    status: u32,
     hp: u16,
     max_hp: u16,
     mp: u16,
@@ -55,13 +59,16 @@ struct BattleCharObj {
 pub struct FieldData {
     field_id: u16,
     field_name: Vec<u8>,
+    field_model_count: u16,
+    field_model_names: Vec<String>,
 }
 
 #[derive(Serialize)]
 pub struct FF7Data {
     basic: FF7BasicData,
     field_models: Vec<FieldModel>,
-    battle_chars: Vec<BattleCharObj>,
+    battle_allies: Vec<BattleCharObj>,
+    battle_enemies: Vec<BattleCharObj>,
     field_data: FieldData,
 }
 
@@ -94,6 +101,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         step_fraction: read_memory_int(addresses.step_fraction)?,
         danger_value: read_memory_int(addresses.danger_value)?,
         battle_id: read_memory_short(addresses.battle_id)?,
+        invincibility_check: read_memory_short(addresses.battle_init_chars_call)?,
     })
 }
 
@@ -118,12 +126,66 @@ fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String
     Ok(models)
 }
 
-fn read_battle_chars(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {
+fn read_name(address: u32) -> Result<String, String> {
+    let mut name = Vec::new();
+    let mut i = 0;
+    while i < 16 {
+        let byte = read_memory_byte(address + i)?;
+        if byte == 0xFF {
+            break;
+        }
+        name.push(byte);
+        i += 1;
+    }
+    let decoded_name = decode_text(&name);
+    Ok(decoded_name.unwrap_or_else(|_| String::from_utf8(name).unwrap()))
+}
+
+fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {
+    let mut party_ids = Vec::new();
+    for i in 0..3 {
+        party_ids.push(read_memory_byte(addresses.party_member_ids + i)?);
+    }
+
+    let mut party_names = Vec::new();
+    for i in 0..3 {
+        let name_addr = addresses.party_member_names + party_ids[i as usize] as u32 * 0x84;
+        let decoded_name = read_name(name_addr);
+        party_names.push(decoded_name.unwrap_or_else(|_| String::from("???")));
+    }
+
+    let mut chars: Vec<BattleCharObj> = Vec::new();
+    let char_obj_length = 104;
+    for i in 0..3 {
+        let name = party_names[i as usize].clone();
+        let char = BattleCharObj {
+            name,
+            status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
+            hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
+            max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
+            mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
+            max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
+            atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
+            limit: read_memory_byte(addresses.ally_limit_ptr_base + i * 52)?,
+        };
+        chars.push(char);
+    }
+    Ok(chars)
+}
+
+fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {
     let mut chars: Vec<BattleCharObj> = Vec::new();
     let char_obj_length = 104;
     let ally_limit_length = 52;
-    for i in 0..3 {
+    let enemy_record_length = 16;
+    let enemy_names_length = 184;
+    for i in 4..10 {
+        let enemy_scene_idx = read_memory_byte(addresses.enemy_obj_base + (i - 4) * enemy_record_length).unwrap_or(0) as u32;
+        let enemy_name = read_name(addresses.enemy_names_base + enemy_scene_idx * enemy_names_length);
+
         let char = BattleCharObj {
+            name: enemy_name.unwrap_or_else(|_| String::from("???")),
+            status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
             hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
             max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
             mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
@@ -139,9 +201,41 @@ fn read_battle_chars(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, Str
 fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
     let field_id = read_memory_short(addresses.field_id)?;
     let field_name = read_memory_buffer(addresses.field_name, 16)?;
+    let field_data_addr = read_memory_int(addresses.field_data_ptr)?;
+    if field_data_addr == 0 {
+        return Ok(FieldData {
+            field_id,
+            field_name,
+            field_model_count: 0,
+            field_model_names: Vec::new(),
+        });
+    }
+
+    let section3_offset = read_memory_int(field_data_addr + 0x0e)?;
+    let section3_addr = field_data_addr + section3_offset + 4;
+    let field_model_count = read_memory_short(section3_addr + 2)?;
+    let models_addr = section3_addr + 6;
+
+    let mut field_model_names = Vec::new();
+    let mut offset = 0;
+    for i in 0..field_model_count {
+        let model_name_size = read_memory_short(models_addr + offset)?;
+        let model_name = read_memory_buffer(models_addr + offset + 2, model_name_size as usize)?;
+        let model_animation_count = read_memory_short(models_addr + offset + model_name_size as u32 + 16)?;
+        field_model_names.push(String::from_utf8(model_name).unwrap_or(String::from("???")));
+        offset += model_name_size as u32 + 48;
+
+        for j in 0..model_animation_count {
+            let animation_name_size = read_memory_short(models_addr + offset)?;
+            offset += animation_name_size as u32 + 4;
+        }
+    }
+
     Ok(FieldData {
         field_id,
         field_name,
+        field_model_count,
+        field_model_names,
     })
 }
 
@@ -149,13 +243,15 @@ pub fn read_data() -> Result<FF7Data, String> {
     let addresses = FF7Addresses::new();
     let basic = read_basic_data(&addresses)?;
     let field_models = read_field_models(&addresses)?;
-    let battle_chars = read_battle_chars(&addresses)?;
+    let battle_allies = read_battle_allies(&addresses)?;
+    let battle_enemies = read_battle_enemies(&addresses)?;
     let field_data = read_field_data(&addresses)?;
     
     Ok(FF7Data {
         basic,
         field_models,
-        battle_chars,
+        battle_allies,
+        battle_enemies,
         field_data,
     })
 }
