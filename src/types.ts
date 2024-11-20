@@ -40,3 +40,61 @@ export interface BattleCharObj {
   limit: number,
   name: string,
 }
+
+export interface WorldModel {
+  x: number;
+  y: number;
+  z: number;
+  direction: number;
+  model_id: number;
+  walkmesh_type: number;
+  script: number;
+}
+
+export enum WorldModelType {
+  Cloud = 0,
+  Tifa = 1,
+  Cid = 2,
+  Highwind = 3,
+  WildChocobo = 4,
+  TinyBronco = 5,
+  Buggy = 6,
+  Submarine = 13,
+  Chocobo = 19,
+  RedSubmarine = 28,
+}
+
+export enum WorldWalkmeshType {
+  Grass = 0,
+  Forest = 1,
+  Mountain = 2,
+  Sea = 3,
+  RiverCrossing = 4,
+  River = 5,
+  Water = 6,
+  Swamp = 7,
+  Desert = 8,
+  Wasteland = 9,
+  Snow = 10,
+  Riverside = 11,
+  Cliff = 12,
+  CorelBridge = 13,
+  WutaiBridge = 14,
+  Unused1 = 15,
+  Hillside = 16,
+  Beach = 17,
+  SubPen = 18,
+  Canyon = 19,
+  MountainPass = 20,
+  UnknownCliff = 21,
+  Waterfall = 22,
+  Unused2 = 23,
+  SaucerDesert = 24,
+  Jungle = 25,
+  Sea2 = 26,
+  NorthernCave = 27,
+  DesertBorder = 28,
+  Bridgehead = 29,
+  BackEntrance = 30,
+  Unused3 = 31
+}

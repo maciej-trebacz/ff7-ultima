@@ -1,7 +1,7 @@
 "use strict";
 
 import Row from "./components/Row";
-import { GameModule } from "./types";
+import { GameModule, WorldModelType, WorldWalkmeshType } from "./types";
 import { formatTime } from "./util";
 import GroupButton from "./components/GroupButton";
 import { useState } from "react";
@@ -39,8 +39,16 @@ function Home() {
   const [editInfoModalValue, setEditInfoModalValue] = useState("");
   const [isStartBattleModalOpen, setIsStartBattleModalOpen] = useState(false);
   const [currentAllyEditing, setCurrentAllyEditing] = useState<number | null>(null);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertText, setAlertText] = useState("");
 
   const gameModuleAsString = GameModule[state.currentModule];
+
+  const showAlert = (title: string, text: string) => {
+    setAlertTitle(title);
+    setAlertText(text);
+    (document.getElementById('alert_modal') as any)?.showModal();
+  };
 
   const openEditStatusModal = () => {
     setEditStatusModalOpen(true);
@@ -136,6 +144,13 @@ function Home() {
     }
     return statusList.join(", ");
   }
+
+  const setSpeed = async (speed: number) => {
+    const check = await ff7.setSpeed(speed);
+    if (!check) {
+      showAlert("Not supported", "This version of FFNx is not supported for setting speed. Use the built-in speedhack instead.");
+    }
+  };
 
   return (
     <div className="w-full h-full flex text-sm select-none">
@@ -269,7 +284,8 @@ function Home() {
                 <Row label="Danger Value">{state.dangerValue}</Row>
               </div>
             </div>
-            Field Models
+
+            <h4 className="text-center mt-2 mb-1 font-medium">Field Models</h4>
             <table className="w-full">
               <thead className="bg-zinc-800 text-xs text-left">
                 <tr>
@@ -282,7 +298,7 @@ function Home() {
                 </thead>
               <tbody>
               {ff7.gameState.fieldModels.map((model, index) => {
-                return (
+                return model ? (
                   <tr key={index} className="bg-zinc-800 text-xs">
                     <td className="p-1 text-nowrap w-14 font-bold">{model.name}</td>
                     <td className="p-1 px-2 text-nowrap">{model.x}</td>
@@ -290,10 +306,38 @@ function Home() {
                     <td className="p-1 px-2 text-nowrap">{model.z}</td>
                     <td className="p-1">{model.direction}</td>
                   </tr>
+                  ) : (
+                  <tr key={index} className="bg-zinc-800 text-xs">
+                    <td className="p-1 text-nowrap w-14 font-bold">N/A</td>
+                    <td className="p-1 px-2 text-nowrap">N/A</td>
+                    <td className="p-1 px-2 text-nowrap">N/A</td>
+                    <td className="p-1 px-2 text-nowrap">N/A</td>
+                    <td className="p-1">N/A</td>
+                  </tr>
                   )
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {currentTab === Tabs.World && (
+          <div>
+            <div className="flex gap-1">
+              <div className="flex-1">
+                <Row label="X">{ff7.gameState.worldCurrentModel.x}</Row>
+                <Row label="Y">{ff7.gameState.worldCurrentModel.y}</Row>
+                <Row label="Z">{ff7.gameState.worldCurrentModel.z}</Row>
+                <Row label="Direction">{ff7.gameState.worldCurrentModel.direction}</Row>
+              </div>
+              <div className="flex-1">
+                <Row label="Model">{WorldModelType[ff7.gameState.worldCurrentModel.model_id]}</Row>
+                <Row label="Terrain">
+                  {WorldWalkmeshType[ff7.gameState.worldCurrentModel.walkmesh_type] || ff7.gameState.worldCurrentModel.walkmesh_type}
+                </Row>
+                <Row label="Script ID">{ff7.gameState.worldCurrentModel.script}</Row>
+              </div>
+            </div>
           </div>
         )}
 
@@ -307,7 +351,8 @@ function Home() {
                     : "-"}
                 </Row>
               </div>
-              <h2>Allies</h2>
+
+              <h4 className="text-center mt-2 mb-1 font-medium">Allies</h4>
               <table>
                 <thead className="bg-zinc-800 text-xs text-left">
                   <tr>
@@ -332,7 +377,7 @@ function Home() {
               </tbody>
               </table>
 
-              <h2>Enemies</h2>
+              <h4 className="text-center mt-2 mb-1 font-medium">Enemies</h4>
               <table>
                 <thead className="bg-zinc-800 text-xs text-left">
                   <tr>
@@ -366,31 +411,31 @@ function Home() {
             <div className="join">
               <GroupButton
                 active={ff7.gameState.speed === "0.25"}
-                onClick={() => ff7.setSpeed(0.25)}
+                onClick={() => setSpeed(0.25)}
               >
                 0.25x
               </GroupButton>
               <GroupButton
                 active={ff7.gameState.speed === "0.5"}
-                onClick={() => ff7.setSpeed(0.5)}
+                onClick={() => setSpeed(0.5)}
               >
                 0.5x
               </GroupButton>
               <GroupButton
                 active={ff7.gameState.speed === "1"}
-                onClick={() => ff7.setSpeed(1)}
+                onClick={() => setSpeed(1)}
               >
                 1x
               </GroupButton>
               <GroupButton
                 active={ff7.gameState.speed === "2"}
-                onClick={() => ff7.setSpeed(2)}
+                onClick={() => setSpeed(2)}
               >
                 2x
               </GroupButton>
               <GroupButton
                 active={ff7.gameState.speed === "4"}
-                onClick={() => ff7.setSpeed(4)}
+                onClick={() => setSpeed(4)}
               >
                 4x
               </GroupButton>
@@ -779,6 +824,31 @@ function Home() {
             </button>
           </div>
         </div>
+
+        <dialog id="alert_modal" className="modal">
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">
+                ✕
+              </button>
+            </form>
+            <h3 className="font-bold text-lg mb-2 mt-0">
+              {alertTitle}
+            </h3>
+            <div className="w-full mb-4">
+              <p className="text-sm">{alertText}</p>
+            </div>
+            <div className="flex gap-2 w-full">
+              <form method="dialog">
+                <button
+                  className="btn btn-primary btn-sm w-full"
+                >
+                  OK
+                </button>
+              </form>
+            </div>
+          </div>
+        </dialog>
 
         <dialog id="edit_info_modal" className="modal">
           <div className="modal-box">

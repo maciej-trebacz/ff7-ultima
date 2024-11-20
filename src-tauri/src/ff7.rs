@@ -64,12 +64,24 @@ pub struct FieldData {
 }
 
 #[derive(Serialize)]
+struct WorldModel {
+    x: u32,
+    y: u32,
+    z: u32,
+    direction: i16,
+    model_id: u8,
+    walkmesh_type: u8
+}
+
+
+#[derive(Serialize)]
 pub struct FF7Data {
     basic: FF7BasicData,
     field_models: Vec<FieldModel>,
     battle_allies: Vec<BattleCharObj>,
     battle_enemies: Vec<BattleCharObj>,
     field_data: FieldData,
+    world_current_model: WorldModel
 }
 
 fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
@@ -239,6 +251,29 @@ fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
     })
 }
 
+ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, String> {
+    let address = read_memory_int(addresses.world_current_obj_ptr)? as u32;
+    if address == 0 {
+        return Ok(WorldModel {
+            x: 0,
+            y: 0,
+            z: 0,
+            direction: 0,
+            model_id: 0,
+            walkmesh_type: 0,
+        });
+    }
+
+    Ok(WorldModel {
+        x: read_memory_int(address + 0xC)?,
+        y: read_memory_int(address + 0x14)?,
+        z: read_memory_int(address + 0x10)?,
+        direction: read_memory_signed_short(address + 0x40)?,
+        model_id: read_memory_byte(address + 0x50)?,
+        walkmesh_type: read_memory_byte(address + 0x4a)?,
+    })
+}
+
 pub fn read_data() -> Result<FF7Data, String> {
     let addresses = FF7Addresses::new();
     let basic = read_basic_data(&addresses)?;
@@ -246,6 +281,7 @@ pub fn read_data() -> Result<FF7Data, String> {
     let battle_allies = read_battle_allies(&addresses)?;
     let battle_enemies = read_battle_enemies(&addresses)?;
     let field_data = read_field_data(&addresses)?;
+    let world_current_model = read_world_current_model(&addresses)?;
     
     Ok(FF7Data {
         basic,
@@ -253,5 +289,6 @@ pub fn read_data() -> Result<FF7Data, String> {
         battle_allies,
         battle_enemies,
         field_data,
+        world_current_model,
     })
 }

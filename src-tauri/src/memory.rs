@@ -63,6 +63,10 @@ pub fn read_memory_short(address: u32) -> Result<u16, String> {
   read_memory::<u16>(address)
 }
 
+pub fn read_memory_signed_short(address: u32) -> Result<i16, String> {
+  read_memory::<i16>(address)
+}
+
 pub fn read_memory_byte(address: u32) -> Result<u8, String> {
   read_memory::<u8>(address)
 }

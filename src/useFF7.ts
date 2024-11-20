@@ -38,7 +38,12 @@ export function useFF7(addresses: FF7Addresses) {
     gameState,
     setSpeed: async (speed: number) => {
       const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
+      const ffnxCheck2 = await readMemory(addresses.ffnx_check + 0xa2, DataType.Byte);
       if (ffnxCheck === 0xE9) {
+        if (ffnxCheck2 !== 0xF2) {
+          return false;
+        }
+
         const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
         const addrFps30 = await readMemory(baseAddress + 0xa, DataType.Int);
         const addrFps15 = await readMemory(baseAddress + 0xa6, DataType.Int);
@@ -50,7 +55,7 @@ export function useFF7(addresses: FF7Addresses) {
 
         // Battle
         await writeMemory(addrFps15, 15 * speed, DataType.Float);
-        return;
+        return true;
       }
 
       const setFps = async (address: number, defaultFps: number) => {
@@ -66,6 +71,8 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(0x60e434, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
       await writeMemory(0x74bd02, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
       await writeMemory(0x41b6d8, [0x90, 0x90, 0x90, 0x90, 0x90, 0x90], DataType.Buffer);
+
+      return true;
     },
     toggleMenuAccess: async () => {
       await writeMemory(addresses.field_menu_access_enabled, gameState.fieldMenuAccessEnabled ? 0 : 1, DataType.Byte);

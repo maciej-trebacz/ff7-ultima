@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { GameModule, FieldModel, BattleCharObj } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel } from "./types";
 import { DataType, readMemory } from "./memory";
 import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
@@ -48,6 +48,7 @@ export const useFF7State = function() {
     dangerValue: 0,
     battleId: 0,
     invincibilityEnabled: false,
+    worldCurrentModel: {} as WorldModel,
   });
 
   useEffect(() => {
@@ -79,6 +80,10 @@ export const useFF7State = function() {
         }
 
         const fieldModels: any = ff7Data.field_data.field_model_names.map((name: any, idx: number) => {
+          if (ff7Data.field_models.length === 0) {
+            return null;
+          }
+
           const nameTrimmed = name.indexOf(fieldName) !== -1 ? name.substring(fieldName.length) : name;
           return {
             name: nameTrimmed.split('.')[0],
@@ -88,6 +93,10 @@ export const useFF7State = function() {
             direction: ff7Data.field_models[idx].direction,
           }
         });
+
+        const worldCurrentModel = ff7Data.world_current_model as WorldModel;
+        worldCurrentModel.script = worldCurrentModel.walkmesh_type >> 5;
+        worldCurrentModel.walkmesh_type = worldCurrentModel.walkmesh_type & 0x1f;
         
         setGameState({
           currentModule: basic.current_module as number,
@@ -125,6 +134,7 @@ export const useFF7State = function() {
           battleAllies,
           battleEnemies,
           invincibilityEnabled: !(basic.invincibility_check === 0x774e),
+          worldCurrentModel,
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {
