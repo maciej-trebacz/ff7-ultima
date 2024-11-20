@@ -323,6 +323,7 @@ function Home() {
 
         {currentTab === Tabs.World && (
           <div>
+            <h4 className="text-center mt-2 mb-1 font-medium">Current Position</h4>
             <div className="flex gap-1">
               <div className="flex-1">
                 <Row label="X">{ff7.gameState.worldCurrentModel.x}</Row>

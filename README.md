@@ -12,7 +12,7 @@ Real-time editor for Final Fantasy VII
   * [x] Game Moment
   * [x] Battle / escape counts
   * [x] Field model coordinates
-  * [ ] World map coordinates
+  * [x] World map coordinates
   * [x] Step count info
   * Battles
     * [x] Party stats
