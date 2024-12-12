@@ -40,8 +40,9 @@ pub struct FF7Addresses {
     pub battle_init_chars_fn: u32,
     pub battle_init_chars_call: u32,
     pub enemy_obj_base: u32,
-    pub enemy_names_base: u32,
+    pub enemy_data_base: u32,
     pub world_current_obj_ptr: u32,
+    pub item_names_base: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -107,8 +108,9 @@ impl FF7Addresses {
             battle_init_chars_fn: 0x5cf650,
             battle_init_chars_call: 0x437efe,
             enemy_obj_base: 0x9a8794,
-            enemy_names_base: 0x9a8e9c,
+            enemy_data_base: 0x9a8e9c,
             world_current_obj_ptr: 0xe3a7d0,
+            item_names_base: 0x9a5e54,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,

@@ -62,6 +62,11 @@ fn read_ff7_data() -> Result<ff7::FF7Data, String> {
 }
 
 #[tauri::command]
+fn read_enemy_data(id: u32) -> Result<ff7::EnemyData, String> {
+    ff7::read_enemy_data(id)
+}
+
+#[tauri::command]
 fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
     memory::set_memory_protection(address, size)
 }
@@ -91,7 +96,8 @@ fn main() {
             write_memory_buffer,
             set_memory_protection,
             read_ff7_data,
-            get_ff7_addresses
+            get_ff7_addresses,
+            read_enemy_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

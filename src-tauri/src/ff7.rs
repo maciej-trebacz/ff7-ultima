@@ -1,5 +1,5 @@
 use serde::Serialize;
-use crate::memory::*;
+use crate::{addresses, memory::*};
 use crate::addresses::FF7Addresses;
 use crate::ff7text::decode_text;
 
@@ -53,6 +53,7 @@ struct BattleCharObj {
     max_mp: u16,
     atb: u16,
     limit: u8,
+    scene_id: u8
 }
 
 #[derive(Serialize)]
@@ -73,6 +74,75 @@ struct WorldModel {
     walkmesh_type: u8
 }
 
+#[derive(Serialize)]
+struct Elemental {
+    element: u8,
+    effect: u8,
+}
+
+#[derive(Serialize)]
+enum ElementalEffect {
+    Death,
+    DoubleDamage = 2,
+    HalfDamage = 4,
+    Nullify = 5,
+    Absorb = 6,
+    FullCure = 7,
+    Nothing = 0xFF,
+}
+
+#[derive(Serialize)]
+enum ElementalType {
+    Fire,
+    Ice,
+    Bolt,
+    Earth,
+    Bio,
+    Gravity,
+    Water,
+    Wind,
+    Holy,
+    Health,
+    Cut,
+    Hit,
+    Punch,
+    Shoot,
+    Scream,
+    Hidden,
+    Nothing = 0xFF,
+}
+
+#[derive(Serialize)]
+struct Item {
+    item_name: u8,
+    item_type: ItemType,
+    rate: u8
+}
+
+#[derive(Serialize)]
+enum ItemType {
+    Steal,
+    Drop,
+}
+#[derive(Serialize)]
+pub struct EnemyData {
+    level: u8,
+    speed: u8,
+    luck: u8,
+    evade: u8,
+    strength: u8,
+    defense: u16,
+    magic: u8,
+    magic_defense: u16,
+    elements: Vec<Elemental>,
+    // items: Vec<Item>,
+    status_immunities: u32,
+    gil: u32,
+    exp: u32,
+    ap: u16,
+    back_damage_multiplier: u8,
+    // morph: Option<String>
+}
 
 #[derive(Serialize)]
 pub struct FF7Data {
@@ -179,6 +249,7 @@ fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, St
             max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
             atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
             limit: read_memory_byte(addresses.ally_limit_ptr_base + i * 52)?,
+            scene_id: 0
         };
         chars.push(char);
     }
@@ -190,10 +261,10 @@ fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, S
     let char_obj_length = 104;
     let ally_limit_length = 52;
     let enemy_record_length = 16;
-    let enemy_names_length = 184;
+    let enemy_data_length = 184;
     for i in 4..10 {
-        let enemy_scene_idx = read_memory_byte(addresses.enemy_obj_base + (i - 4) * enemy_record_length).unwrap_or(0) as u32;
-        let enemy_name = read_name(addresses.enemy_names_base + enemy_scene_idx * enemy_names_length);
+        let enemy_scene_idx = read_memory_byte(addresses.enemy_obj_base + (i - 4) * enemy_record_length).unwrap_or(0);
+        let enemy_name = read_name(addresses.enemy_data_base + u32::from(enemy_scene_idx) * enemy_data_length);
 
         let char = BattleCharObj {
             name: enemy_name.unwrap_or_else(|_| String::from("???")),
@@ -204,6 +275,7 @@ fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, S
             max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
             atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
             limit: read_memory_byte(addresses.ally_limit_ptr_base + i * ally_limit_length)?,
+            scene_id: enemy_scene_idx,
         };
         chars.push(char);
     }
@@ -290,5 +362,56 @@ pub fn read_data() -> Result<FF7Data, String> {
         battle_enemies,
         field_data,
         world_current_model,
+    })
+}
+
+pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
+    let addresses = FF7Addresses::new();
+    let enemy_data_length = 184;
+    let enemy_data_addr = addresses.enemy_data_base + id * enemy_data_length;
+
+    let level = read_memory_byte(enemy_data_addr + 0x20)? as u8;
+    let speed = read_memory_byte(enemy_data_addr + 0x21)? as u8;
+    let luck = read_memory_byte(enemy_data_addr + 0x22)? as u8;
+    let evade = read_memory_byte(enemy_data_addr + 0x23)? as u8;
+    let strength = read_memory_byte(enemy_data_addr + 0x24)? as u8;
+    let magic = read_memory_byte(enemy_data_addr + 0x26)? as u8;
+
+    // Defense and magic defense are multiplied by 2 to get the actual value that the game uses
+    let defense = read_memory_byte(enemy_data_addr + 0x25)? as u16 * 2;
+    let magic_defense = read_memory_byte(enemy_data_addr + 0x27)? as u16 * 2;
+
+    let gil = read_memory_int(enemy_data_addr + 0xAC)?;
+    let exp = read_memory_int(enemy_data_addr + 0xA8)?;
+    let ap = read_memory_short(enemy_data_addr + 0x9E)?;
+    let back_damage_multiplier = read_memory_byte(enemy_data_addr + 0xA2)? / 8;
+
+    let mut elements: Vec<Elemental> = Vec::new();
+    for i in 0..8 {
+        let element = read_memory_byte(enemy_data_addr + 0x28 + i)?;
+        elements.push(Elemental {
+            element,
+            effect: read_memory_byte(enemy_data_addr + 0x30 + i)?,
+        });
+    }
+
+    let status_immunities: u32 = read_memory_int(enemy_data_addr + 0xb0)?;
+
+    Ok(EnemyData {
+        level,
+        speed,
+        luck,
+        evade,
+        strength,
+        defense,
+        magic,
+        magic_defense,
+        gil,
+        exp,
+        ap,
+        back_damage_multiplier,
+        elements,
+        status_immunities,
+
     })
 }

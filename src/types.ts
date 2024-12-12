@@ -39,6 +39,7 @@ export interface BattleCharObj {
   atb: number,
   limit: number,
   name: string,
+  scene_id: number,
 }
 
 export interface WorldModel {
@@ -97,4 +98,56 @@ export enum WorldWalkmeshType {
   Bridgehead = 29,
   BackEntrance = 30,
   Unused3 = 31
+}
+
+export enum ElementalType {
+  Fire = 0,
+  Ice = 1,
+  Lightning = 2,
+  Earth = 3,
+  Poison = 4,
+  Gravity = 5,
+  Water = 6,
+  Wind = 7,
+  Holy = 8,
+  Health = 9,
+  Cut = 10,
+  Hit = 11,
+  Punch = 12,
+  Shoot = 13,
+  Scream = 14,
+  Hidden = 15,
+  Nothing = 0xFF,
+}
+
+export enum ElementalEffect {
+  Death = 0,
+  DoubleDamage = 2,
+  HalfDamage = 4,
+  Nullify = 5,
+  Absorb = 6,
+  FullCure = 7,
+  Nothing = 0xFF,
+}
+
+export interface Elemental {
+  element: ElementalType,
+  effect: ElementalEffect
+}
+
+export interface EnemyData {
+  level: number,
+  speed: number,
+  luck: number,
+  evade: number,
+  strength: number,
+  defense: number,
+  magic: number,
+  magic_defense: number,
+  gil: number,
+  exp: number,
+  ap: number,
+  back_damage_multiplier: number,
+  elements: Elemental[],
+  status_immunities: number,
 }

@@ -1,9 +1,10 @@
 "use strict";
 
+import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
-import { GameModule } from "./types";
+import { EnemyData, GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { statuses } from "./ff7Statuses";
 
@@ -355,6 +356,9 @@ export function useFF7(addresses: FF7Addresses) {
       statusFlags ^= status;
       await writeMemory(addresses.ally_ptr_base + index * 104, statusFlags, DataType.Int);
     },
+    readEnemyData: async (enemyId: number) => {
+      return await invoke("read_enemy_data", { id: enemyId }) as EnemyData;
+    }
   };
 
   return ff7;
