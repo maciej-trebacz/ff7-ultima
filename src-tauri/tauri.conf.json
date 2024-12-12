@@ -1,6 +1,6 @@
 {
   "productName": "ff7-ultima",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "identifier": "org.m4v3r.ff7-ultima",
   "build": {
     "beforeDevCommand": "npm run dev",

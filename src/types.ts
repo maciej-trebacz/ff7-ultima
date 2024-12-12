@@ -135,6 +135,17 @@ export interface Elemental {
   effect: ElementalEffect
 }
 
+export enum ItemType {
+  Steal = 0,
+  Drop = 1
+}
+
+export interface Item {
+  name: string,
+  item_type: ItemType,
+  rate: number
+}
+
 export interface EnemyData {
   level: number,
   speed: number,
@@ -150,4 +161,6 @@ export interface EnemyData {
   back_damage_multiplier: number,
   elements: Elemental[],
   status_immunities: number,
+  items: Item[],
+  morph: String | null,
 }

@@ -114,7 +114,7 @@ enum ElementalType {
 
 #[derive(Serialize)]
 struct Item {
-    item_name: u8,
+    name: String,
     item_type: ItemType,
     rate: u8
 }
@@ -135,13 +135,13 @@ pub struct EnemyData {
     magic: u8,
     magic_defense: u16,
     elements: Vec<Elemental>,
-    // items: Vec<Item>,
+    items: Vec<Item>,
     status_immunities: u32,
     gil: u32,
     exp: u32,
     ap: u16,
     back_damage_multiplier: u8,
-    // morph: Option<String>
+    morph: Option<String>
 }
 
 #[derive(Serialize)]
@@ -365,6 +365,37 @@ pub fn read_data() -> Result<FF7Data, String> {
     })
 }
 
+fn read_item_names_section(items: &mut Vec<String>, base_address: u32, count: u32) -> Result<u32, String> {
+    let mut pos = 0;
+    for i in 0..count {
+        let offset = read_memory_short(base_address + i * 2)? as u16;
+        let address = base_address + offset as u32;
+        let name = read_name(address).unwrap_or_else(|_| String::from("???"));
+        pos = address + name.len() as u32 + 1;
+        items.push(name);
+    }
+    Ok(pos)
+}
+
+fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
+    let mut items: Vec<String> = Vec::new();
+    let mut addr = addresses.item_names_base;
+
+    // Items
+    addr = read_item_names_section(&mut items, addr, 128)?;
+
+    // Weapons
+    addr = read_item_names_section(&mut items, addr, 128)?;
+
+    // Armors
+    addr = read_item_names_section(&mut items, addr, 32)?;
+
+    // Accessories
+    read_item_names_section(&mut items, addr, 32)?;
+
+    Ok(items)
+}
+
 pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
     let addresses = FF7Addresses::new();
     let enemy_data_length = 184;
@@ -397,6 +428,27 @@ pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
 
     let status_immunities: u32 = read_memory_int(enemy_data_addr + 0xb0)?;
 
+    let item_names = read_item_names(&addresses)?;
+    let mut items: Vec<Item> = Vec::new();
+    for i in 0..4 {
+        let rate = read_memory_byte(enemy_data_addr + 0x88 + i)? as u8;
+        let id = read_memory_short(enemy_data_addr + 0x8c + i * 2)? as u32;
+
+        if id == 0xFFFF {
+            break;
+        }
+
+        let name = item_names[id as usize].clone();
+
+        // Type is Drop when rate is lower than 128
+        let item_type = if rate < 128 { ItemType::Drop } else { ItemType::Steal };
+
+        items.push(Item { rate: rate % 128, name, item_type });
+    }
+
+    let morph_id = read_memory_short(enemy_data_addr + 0xA0)? as u16;
+    let morph = if morph_id == 0xFFFF { None } else { Some(item_names[morph_id as usize].clone()) };
+
     Ok(EnemyData {
         level,
         speed,
@@ -412,6 +464,7 @@ pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
         back_damage_multiplier,
         elements,
         status_immunities,
-
+        items,
+        morph,
     })
 }

@@ -1,7 +1,7 @@
 "use strict";
 
 import Row from "./components/Row";
-import { EnemyData, GameModule, WorldModelType, WorldWalkmeshType, ElementalType, ElementalEffect, BattleCharObj } from "./types";
+import { EnemyData, GameModule, WorldModelType, WorldWalkmeshType, ElementalType, ElementalEffect, BattleCharObj, ItemType } from "./types";
 import { formatTime } from "./util";
 import GroupButton from "./components/GroupButton";
 import { useState } from "react";
@@ -161,6 +161,7 @@ function Home() {
     setEnemyData(data);
     setEnemyName(name);
     setSelectedEnemy(sceneId);
+    (document.getElementById('enemy_info_modal') as any)?.showModal();
     setIsEnemyInfoModalOpen(true);
   }
 
@@ -427,105 +428,6 @@ function Home() {
               })}
               </tbody>
               </table>
-            </div>
-          </div>
-        )}
-
-        {isEnemyInfoModalOpen && enemyData && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-zinc-900 p-4 rounded-lg w-96">
-              <h3 className="text-lg font-bold mb-4">Enemy info: {enemyName}</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Level:</span>
-                  <span className="float-right">{enemyData.level}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Speed:</span>
-                  <span className="float-right">{enemyData.speed}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Strength:</span>
-                  <span className="float-right">{enemyData.strength}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Defense:</span>
-                  <span className="float-right">{enemyData.defense}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Magic:</span>
-                  <span className="float-right">{enemyData.magic}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">M.Defense:</span>
-                  <span className="float-right">{enemyData.magic_defense}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Luck:</span>
-                  <span className="float-right">{enemyData.luck}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Evade:</span>
-                  <span className="float-right">{enemyData.evade}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Exp:</span>
-                  <span className="float-right">{enemyData.exp}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">AP:</span>
-                  <span className="float-right">{enemyData.ap}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Gil:</span>
-                  <span className="float-right">{enemyData.gil}</span>
-                </div>
-                <div className="bg-zinc-800 p-2 rounded">
-                  <span className="text-zinc-400">Back atk multiplier:</span>
-                  <span className="float-right">{enemyData.back_damage_multiplier}</span>
-                </div>
-              </div>
-              <div className="bg-zinc-800 p-3 rounded mt-4">
-                <h4 className="text-zinc-400 font-semibold mb-2">Elemental Effects</h4>
-                <div className="grid grid-cols-1 gap-1">
-                  {enemyData.elements.map((elem, index) => {
-                    const elementType = ElementalType[elem.element] || "Unknown";
-                    const effectType = ElementalEffect[elem.effect] || "None";
-                    if (effectType === "Nothing" || elementType === "Nothing") return null;
-                    return (
-                      <div key={index} className="flex justify-between items-center text-sm">
-                        <span className="text-zinc-300">{elementType}:</span>
-                        <span className={`${
-                          effectType === "Absorb" ? "text-green-400" :
-                          effectType === "Nullify" ? "text-blue-400" :
-                          effectType === "HalfDamage" ? "text-yellow-400" :
-                          effectType === "DoubleDamage" ? "text-red-400" :
-                          effectType === "Death" ? "text-purple-400" :
-                          effectType === "FullCure" ? "text-emerald-400" :
-                          "text-zinc-400"
-                        }`}>{effectType}</span>
-                      </div>
-                    );
-                  })}
-                  {!enemyData.elements.find(elem => elem.element !== 0xFF) && <span className="text-zinc-400">None</span>}
-                </div>
-              </div>
-              <div className="bg-zinc-800 p-3 rounded mt-4">
-                <h4 className="text-zinc-400 font-semibold mb-2">Status Immunities</h4>
-                <div className="text-sm">
-                  {formatStatus(enemyData.status_immunities ^ 0xFFFFFFFF) || <span className="text-zinc-400">None</span>}
-                </div>
-              </div>
-              <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full"
-                onClick={() => {
-                  setIsEnemyInfoModalOpen(false);
-                  setEnemyData(null);
-                  setEnemyName("");
-                }}
-              >
-                Close
-              </button>
             </div>
           </div>
         )}
@@ -1048,6 +950,121 @@ function Home() {
                 </div>
               )})}
             </div>
+          </div>
+        </dialog>
+
+        <dialog id="enemy_info_modal" className="modal">
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">
+                ✕
+              </button>
+            </form>
+            {enemyData && (
+            <>
+              <h3 className="text-lg font-bold mb-4">Enemy info: {enemyName}</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Level:</span>
+                  <span className="float-right">{enemyData.level}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Speed:</span>
+                  <span className="float-right">{enemyData.speed}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Strength:</span>
+                  <span className="float-right">{enemyData.strength}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Defense:</span>
+                  <span className="float-right">{enemyData.defense}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Magic:</span>
+                  <span className="float-right">{enemyData.magic}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">M.Defense:</span>
+                  <span className="float-right">{enemyData.magic_defense}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Luck:</span>
+                  <span className="float-right">{enemyData.luck}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Evade:</span>
+                  <span className="float-right">{enemyData.evade}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Exp:</span>
+                  <span className="float-right">{enemyData.exp}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">AP:</span>
+                  <span className="float-right">{enemyData.ap}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Gil:</span>
+                  <span className="float-right">{enemyData.gil}</span>
+                </div>
+                <div className="bg-zinc-800 p-2 rounded">
+                  <span className="text-zinc-400">Back atk multiplier:</span>
+                  <span className="float-right">{enemyData.back_damage_multiplier}</span>
+                </div>
+              </div>
+              <div className="bg-zinc-800 p-3 rounded mt-4">
+                <h4 className="text-zinc-400 font-semibold mb-2">Elemental Effects</h4>
+                <div className="grid grid-cols-1 gap-1">
+                  {enemyData.elements.map((elem, index) => {
+                    const elementType = ElementalType[elem.element] || "Unknown";
+                    const effectType = ElementalEffect[elem.effect] || "None";
+                    if (effectType === "Nothing" || elementType === "Nothing") return null;
+                    return (
+                      <div key={index} className="flex justify-between items-center text-sm">
+                        <span className="text-zinc-300">{elementType}:</span>
+                        <span className={`${
+                          effectType === "Absorb" ? "text-green-400" :
+                          effectType === "Nullify" ? "text-blue-400" :
+                          effectType === "HalfDamage" ? "text-yellow-400" :
+                          effectType === "DoubleDamage" ? "text-red-400" :
+                          effectType === "Death" ? "text-purple-400" :
+                          effectType === "FullCure" ? "text-emerald-400" :
+                          "text-zinc-400"
+                        }`}>{effectType}</span>
+                      </div>
+                    );
+                  })}
+                  {!enemyData.elements.find(elem => elem.element !== 0xFF) && <span className="text-zinc-400">None</span>}
+                </div>
+              </div>
+              <div className="bg-zinc-800 p-3 rounded mt-4">
+                <h4 className="text-zinc-400 font-semibold mb-2">Status Immunities</h4>
+                <div className="text-sm">
+                  {formatStatus(enemyData.status_immunities ^ 0xFFFFFFFF) || <span className="text-zinc-400">None</span>}
+                </div>
+              </div>
+              <div className="bg-zinc-800 p-3 rounded mt-4">
+                <h4 className="text-zinc-400 font-semibold mb-2">Items</h4>
+                <div className="grid grid-cols-1 gap-1">
+                  {enemyData.items?.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span className="text-zinc-300">{item.name}</span>
+                      <span className={`${item.item_type === 0 ? "text-yellow-400" : "text-blue-400"}`}>{item.item_type} ({item.rate + 1} / 64 = {Math.round((item.rate + 1) / 64 * 100)}%)
+                      </span>
+                    </div>
+                  ))}
+                  {enemyData.morph && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-zinc-300">{enemyData.morph}</span>
+                      <span className="text-yellow-400">Morph</span>
+                    </div>
+                  )}
+                  {(!enemyData.items || enemyData.items.length === 0) && <span className="text-zinc-400">None</span>}
+                </div>
+              </div>
+            </>
+            )}
           </div>
         </dialog>
       </div>
