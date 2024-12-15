@@ -110,13 +110,21 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.world_battle_enable, 0x0f, DataType.Byte);
       await writeMemory(addresses.world_battle_disable, 0x10, DataType.Byte);
     },
-    endBattle: async () => {
+    endBattle: async (win: boolean) => {
       if (gameState.currentModule === GameModule.Battle) {
         const checkForBattleEnd = async () => {
           try {
             const battleMode = await readMemory(addresses.battle_mode, DataType.Byte);
             if (battleMode > 5) {
-              await writeMemory(addresses.battle_end_check, 0x08, DataType.Byte);
+              if (!win) {
+                await writeMemory(addresses.battle_end_check, 0x08, DataType.Byte);
+              } else {
+                for (let i = 4; i < 10; i++) {
+                  await writeMemory(addresses.ally_ptr_base + i * 104, statuses.Dead, DataType.Int);
+                }
+                await writeMemory(addresses.battle_mode, 0x10, DataType.Byte);
+                await writeMemory(addresses.battle_end_check, 0x20, DataType.Byte);
+              }
             } else if (!connected || gameState.currentModule !== GameModule.Battle) {
               return;
             } else {

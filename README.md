@@ -39,6 +39,7 @@ Real-time editor for Final Fantasy VII
   * [x] Dropdown for picking a battle using friendly formation names
 * [x] Disable battle swirl
 * [x] Invincibility in battle
+* [ ] One Hit Kill
 * [ ] Remember last used hacks
 * [ ] Auto-apply hacks on game start
 * [ ] Teleport to specific field

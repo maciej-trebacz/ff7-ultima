@@ -853,12 +853,18 @@ function Home() {
               </div>
             </dialog>
           </div>
-          <div className="flex-1 py-1">
+          <div className="flex flex-1 py-1">
             <button
-              className="btn btn-primary btn-sm w-full"
-              onClick={() => ff7.endBattle()}
+              className="btn btn-primary btn-sm flex-1"
+              onClick={() => ff7.endBattle(false)}
             >
-              End Battle
+              Escape
+            </button>
+            <button
+              className="btn btn-primary btn-sm ml-0.5 flex-1"
+              onClick={() => ff7.endBattle(true)}
+            >
+              Win
             </button>
           </div>
           <div className="flex-1 py-1">
