@@ -356,6 +356,11 @@ export function useFF7(addresses: FF7Addresses) {
       statusFlags ^= status;
       await writeMemory(addresses.ally_ptr_base + index * 104, statusFlags, DataType.Int);
     },
+    toggleFlags: async (flags: number, index: number) => {
+      let statusFlags = await readMemory(addresses.ally_ptr_base + index * 104 + 5, DataType.Byte);
+      statusFlags ^= flags;
+      await writeMemory(addresses.ally_ptr_base + index * 104 + 5, statusFlags, DataType.Byte);
+    },
     readEnemyData: async (enemyId: number) => {
       return await invoke("read_enemy_data", { id: enemyId }) as EnemyData;
     }

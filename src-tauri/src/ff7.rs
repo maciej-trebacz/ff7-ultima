@@ -46,6 +46,7 @@ struct FieldModel {
 #[derive(Serialize)]
 struct BattleCharObj {
     name: String,
+    flags: u8,
     status: u32,
     hp: u16,
     max_hp: u16,
@@ -243,6 +244,7 @@ fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, St
         let char = BattleCharObj {
             name,
             status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
+            flags: read_memory_byte(addresses.ally_ptr_base + i * char_obj_length + 0x5)?,
             hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
             max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
             mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
@@ -269,6 +271,7 @@ fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, S
         let char = BattleCharObj {
             name: enemy_name.unwrap_or_else(|_| String::from("???")),
             status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
+            flags: read_memory_byte(addresses.ally_ptr_base + i * char_obj_length + 0x5)?,
             hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
             max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
             mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,

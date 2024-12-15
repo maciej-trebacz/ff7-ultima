@@ -814,7 +814,7 @@ dependencies = [
 
 [[package]]
 name = "ff7-ultima"
-version = "0.5.5"
+version = "0.5.7"
 dependencies = [
  "lazy_static",
  "parking_lot",

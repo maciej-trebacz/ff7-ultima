@@ -18,7 +18,8 @@ Real-time editor for Final Fantasy VII
     * [x] Party stats
     * [x] Enemy stats
     * [x] Status flags
-    * [ ] Enemy info (weaknesses, resistances, steal/morph tables)
+    * [x] Enemy info (weaknesses, resistances, steal/morph tables)
+    * [ ] Battle log (display a log of attacks, status changes, etc.)
   * [ ] RNG info (seed, joker, animation index, etc.)
   * [x] Edit basic game info
 * Speedhack

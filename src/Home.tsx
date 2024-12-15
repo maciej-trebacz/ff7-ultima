@@ -139,12 +139,18 @@ function Home() {
     };
   });
 
-  const formatStatus = (status: number) => {
+  const formatStatus = (status: number, flags: number) => {
     const statusList: string[] = [];
     for (const key in statuses) {
       if (status & statuses[key as keyof typeof statuses]) {
         statusList.push(key);
       }
+    }
+    if (flags & 0x1) {
+      statusList.push("ImmunePhysical");
+    }
+    if (flags & 0x2) {
+      statusList.push("ImmuneMagic");
     }
     return statusList.join(", ");
   }
@@ -185,6 +191,9 @@ function Home() {
     }
     return ElementalType[element] || "Unknown";
   }
+
+  const actors = currentAllyEditing !== null && currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
+  const actorIdx = currentAllyEditing !== null && currentAllyEditing > 3 ? currentAllyEditing - 4 : currentAllyEditing;
 
   return (
     <div className="w-full h-full flex text-sm select-none">
@@ -405,7 +414,7 @@ function Home() {
                     <td className="p-1 text-nowrap w-14 font-bold">{char.name}</td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index); openEditInfoModal("HP", char.hp + "")}}>{char.hp} / {char.max_hp}</td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index); openEditInfoModal("MP", char.mp + "")}}>{char.mp} / {char.max_mp}</td>
-                    <td className="p-1 cursor-pointer" onClick={() => {setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status) || <span className="text-zinc-400">[None]</span>}</td>
+                    <td className="p-1 cursor-pointer" onClick={() => {setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
                   </tr>
                 )
               })}
@@ -432,7 +441,7 @@ function Home() {
                     </td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index + 4); openEditInfoModal("HP", char.hp + "")}}>{char.hp} / {char.max_hp}</td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index + 4); openEditInfoModal("MP", char.mp + "")}}>{char.mp} / {char.max_mp}</td>
-                    <td className="p-1 cursor-pointer" onClick={() => {setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status) || <span className="text-zinc-400">[None]</span>}</td>
+                    <td className="p-1 cursor-pointer" onClick={() => {setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
                   </tr>
                 )
               })}
@@ -935,15 +944,13 @@ function Home() {
                 }
 
                 const statusId = statuses[status as keyof typeof statuses];
+                const currentStatus = actorIdx !== null && currentAllyEditing !== null ? actors[actorIdx].status : 0;
+                const currentStatusState = currentStatus & statusId;
 
                 if ([statuses.DualDrain, statuses.Imprisoned].includes(statusId)) {
                   return null;
                 }
 
-                const actors = currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
-                const actorIdx = currentAllyEditing > 3 ? currentAllyEditing - 4 : currentAllyEditing;
-                const currentStatus = currentAllyEditing !== null ? actors[actorIdx].status : 0;
-                const currentStatusState = currentStatus & statusId;
                 return (
                 <div
                   key={status}
@@ -956,6 +963,34 @@ function Home() {
                     }}
                   >
                     {status}
+                  </button>
+                </div>
+              )})}
+            </div>
+            <h3 className="font-bold text-lg mb-2 mt-3">
+              Flags
+            </h3>
+            <div className="grid grid-cols-2 gap-1">
+              {['Physical Immunity', 'Magical Immunity'].map((flag, flagIdx) => {
+                if (currentAllyEditing === null) {
+                  return null;
+                }
+
+                const currentStatus = actorIdx !== null && currentAllyEditing !== null ? actors[actorIdx].flags : 0;
+                const currentStatusState = currentStatus & (flagIdx + 1);
+
+                return (
+                <div
+                  key={status}
+                  className="h-8 flex items-center justify-center"
+                >
+                  <button
+                    className={"btn btn-sm w-full " + (currentStatusState ? "btn-primary" : "btn-outline")}
+                    onClick={() => {
+                      ff7.toggleFlags(flagIdx + 1, currentAllyEditing || 0);
+                    }}
+                  >
+                    {flag}
                   </button>
                 </div>
               )})}
@@ -1051,7 +1086,7 @@ function Home() {
               <div className="bg-zinc-800 p-3 rounded mt-4">
                 <h4 className="text-zinc-400 font-semibold mb-2">Status Immunities</h4>
                 <div className="text-sm">
-                  {formatStatus(enemyData.status_immunities ^ 0xFFFFFFFF) || <span className="text-zinc-400">None</span>}
+                  {formatStatus(enemyData.status_immunities ^ 0xFFFFFFFF, 0) || <span className="text-zinc-400">None</span>}
                 </div>
               </div>
               <div className="bg-zinc-800 p-3 rounded mt-4">

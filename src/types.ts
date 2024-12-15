@@ -32,6 +32,7 @@ export interface FieldModel {
 
 export interface BattleCharObj {
   status: number,
+  flags: number,
   hp: number,
   max_hp: number,
   mp: number,
