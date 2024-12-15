@@ -43,6 +43,7 @@ pub struct FF7Addresses {
     pub enemy_data_base: u32,
     pub world_current_obj_ptr: u32,
     pub item_names_base: u32,
+    pub kernel_read_fn_call: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -111,6 +112,7 @@ impl FF7Addresses {
             enemy_data_base: 0x9a8e9c,
             world_current_obj_ptr: 0xe3a7d0,
             item_names_base: 0x9a5e54,
+            kernel_read_fn_call: 0x419458,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,

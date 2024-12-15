@@ -122,6 +122,7 @@ export enum ElementalType {
 
 export enum ElementalEffect {
   Death = 0,
+  AutoHit = 1,
   DoubleDamage = 2,
   HalfDamage = 4,
   Nullify = 5,

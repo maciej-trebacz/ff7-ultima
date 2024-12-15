@@ -176,6 +176,16 @@ function Home() {
     }
   }
 
+  const getElementName = (element: number) => {
+    if (element >= 0x10 && element < 0x20) {
+      return "No Effect";
+    }
+    if (element >= 0x20 && element < 0x40) {
+      return Object.keys(statuses)[element - 0x20] + " (status)";
+    }
+    return ElementalType[element] || "Unknown";
+  }
+
   return (
     <div className="w-full h-full flex text-sm select-none">
       <div className="flex-1 p-3">
@@ -1017,7 +1027,7 @@ function Home() {
                 <h4 className="text-zinc-400 font-semibold mb-2">Elemental Effects</h4>
                 <div className="grid grid-cols-1 gap-1">
                   {enemyData.elements.map((elem, index) => {
-                    const elementType = ElementalType[elem.element] || "Unknown";
+                    const elementType = getElementName(elem.element);
                     const effectType = ElementalEffect[elem.effect] || "None";
                     if (effectType === "Nothing" || elementType === "Nothing") return null;
                     return (

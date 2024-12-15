@@ -381,16 +381,33 @@ fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     let mut items: Vec<String> = Vec::new();
     let mut addr = addresses.item_names_base;
 
+    let ffnx_check = read_memory_int(addresses.item_names_base)? as u32;
+    let mut kernel_sections_tbl: u32 = 0;
+    if ffnx_check == 0 {
+        let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32 + addresses.kernel_read_fn_call + 4;
+        kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
+        addr = read_memory_int(kernel_sections_tbl + (4 * 10))? as u32;
+    }
+
     // Items
     addr = read_item_names_section(&mut items, addr, 128)?;
 
     // Weapons
+    if ffnx_check == 0 {
+        addr = read_memory_int(kernel_sections_tbl + (4 * 11))? as u32;
+    }
     addr = read_item_names_section(&mut items, addr, 128)?;
 
     // Armors
+    if ffnx_check == 0 {
+        addr = read_memory_int(kernel_sections_tbl + (4 * 12))? as u32;
+    }
     addr = read_item_names_section(&mut items, addr, 32)?;
 
     // Accessories
+    if ffnx_check == 0 {
+        addr = read_memory_int(kernel_sections_tbl + (4 * 13))? as u32;
+    }
     read_item_names_section(&mut items, addr, 32)?;
 
     Ok(items)
