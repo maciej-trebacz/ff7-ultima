@@ -14,7 +14,7 @@ interface AutocompleteInputProps {
 
 const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisible, onSelect, onAccept }) => {
   const [input, setInput] = useState<string>('');
-  const [suggestions, setSuggestions] = useState<Battle[]>([]);
+  const [suggestions, setSuggestions] = useState<BattleItem[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
     setHighlightedIndex(-1);
   };
 
-  const handleSelectSuggestion = (battle: Battle) => {
+  const handleSelectSuggestion = (battle: BattleItem) => {
     setInput(battle.name);
     setIsOpen(false);
     onSelect(battle.id);

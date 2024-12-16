@@ -1,6 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-// Re-export the addresses module
 pub mod addresses;
 pub mod ff7text;
 pub mod types;
