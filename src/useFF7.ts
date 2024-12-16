@@ -120,7 +120,7 @@ export function useFF7(addresses: FF7Addresses) {
                 await writeMemory(addresses.battle_end_check, 0x08, DataType.Byte);
               } else {
                 for (let i = 4; i < 10; i++) {
-                  await writeMemory(addresses.ally_ptr_base + i * 104, statuses.Dead, DataType.Int);
+                  await writeMemory(addresses.battle_char_base + i * 104, statuses.Dead, DataType.Int);
                 }
                 await writeMemory(addresses.battle_mode, 0x10, DataType.Byte);
                 await writeMemory(addresses.battle_end_check, 0x20, DataType.Byte);
@@ -240,7 +240,7 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.instant_atb_set, [0xc7, 0x45, 0xfc, 0xff, 0xff, 0x00, 0x00, 0x90, 0x90, 0x90], DataType.Buffer); // mov [ebp-04],0000FFFF and 3 nops
       const charObjLength = 68;
       for (let i = 0; i < 3; i++) {
-        await writeMemory(addresses.atb_increase_ptr_base + i * charObjLength, 0xffff, DataType.Short);
+        await writeMemory(addresses.battle_atb_base + i * charObjLength, 0xffff, DataType.Short);
       }
     },
     disableInstantATB: async () => {
@@ -320,13 +320,13 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
     setHP: async (hp: number, index: number) => {
-      await writeMemory(addresses.ally_ptr_base + index * 104 + 0x2c, hp, DataType.Short);
+      await writeMemory(addresses.battle_char_base + index * 104 + 0x2c, hp, DataType.Short);
     },
     setMP: async (mp: number, index: number) => {
-      await writeMemory(addresses.ally_ptr_base + index * 104 + 0x28, mp, DataType.Short);
+      await writeMemory(addresses.battle_char_base + index * 104 + 0x28, mp, DataType.Short);
     },
     setStatus: async (status: number, index: number) => {
-      await writeMemory(addresses.ally_ptr_base + index * 104, status, DataType.Int);
+      await writeMemory(addresses.battle_char_base + index * 104, status, DataType.Int);
     },
     enableInvincibility: async () => {
       // Function to write state flags for all allies
@@ -338,9 +338,9 @@ export function useFF7(addresses: FF7Addresses) {
       // Set state flags for all allies immediately
       let flags = 0;
       for (let i = 0; i < 3; i++) {
-        flags = await readMemory(addresses.ally_ptr_base + i * 104 + 5, DataType.Byte);
+        flags = await readMemory(addresses.battle_char_base + i * 104 + 5, DataType.Byte);
         flags |= 0x07;
-        await writeMemory(addresses.ally_ptr_base + i * 104 + 5, flags, DataType.Byte);
+        await writeMemory(addresses.battle_char_base + i * 104 + 5, flags, DataType.Byte);
       }
     },
     disableInvincibility: async () => {
@@ -349,9 +349,9 @@ export function useFF7(addresses: FF7Addresses) {
       // Set state flags for all allies immediately
       let flags = 0;
       for (let i = 0; i < 3; i++) {
-        flags = await readMemory(addresses.ally_ptr_base + i * 104 + 5, DataType.Byte);
+        flags = await readMemory(addresses.battle_char_base + i * 104 + 5, DataType.Byte);
         flags &= 0xf8;
-        await writeMemory(addresses.ally_ptr_base + i * 104 + 5, flags, DataType.Byte);
+        await writeMemory(addresses.battle_char_base + i * 104 + 5, flags, DataType.Byte);
       }
     },
     toggleStatus: async (status: number, index: number) => {
@@ -360,14 +360,14 @@ export function useFF7(addresses: FF7Addresses) {
         status |= 0x8000000;
       }
 
-      let statusFlags = await readMemory(addresses.ally_ptr_base + index * 104, DataType.Int);
+      let statusFlags = await readMemory(addresses.battle_char_base + index * 104, DataType.Int);
       statusFlags ^= status;
-      await writeMemory(addresses.ally_ptr_base + index * 104, statusFlags, DataType.Int);
+      await writeMemory(addresses.battle_char_base + index * 104, statusFlags, DataType.Int);
     },
     toggleFlags: async (flags: number, index: number) => {
-      let statusFlags = await readMemory(addresses.ally_ptr_base + index * 104 + 5, DataType.Byte);
+      let statusFlags = await readMemory(addresses.battle_char_base + index * 104 + 5, DataType.Byte);
       statusFlags ^= flags;
-      await writeMemory(addresses.ally_ptr_base + index * 104 + 5, statusFlags, DataType.Byte);
+      await writeMemory(addresses.battle_char_base + index * 104 + 5, statusFlags, DataType.Byte);
     },
     readEnemyData: async (enemyId: number) => {
       return await invoke("read_enemy_data", { id: enemyId }) as EnemyData;

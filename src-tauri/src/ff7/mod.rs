@@ -99,14 +99,14 @@ fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, St
         let name = party_names[i as usize].clone();
         let char = BattleCharObj {
             name,
-            status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
-            flags: read_memory_byte(addresses.ally_ptr_base + i * char_obj_length + 0x5)?,
-            hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
-            max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
-            mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
-            max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
-            atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
-            limit: read_memory_byte(addresses.ally_limit_ptr_base + i * 52)?,
+            status: read_memory_int(addresses.battle_char_base + i * char_obj_length)?,
+            flags: read_memory_byte(addresses.battle_char_base + i * char_obj_length + 0x5)?,
+            hp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2c)?,
+            max_hp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x30)?,
+            mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x28)?,
+            max_mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2a)?,
+            atb: read_memory_short(addresses.battle_atb_base + i * 68 + 0x2)?,
+            limit: read_memory_byte(addresses.ally_limit + i * 52)?,
             scene_id: 0
         };
         chars.push(char);
@@ -117,7 +117,6 @@ fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, St
 fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {
     let mut chars: Vec<BattleCharObj> = Vec::new();
     let char_obj_length = 104;
-    let ally_limit_length = 52;
     let enemy_record_length = 16;
     let enemy_data_length = 184;
     for i in 4..10 {
@@ -126,14 +125,14 @@ fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, S
 
         let char = BattleCharObj {
             name: enemy_name.unwrap_or_else(|_| String::from("???")),
-            status: read_memory_int(addresses.ally_ptr_base + i * char_obj_length)?,
-            flags: read_memory_byte(addresses.ally_ptr_base + i * char_obj_length + 0x5)?,
-            hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2c)?,
-            max_hp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x30)?,
-            mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x28)?,
-            max_mp: read_memory_short(addresses.ally_ptr_base + i * char_obj_length + 0x2a)?,
-            atb: read_memory_short(addresses.ally_ptr_base + i * char_obj_length)?,
-            limit: read_memory_byte(addresses.ally_limit_ptr_base + i * ally_limit_length)?,
+            status: read_memory_int(addresses.battle_char_base + i * char_obj_length)?,
+            flags: read_memory_byte(addresses.battle_char_base + i * char_obj_length + 0x5)?,
+            hp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2c)?,
+            max_hp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x30)?,
+            mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x28)?,
+            max_mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2a)?,
+            atb: read_memory_short(addresses.battle_atb_base + i * 68 + 0x2)?,
+            limit: 0,
             scene_id: enemy_scene_idx,
         };
         chars.push(char);

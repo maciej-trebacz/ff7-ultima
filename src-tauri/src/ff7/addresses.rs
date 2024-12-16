@@ -31,8 +31,9 @@ pub struct FF7Addresses {
     pub battle_id: u32,
     pub field_models_ptr: u32,
     pub field_data_ptr: u32,
-    pub ally_ptr_base: u32,
-    pub ally_limit_ptr_base: u32,
+    pub battle_char_base: u32,
+    pub battle_atb_base: u32,
+    pub ally_limit: u32,
     pub field_name: u32,
     pub party_member_ids: u32,
     pub party_member_names: u32,
@@ -64,7 +65,6 @@ pub struct FF7Addresses {
     pub battle_swirl_disable1: u32,
     pub battle_swirl_disable2: u32,
     pub instant_atb_set: u32,
-    pub atb_increase_ptr_base: u32,
     pub intro_skip: u32,
 }
 
@@ -100,8 +100,9 @@ impl FF7Addresses {
             battle_id: 0x9aad3c,
             field_models_ptr: 0xcff738,
             field_data_ptr: 0xcff594,
-            ally_ptr_base: 0x9ab0dc,
-            ally_limit_ptr_base: 0x9a8dc2,
+            battle_char_base: 0x9ab0dc,
+            battle_atb_base: 0x9a8b12,
+            ally_limit: 0x9a8dc2,
             field_name: 0xcc1ef0,
             party_member_ids: 0xdc0230,
             party_member_names: 0xdbfd9c,
@@ -133,7 +134,6 @@ impl FF7Addresses {
             battle_swirl_disable1: 0x402712,
             battle_swirl_disable2: 0x4027e5,
             instant_atb_set: 0x433abd,
-            atb_increase_ptr_base: 0x9a8b12,
             intro_skip: 0xf4f448,
         }
     }

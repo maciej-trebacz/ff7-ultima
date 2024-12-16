@@ -147,10 +147,10 @@ function Home() {
       }
     }
     if (flags & 0x1) {
-      statusList.push("ImmunePhysical");
+      statusList.push("ImmunePhy");
     }
     if (flags & 0x2) {
-      statusList.push("ImmuneMagic");
+      statusList.push("ImmuneMag");
     }
     return statusList.join(", ");
   }
@@ -411,7 +411,16 @@ function Home() {
                 if (!char.name.trim()) return null;
                 return (
                   <tr key={index} className="bg-zinc-800 text-xs">
-                    <td className="p-1 text-nowrap w-14 font-bold">{char.name}</td>
+                    <td className="p-1 text-nowrap w-14 font-bold">
+                      {char.name}
+                      <div className="w-full h-0">
+                        <progress 
+                          className="progress w-full h-[2px] top-[-10px]" 
+                          value={(char.atb / 0xFFFF) * 100} 
+                          max="100"
+                        ></progress>
+                      </div>
+                    </td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index); openEditInfoModal("HP", char.hp + "")}}>{char.hp} / {char.max_hp}</td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index); openEditInfoModal("MP", char.mp + "")}}>{char.mp} / {char.max_mp}</td>
                     <td className="p-1 cursor-pointer" onClick={() => {setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
@@ -438,6 +447,13 @@ function Home() {
                   <tr key={index} className="bg-zinc-800 text-xs">
                     <td className="p-1 text-nowrap w-14 font-bold cursor-pointer hover:text-blue-300" onClick={() => {showEnemyInfoModal(char.scene_id, char.name)}}>
                       {parseEnemyName(char)}
+                      <div className="w-full h-0">
+                        <progress 
+                          className="progress w-full h-[2px] top-[-10px]" 
+                          value={(char.atb / 0xFFFF) * 100} 
+                          max="100"
+                        ></progress>
+                      </div>
                     </td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index + 4); openEditInfoModal("HP", char.hp + "")}}>{char.hp} / {char.max_hp}</td>
                     <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => {setCurrentAllyEditing(index + 4); openEditInfoModal("MP", char.mp + "")}}>{char.mp} / {char.max_mp}</td>

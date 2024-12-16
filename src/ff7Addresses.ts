@@ -31,8 +31,8 @@ export interface FF7Addresses {
   battle_id: number;
   field_models_ptr: number;
   field_data_ptr: number;
-  ally_ptr_base: number;
-  ally_limit_ptr_base: number;
+  battle_char_base: number;
+  ally_limit: number;
   field_name: number;
   field_obj_ptr: number;
   field_battle_disable: number;
@@ -52,7 +52,7 @@ export interface FF7Addresses {
   battle_swirl_disable1: number;
   battle_swirl_disable2: number;
   instant_atb_set: number;
-  atb_increase_ptr_base: number;
+  battle_atb_base: number;
   intro_skip: number;
   code_cave: number;
   battle_init_chars_fn: number;
