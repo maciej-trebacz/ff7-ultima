@@ -8,7 +8,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { addresses, isLoading, error } = useFF7Addresses();
 
   if (isLoading) {
-    return <div>Loading FF7 addresses...</div>;
+    return <></>
   }
 
   if (error) {

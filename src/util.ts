@@ -1,5 +1,8 @@
 "use strict";
 
+import { statuses } from "./ff7Statuses";
+import { ElementalType } from "./types";
+
 export const waitFor = async (condition: () => Promise<boolean>) => {
   return new Promise((resolve) => {
     const intervalId = setInterval(async () => {
@@ -32,4 +35,30 @@ export function formatTime(seconds: number): string {
   const formattedSeconds = zeroPad(secs);
 
   return `${formattedHours}${formattedMinutes}${formattedSeconds}`;
+}
+
+export const formatStatus = (status: number, flags: number) => {
+  const statusList: string[] = [];
+  for (const key in statuses) {
+    if (status & statuses[key as keyof typeof statuses]) {
+      statusList.push(key);
+    }
+  }
+  if (flags & 0x1) {
+    statusList.push("ImmunePhy");
+  }
+  if (flags & 0x2) {
+    statusList.push("ImmuneMag");
+  }
+  return statusList.join(", ");
+}
+
+export const getElementName = (element: number) => {
+  if (element >= 0x10 && element < 0x20) {
+    return "No Effect";
+  }
+  if (element >= 0x20 && element < 0x40) {
+    return Object.keys(statuses)[element - 0x20] + " (status)";
+  }
+  return ElementalType[element] || "Unknown";
 }

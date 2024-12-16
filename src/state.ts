@@ -6,13 +6,7 @@ import { GameModule, FieldModel, BattleCharObj, WorldModel } from "./types";
 import { DataType, readMemory } from "./memory";
 import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
-export const useFF7State = function() {
-  const { addresses, isLoading, error } = useFF7Addresses();
-  const [connected, setConnected] = useState(false);
-  const [hacks, setHacks] = useState({
-    skipIntro: false,
-  });
-  const [gameState, setGameState] = useState({
+const defaultState = {
     currentModule: 0,
     gameMoment: 0,
     fieldId: 0,
@@ -49,7 +43,15 @@ export const useFF7State = function() {
     battleId: 0,
     invincibilityEnabled: false,
     worldCurrentModel: {} as WorldModel,
+  };
+
+export const useFF7State = function() {
+  const { addresses, isLoading, error } = useFF7Addresses();
+  const [connected, setConnected] = useState(false);
+  const [hacks, setHacks] = useState({
+    skipIntro: false,
   });
+  const [gameState, setGameState] = useState(defaultState);
 
   useEffect(() => {
     if (isLoading || error || !addresses) {
@@ -157,3 +159,5 @@ export const useFF7State = function() {
     addresses,
   };
 };
+
+export type FF7State = typeof defaultState;

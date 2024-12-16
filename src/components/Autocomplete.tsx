@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 
-export interface Battle {
+export interface BattleItem {
   id: number;
   name: string;
 }
 
 interface AutocompleteInputProps {
-  battles: Battle[];
+  battles: BattleItem[];
   isVisible: boolean;
   onSelect: (id: number | null) => void;
   onAccept?: (e: any) => void;

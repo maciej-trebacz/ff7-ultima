@@ -376,3 +376,5 @@ export function useFF7(addresses: FF7Addresses) {
 
   return ff7;
 }
+
+export type FF7 = ReturnType<typeof useFF7>;
