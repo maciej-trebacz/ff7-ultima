@@ -169,7 +169,7 @@ export function Battle(props: { ff7: FF7 }) {
             }
 
             const statusId = statuses[status as keyof typeof statuses];
-            const currentStatus = currentAllyEditing !== null ? ff7.gameState.battleAllies[currentAllyEditing].status : 0;
+            const currentStatus = actorIdx !== null && currentAllyEditing !== null ? actors[actorIdx].status : 0;
             const currentStatusState = currentStatus & statusId;
 
             if ([statuses.DualDrain, statuses.Imprisoned].includes(statusId)) {
@@ -196,7 +196,7 @@ export function Battle(props: { ff7: FF7 }) {
         <h3 className="font-bold text-lg mb-2 mt-3">
           Flags
         </h3>
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-2 gap-1 mb-2">
             {['Physical Immunity', 'Magical Immunity'].map((flag, flagIdx) => {
               if (currentAllyEditing === null) {
                 return null;
