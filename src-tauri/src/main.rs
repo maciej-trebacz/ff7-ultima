@@ -1,10 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod ff7;
-mod ff7text;
-mod memory;
-mod process;
-mod addresses;
+mod utils;
+
+use utils::memory;
+use utils::process;
+
+use ff7::addresses::FF7Addresses;
+use ff7::types::EnemyData;
 
 #[tauri::command]
 fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -57,12 +60,12 @@ fn write_memory_buffer(address: u32, buffer: Vec<u64>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn read_ff7_data() -> Result<ff7::FF7Data, String> {
+fn read_ff7_data() -> Result<ff7::types::FF7Data, String> {
     ff7::read_data()
 }
 
 #[tauri::command]
-fn read_enemy_data(id: u32) -> Result<ff7::EnemyData, String> {
+fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
     ff7::read_enemy_data(id)
 }
 
@@ -72,8 +75,8 @@ fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_ff7_addresses() -> addresses::FF7Addresses {
-    addresses::FF7Addresses::new()
+fn get_ff7_addresses() -> FF7Addresses {
+    FF7Addresses::new()
 }
 
 fn main() {

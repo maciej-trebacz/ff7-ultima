@@ -1,12 +1,11 @@
 use process_memory::{DataMember, Memory, Pid, TryIntoProcessHandle};
 use winapi::um::memoryapi::VirtualProtectEx;
-use winapi::um::winnt::{MEMORY_BASIC_INFORMATION, PAGE_READWRITE, PVOID};
-use std::ptr;
+use winapi::um::winnt::{PAGE_READWRITE, PVOID};
 use crate::process;
 
 fn get_process_handle() -> Result<process_memory::ProcessHandle, String> {
     process::get_pid()
-        .ok_or_else(|| "No ff7_en.exe process found".to_string())
+        .ok_or_else(|| "Process not found".to_string())
         .and_then(|pid| {
             (pid.as_u32() as Pid).try_into_process_handle()
                 .map_err(|_| "Failed to get process handle".to_string())
@@ -33,7 +32,7 @@ fn read_memory<T: Copy>(address: u32) -> Result<T, String> {
 
 fn write_memory<T: Copy>(address: u32, new_value: T) -> Result<(), String> {
     access_memory(address, |value| {
-        value.write(&new_value);
+        let _ = value.write(&new_value);
         Ok(new_value)
     })?;
     Ok(())

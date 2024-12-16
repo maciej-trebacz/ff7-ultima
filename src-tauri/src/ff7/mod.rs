@@ -1,159 +1,15 @@
-use serde::Serialize;
-use crate::{addresses, memory::*};
-use crate::addresses::FF7Addresses;
-use crate::ff7text::decode_text;
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[derive(Serialize)]
-struct FF7BasicData {
-    current_module: u16,
-    game_moment: u16,
-    field_id: u16,
-    field_fps: f64,
-    battle_fps: f64,
-    world_fps: f64,
-    in_game_time: u32,
-    disc_id: u8,
-    menu_visibility: u16,
-    menu_locks: u16,
-    field_movement_disabled: u8,
-    field_menu_access_enabled: u8,
-    party_bitmask: u16,
-    gil: u32,
-    gp: u16,
-    battle_count: u16,
-    battle_escape_count: u16,
-    field_battle_check: u32,
-    game_obj_ptr: u32,
-    battle_swirl_check: u8,
-    instant_atb_check: u16,
-    unfocus_patch_check: u8,
-    ffnx_check: u8,
-    step_id: u32,
-    step_fraction: u32,
-    danger_value: u32,
-    battle_id: u16,
-    invincibility_check: u16,
-}
+// Re-export the addresses module
+pub mod addresses;
+pub mod ff7text;
+pub mod types;
 
-#[derive(Serialize)]
-struct FieldModel {
-    x: i32,
-    y: i32,
-    z: i32,
-    direction: u8,
-}
+use addresses::FF7Addresses;
+use ff7text::decode_text;
+use types::*;
 
-#[derive(Serialize)]
-struct BattleCharObj {
-    name: String,
-    flags: u8,
-    status: u32,
-    hp: u16,
-    max_hp: u16,
-    mp: u16,
-    max_mp: u16,
-    atb: u16,
-    limit: u8,
-    scene_id: u8
-}
-
-#[derive(Serialize)]
-pub struct FieldData {
-    field_id: u16,
-    field_name: Vec<u8>,
-    field_model_count: u16,
-    field_model_names: Vec<String>,
-}
-
-#[derive(Serialize)]
-struct WorldModel {
-    x: u32,
-    y: u32,
-    z: u32,
-    direction: i16,
-    model_id: u8,
-    walkmesh_type: u8
-}
-
-#[derive(Serialize)]
-struct Elemental {
-    element: u8,
-    effect: u8,
-}
-
-#[derive(Serialize)]
-enum ElementalEffect {
-    Death,
-    DoubleDamage = 2,
-    HalfDamage = 4,
-    Nullify = 5,
-    Absorb = 6,
-    FullCure = 7,
-    Nothing = 0xFF,
-}
-
-#[derive(Serialize)]
-enum ElementalType {
-    Fire,
-    Ice,
-    Bolt,
-    Earth,
-    Bio,
-    Gravity,
-    Water,
-    Wind,
-    Holy,
-    Health,
-    Cut,
-    Hit,
-    Punch,
-    Shoot,
-    Scream,
-    Hidden,
-    Nothing = 0xFF,
-}
-
-#[derive(Serialize)]
-struct Item {
-    name: String,
-    item_type: ItemType,
-    rate: u8
-}
-
-#[derive(Serialize)]
-enum ItemType {
-    Steal,
-    Drop,
-}
-#[derive(Serialize)]
-pub struct EnemyData {
-    level: u8,
-    speed: u8,
-    luck: u8,
-    evade: u8,
-    strength: u8,
-    defense: u16,
-    magic: u8,
-    magic_defense: u16,
-    elements: Vec<Elemental>,
-    items: Vec<Item>,
-    status_immunities: u32,
-    gil: u32,
-    exp: u32,
-    ap: u16,
-    back_damage_multiplier: u8,
-    morph: Option<String>
-}
-
-#[derive(Serialize)]
-pub struct FF7Data {
-    basic: FF7BasicData,
-    field_models: Vec<FieldModel>,
-    battle_allies: Vec<BattleCharObj>,
-    battle_enemies: Vec<BattleCharObj>,
-    field_data: FieldData,
-    world_current_model: WorldModel
-}
+use crate::utils::memory::*;
 
 fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
     Ok(FF7BasicData {
@@ -305,14 +161,14 @@ fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
 
     let mut field_model_names = Vec::new();
     let mut offset = 0;
-    for i in 0..field_model_count {
+    for _i in 0..field_model_count {
         let model_name_size = read_memory_short(models_addr + offset)?;
         let model_name = read_memory_buffer(models_addr + offset + 2, model_name_size as usize)?;
         let model_animation_count = read_memory_short(models_addr + offset + model_name_size as u32 + 16)?;
         field_model_names.push(String::from_utf8(model_name).unwrap_or(String::from("???")));
         offset += model_name_size as u32 + 48;
 
-        for j in 0..model_animation_count {
+        for _j in 0..model_animation_count {
             let animation_name_size = read_memory_short(models_addr + offset)?;
             offset += animation_name_size as u32 + 4;
         }
