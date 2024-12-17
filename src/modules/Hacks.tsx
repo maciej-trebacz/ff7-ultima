@@ -50,6 +50,86 @@ export function Hacks(props: { ff7: FF7 }) {
           </GroupButton>
         </div>
       </Row>
+      <Row label="EXP Multiplier">
+        <div className="join">
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 0}
+            onClick={() => ff7.setExpMultiplier(0)}
+          >
+            0x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 1}
+            onClick={() => ff7.setExpMultiplier(1)}
+          >
+            1x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 2}
+            onClick={() => ff7.setExpMultiplier(2)}
+          >
+            2x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 3}
+            onClick={() => ff7.setExpMultiplier(3)}
+          >
+            3x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 4}
+            onClick={() => ff7.setExpMultiplier(4)}
+          >
+            4x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.expMultiplier === 5}
+            onClick={() => ff7.setExpMultiplier(5)}
+          >
+            5x
+          </GroupButton>
+        </div>
+      </Row>
+      <Row label="AP Multiplier">
+        <div className="join">
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 0}
+            onClick={() => ff7.setApMultiplier(0)}
+          >
+            0x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 1}
+            onClick={() => ff7.setApMultiplier(1)}
+          >
+            1x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 2}
+            onClick={() => ff7.setApMultiplier(2)}
+          >
+            2x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 3}
+            onClick={() => ff7.setApMultiplier(3)}
+          >
+            3x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 4}
+            onClick={() => ff7.setApMultiplier(4)}
+          >
+            4x
+          </GroupButton>
+          <GroupButton
+            active={ff7.gameState.apMultiplier === 5}
+            onClick={() => ff7.setApMultiplier(5)}
+          >
+            5x
+          </GroupButton>
+        </div>
+      </Row>
       <Row label="Battles">
         <div className="join">
           <GroupButton

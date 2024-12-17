@@ -66,6 +66,8 @@ pub struct FF7Addresses {
     pub battle_swirl_disable2: u32,
     pub instant_atb_set: u32,
     pub intro_skip: u32,
+    pub battle_exp_calc: u32,
+    pub battle_ap_calc: u32,
 }
 
 impl FF7Addresses {
@@ -135,6 +137,8 @@ impl FF7Addresses {
             battle_swirl_disable2: 0x4027e5,
             instant_atb_set: 0x433abd,
             intro_skip: 0xf4f448,
+            battle_exp_calc: 0x43153f,
+            battle_ap_calc: 0x431576,
         }
     }
 }

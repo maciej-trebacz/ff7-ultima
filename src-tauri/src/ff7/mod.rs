@@ -38,6 +38,8 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         danger_value: read_memory_int(addresses.danger_value)?,
         battle_id: read_memory_short(addresses.battle_id)?,
         invincibility_check: read_memory_short(addresses.battle_init_chars_call)?,
+        exp_multiplier: read_memory_byte(addresses.battle_exp_calc + 8)?,
+        ap_multiplier: read_memory_byte(addresses.battle_ap_calc + 2)?,
     })
 }
 

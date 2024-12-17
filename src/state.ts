@@ -43,6 +43,8 @@ const defaultState = {
     battleId: 0,
     invincibilityEnabled: false,
     worldCurrentModel: {} as WorldModel,
+    expMultiplier: 1,
+    apMultiplier: 1,
   };
 
 export const useFF7State = function() {
@@ -137,6 +139,8 @@ export const useFF7State = function() {
           battleEnemies,
           invincibilityEnabled: !(basic.invincibility_check === 0x774e),
           worldCurrentModel,
+          expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
+          apMultiplier: !(basic.ap_multiplier === 0xe2) ? basic.ap_multiplier as number : 1,
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

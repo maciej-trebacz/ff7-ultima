@@ -371,7 +371,13 @@ export function useFF7(addresses: FF7Addresses) {
     },
     readEnemyData: async (enemyId: number) => {
       return await invoke("read_enemy_data", { id: enemyId }) as EnemyData;
-    }
+    },
+    setExpMultiplier: async (multiplier: number) => {
+      await writeMemory(addresses.battle_exp_calc, [0x8b, 0x88, 0x38, 0xB1, 0x9A, 0x00, 0x6B, 0xC9, multiplier, 0x01, 0x0D, 0xC0, 0xE2, 0x99, 0, 0x90, 0x90, 0x90], DataType.Buffer);
+    },
+    setApMultiplier: async (multiplier: number) => {
+      await writeMemory(addresses.battle_ap_calc, [0x6B, 0xD2, multiplier, 0x01, 0x15, 0xC4, 0xE2, 0x99, 0, 0x90, 0x90, 0x90], DataType.Buffer);
+    },
   };
 
   return ff7;

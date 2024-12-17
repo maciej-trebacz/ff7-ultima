@@ -30,6 +30,8 @@ pub struct FF7BasicData {
     pub danger_value: u32,
     pub battle_id: u16,
     pub invincibility_check: u16,
+    pub exp_multiplier: u8,
+    pub ap_multiplier: u8,
 }
 
 #[derive(Serialize)]

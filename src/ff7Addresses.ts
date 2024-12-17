@@ -57,6 +57,8 @@ export interface FF7Addresses {
   code_cave: number;
   battle_init_chars_fn: number;
   battle_init_chars_call: number;
+  battle_exp_calc: number;
+  battle_ap_calc: number;
 }
 
 export function useFF7Addresses() {
