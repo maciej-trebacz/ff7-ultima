@@ -1,5 +1,4 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 mod ff7;
 mod utils;
 
@@ -8,6 +7,8 @@ use utils::process;
 
 use ff7::addresses::FF7Addresses;
 use ff7::types::EnemyData;
+
+use tauri_plugin_updater::UpdaterExt;
 
 #[tauri::command]
 fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -85,6 +86,13 @@ fn main() {
     println!("FF7 scanner started");
 
     tauri::Builder::default()
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                update(handle).await.unwrap();
+            });
+            Ok(())
+        })
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
@@ -105,4 +113,31 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+    if let Some(update) = app.updater()?.check().await? {
+        let mut downloaded = 0;
+        let version = update.version.clone();
+
+        println!("[Updater] update to version {version} available, downloading...");
+
+        update
+            .download_and_install(
+                |chunk_length, _content_length| {
+                    downloaded += chunk_length;
+                },
+                || {
+                    println!("[Updater] download finished");
+                },
+            )
+            .await?;
+
+        println!("[Updater] update installed");
+        app.restart();
+    } else {
+        println!("[Updater] no update available");
+    }
+
+    Ok(())
 }
