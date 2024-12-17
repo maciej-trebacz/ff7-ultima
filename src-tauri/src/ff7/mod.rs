@@ -43,7 +43,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
 
 fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String> {
     let mut models: Vec<FieldModel> = Vec::new();
-    
+
     let model_ptr = read_memory_int(addresses.field_models_ptr)?;
     if model_ptr == 0 {
         return Ok(models);
@@ -104,7 +104,7 @@ fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, St
             max_mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2a)?,
             atb: read_memory_short(addresses.battle_atb_base + i * 68 + 0x2)?,
             limit: read_memory_byte(addresses.ally_limit + i * 52)?,
-            scene_id: 0
+            scene_id: 0,
         };
         chars.push(char);
     }
@@ -117,8 +117,10 @@ fn read_battle_enemies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, S
     let enemy_record_length = 16;
     let enemy_data_length = 184;
     for i in 4..10 {
-        let enemy_scene_idx = read_memory_byte(addresses.enemy_obj_base + (i - 4) * enemy_record_length).unwrap_or(0);
-        let enemy_name = read_name(addresses.enemy_data_base + u32::from(enemy_scene_idx) * enemy_data_length);
+        let enemy_scene_idx =
+            read_memory_byte(addresses.enemy_obj_base + (i - 4) * enemy_record_length).unwrap_or(0);
+        let enemy_name =
+            read_name(addresses.enemy_data_base + u32::from(enemy_scene_idx) * enemy_data_length);
 
         let char = BattleCharObj {
             name: enemy_name.unwrap_or_else(|_| String::from("???")),
@@ -160,7 +162,8 @@ fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
     for _i in 0..field_model_count {
         let model_name_size = read_memory_short(models_addr + offset)?;
         let model_name = read_memory_buffer(models_addr + offset + 2, model_name_size as usize)?;
-        let model_animation_count = read_memory_short(models_addr + offset + model_name_size as u32 + 16)?;
+        let model_animation_count =
+            read_memory_short(models_addr + offset + model_name_size as u32 + 16)?;
         field_model_names.push(String::from_utf8(model_name).unwrap_or(String::from("???")));
         offset += model_name_size as u32 + 48;
 
@@ -178,7 +181,7 @@ fn read_field_data(addresses: &FF7Addresses) -> Result<FieldData, String> {
     })
 }
 
- fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, String> {
+fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, String> {
     let address = read_memory_int(addresses.world_current_obj_ptr)? as u32;
     if address == 0 {
         return Ok(WorldModel {
@@ -209,7 +212,7 @@ pub fn read_data() -> Result<FF7Data, String> {
     let battle_enemies = read_battle_enemies(&addresses)?;
     let field_data = read_field_data(&addresses)?;
     let world_current_model = read_world_current_model(&addresses)?;
-    
+
     Ok(FF7Data {
         basic,
         field_models,
@@ -220,7 +223,11 @@ pub fn read_data() -> Result<FF7Data, String> {
     })
 }
 
-fn read_item_names_section(items: &mut Vec<String>, base_address: u32, count: u32) -> Result<u32, String> {
+fn read_item_names_section(
+    items: &mut Vec<String>,
+    base_address: u32,
+    count: u32,
+) -> Result<u32, String> {
     let mut pos = 0;
     for i in 0..count {
         let offset = read_memory_short(base_address + i * 2)? as u16;
@@ -239,7 +246,9 @@ fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     let ffnx_check = read_memory_int(addresses.item_names_base)? as u32;
     let mut kernel_sections_tbl: u32 = 0;
     if ffnx_check == 0 {
-        let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32 + addresses.kernel_read_fn_call + 4;
+        let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
+            + addresses.kernel_read_fn_call
+            + 4;
         kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
         addr = read_memory_int(kernel_sections_tbl + (4 * 10))? as u32;
     }
@@ -313,13 +322,25 @@ pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
         let name = item_names[id as usize].clone();
 
         // Type is Drop when rate is lower than 128
-        let item_type = if rate < 128 { ItemType::Drop } else { ItemType::Steal };
+        let item_type = if rate < 128 {
+            ItemType::Drop
+        } else {
+            ItemType::Steal
+        };
 
-        items.push(Item { rate: rate % 128, name, item_type });
+        items.push(Item {
+            rate: rate % 128,
+            name,
+            item_type,
+        });
     }
 
     let morph_id = read_memory_short(enemy_data_addr + 0xA0)? as u16;
-    let morph = if morph_id == 0xFFFF { None } else { Some(item_names[morph_id as usize].clone()) };
+    let morph = if morph_id == 0xFFFF {
+        None
+    } else {
+        Some(item_names[morph_id as usize].clone())
+    };
 
     Ok(EnemyData {
         level,

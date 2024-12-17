@@ -51,7 +51,7 @@ pub struct BattleCharObj {
     pub max_mp: u16,
     pub atb: u16,
     pub limit: u8,
-    pub scene_id: u8
+    pub scene_id: u8,
 }
 
 #[derive(Serialize)]
@@ -69,7 +69,7 @@ pub struct WorldModel {
     pub z: u32,
     pub direction: i16,
     pub model_id: u8,
-    pub walkmesh_type: u8
+    pub walkmesh_type: u8,
 }
 
 #[derive(Serialize)]
@@ -116,7 +116,7 @@ pub enum ElementalType {
 pub struct Item {
     pub name: String,
     pub item_type: ItemType,
-    pub rate: u8
+    pub rate: u8,
 }
 
 #[derive(Serialize)]
@@ -142,7 +142,7 @@ pub struct EnemyData {
     pub exp: u32,
     pub ap: u16,
     pub back_damage_multiplier: u8,
-    pub morph: Option<String>
+    pub morph: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -152,5 +152,5 @@ pub struct FF7Data {
     pub battle_allies: Vec<BattleCharObj>,
     pub battle_enemies: Vec<BattleCharObj>,
     pub field_data: FieldData,
-    pub world_current_model: WorldModel
+    pub world_current_model: WorldModel,
 }

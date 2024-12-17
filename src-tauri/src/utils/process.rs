@@ -1,10 +1,10 @@
-use std::time::Duration;
-use std::thread;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use sysinfo::{System, Pid};
 use lazy_static::lazy_static;
 use parking_lot::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
+use sysinfo::{Pid, System};
 
 struct ProcessScanner {
     process: Option<Pid>,
@@ -34,7 +34,11 @@ impl ProcessScanner {
                     let process_memory = process.memory();
 
                     // Return the PID only if the process is healthy (when the game crashes its reported memory usage falls down below 1MB)
-                    if names.iter().any(|name| name.to_lowercase() == process_name.to_lowercase() && process_status == sysinfo::ProcessStatus::Run && process_memory > 1024768) {
+                    if names.iter().any(|name| {
+                        name.to_lowercase() == process_name.to_lowercase()
+                            && process_status == sysinfo::ProcessStatus::Run
+                            && process_memory > 1024768
+                    }) {
                         Some(pid)
                     } else {
                         None

@@ -92,22 +92,32 @@ pub fn decode_text(buf: &[u8]) -> Result<String, String> {
                 if i + 1 >= buf.len() {
                     return Err("Not enough bytes for WAIT command".to_string());
                 }
-                let arg = u16::from_le_bytes([buf[i], buf[i+1]]);
+                let arg = u16::from_le_bytes([buf[i], buf[i + 1]]);
                 i += 2;
                 text.push_str(&format!("{{WAIT {}}}", arg));
             } else if k == 0xE2 {
                 if i + 3 >= buf.len() {
                     return Err("Not enough bytes for STR command".to_string());
                 }
-                let offset = u16::from_le_bytes([buf[i], buf[i+1]]);
-                let length = u16::from_le_bytes([buf[i+2], buf[i+3]]);
+                let offset = u16::from_le_bytes([buf[i], buf[i + 1]]);
+                let length = u16::from_le_bytes([buf[i + 2], buf[i + 3]]);
                 i += 4;
                 text.push_str(&format!("{{STR {} {}}}", offset, length));
             } else {
-                text.push_str(chars.field_control.get(&k).ok_or_else(|| format!("Illegal control code {}", k))?);
+                text.push_str(
+                    chars
+                        .field_control
+                        .get(&k)
+                        .ok_or_else(|| format!("Illegal control code {}", k))?,
+                );
             }
         } else {
-            text.push_str(chars.field_special.get(&c).ok_or_else(|| format!("Unknown special character {}", c))?);
+            text.push_str(
+                chars
+                    .field_special
+                    .get(&c)
+                    .ok_or_else(|| format!("Unknown special character {}", c))?,
+            );
             if c == 0xE8 {
                 text.push('\n');
             }
