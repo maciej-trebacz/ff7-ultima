@@ -6,6 +6,8 @@ import { formatStatus, getElementName } from "@/util";
 import { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { EditModal } from "@/components/EditModal";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function Battle(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -66,18 +68,63 @@ export function Battle(props: { ff7: FF7 }) {
 
   return (
     <div>
-      <div className="flex flex-col gap-1">
         <div className="flex-1">
-          <Row label="Battle Scene ID">
+          <Row label="Scene ID">
             {state.battleId > 0 && state.battleId < 0xffff
               ? state.battleId
               : "-"}
 
           </Row>
         </div>
+        <div className="flex gap-1">
+          <div className="flex-1">
+            <Row label="Invincibility">
+              <Switch checked={ff7.gameState.invincibilityEnabled} onClick={() => ff7.gameState.invincibilityEnabled ? ff7.disableInvincibility() : ff7.enableInvincibility()} />
+            </Row>
+          </div>
+          <div className="flex-1">
+            <Row label="Instant ATB">
+              <Switch checked={ff7.gameState.instantATBEnabled} onClick={() => ff7.gameState.instantATBEnabled ? ff7.disableInstantATB() : ff7.enableInstantATB()} />
+            </Row>
+          </div>
+        </div>
+        <div className="flex gap-1">
+          <div className="flex-1">
+            <Row label="EXP Multiplier">
+              <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => ff7.setExpMultiplier(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                </SelectContent>
+              </Select>
+            </Row>
+          </div>
+          <div className="flex-1">
+            <Row label="AP Multiplier">
+              <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => ff7.setApMultiplier(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                </SelectContent>
+              </Select>
+            </Row>
+          </div>
+        </div>
 
         <h4 className="text-center mt-2 mb-1 font-medium">Allies</h4>
-        <table>
+        <table className="w-full">
           <thead className="bg-zinc-800 text-xs text-left">
             <tr>
               <th className="p-1">Name</th>
@@ -103,7 +150,7 @@ export function Battle(props: { ff7: FF7 }) {
                   </td>
                   <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => { setCurrentAllyEditing(index); openEditInfoModal("HP", char.hp + "") }}>{char.hp} / {char.max_hp}</td>
                   <td className="p-1 cursor-pointer px-2 text-nowrap" onClick={() => { setCurrentAllyEditing(index); openEditInfoModal("MP", char.mp + "") }}>{char.mp} / {char.max_mp}</td>
-                  <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
+                  <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
                 </tr>
               )
             })}
@@ -111,7 +158,7 @@ export function Battle(props: { ff7: FF7 }) {
         </table>
 
         <h4 className="text-center mt-2 mb-1 font-medium">Enemies</h4>
-        <table>
+        <table className="w-full">
           <thead className="bg-zinc-800 text-xs text-left">
             <tr>
               <th className="p-1">Name</th>
@@ -143,7 +190,6 @@ export function Battle(props: { ff7: FF7 }) {
             })}
           </tbody>
         </table>
-      </div>
 
       <EditModal
         open={editInfoModalOpen}
@@ -197,13 +243,13 @@ export function Battle(props: { ff7: FF7 }) {
           Flags
         </h3>
         <div className="grid grid-cols-2 gap-1 mb-2">
-            {['Physical Immunity', 'Magical Immunity'].map((flag, flagIdx) => {
-              if (currentAllyEditing === null) {
-                return null;
-              }
-        
-              const currentStatus = actorIdx !== null && currentAllyEditing !== null ? actors[actorIdx].flags : 0;
-              const currentStatusState = currentStatus & (flagIdx + 1);            
+          {['Physical Immunity', 'Magical Immunity'].map((flag, flagIdx) => {
+            if (currentAllyEditing === null) {
+              return null;
+            }
+
+            const currentStatus = actorIdx !== null && currentAllyEditing !== null ? actors[actorIdx].flags : 0;
+            const currentStatusState = currentStatus & (flagIdx + 1);
 
             return (
               <div
@@ -294,12 +340,12 @@ export function Battle(props: { ff7: FF7 }) {
                     <div key={index} className="flex justify-between items-center text-sm">
                       <span className="text-zinc-300">{elementType}:</span>
                       <span className={`${effectType === "Absorb" ? "text-green-400" :
-                          effectType === "Nullify" ? "text-blue-400" :
-                            effectType === "HalfDamage" ? "text-yellow-400" :
-                              effectType === "DoubleDamage" ? "text-red-400" :
-                                effectType === "Death" ? "text-purple-400" :
-                                  effectType === "FullCure" ? "text-emerald-400" :
-                                    "text-zinc-400"
+                        effectType === "Nullify" ? "text-blue-400" :
+                          effectType === "HalfDamage" ? "text-yellow-400" :
+                            effectType === "DoubleDamage" ? "text-red-400" :
+                              effectType === "Death" ? "text-purple-400" :
+                                effectType === "FullCure" ? "text-emerald-400" :
+                                  "text-zinc-400"
                         }`}>{effectType}</span>
                     </div>
                   );

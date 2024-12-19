@@ -39,15 +39,29 @@ export function useFF7(addresses: FF7Addresses) {
     gameState,
     setSpeed: async (speed: number) => {
       const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
-      const ffnxCheck2 = await readMemory(addresses.ffnx_check + 0xa2, DataType.Byte);
       if (ffnxCheck === 0xE9) {
-        if (ffnxCheck2 !== 0xF2) {
+        const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
+        const code = await readMemoryBuffer(baseAddress, 256);
+        const opcodes = [0xF2, 0x0F, 0x10, 0x05];
+
+        debugger;
+
+        const fps30index = code.findIndex((byte, i) =>
+          opcodes.every((opcode, j) => code[i + j] === opcode)
+        );
+        if (fps30index === -1) {
+          return false;
+        }
+        
+        const fps15index = code.slice(fps30index + 1).findIndex((byte, i) =>
+          opcodes.every((opcode, j) => code.slice(fps30index + 1)[i + j] === opcode)
+        ) + fps30index + 1;
+        if (fps15index - fps30index - 1 === -1) {
           return false;
         }
 
-        const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
-        const addrFps30 = await readMemory(baseAddress + 0xa, DataType.Int);
-        const addrFps15 = await readMemory(baseAddress + 0xa6, DataType.Int);
+        const addrFps30 = await readMemory(baseAddress + fps30index + 4, DataType.Int);
+        const addrFps15 = await readMemory(baseAddress + fps15index + 4, DataType.Int);
 
         await setMemoryProtection(addrFps15, 16);
 
@@ -379,8 +393,24 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.battle_ap_calc, [0x6B, 0xD2, multiplier, 0x01, 0x15, 0xC4, 0xE2, 0x99, 0, 0x90, 0x90, 0x90], DataType.Buffer);
     },
     gameOver: async () => {
-      // implement game over
-      await writeMemory(0xcc0d89, 26, DataType.Byte);
+      if (gameState.currentModule === GameModule.Battle) {
+        for (let i = 0; i < 3; i++) {
+          await writeMemory(addresses.battle_char_base + i * 104, statuses.Dead, DataType.Int);
+        }
+      } else if (gameState.currentModule === GameModule.Field) {
+        await writeMemory(0xcc0d89, 26, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.World) {
+        // Enter field module first and then issue a game over
+        await writeMemory(0xCBF9DC, 1, DataType.Byte);
+        await writeMemory(0xE045E4, 2, DataType.Byte);
+        await writeMemory(0xE3A884, 0, DataType.Byte);
+        await writeMemory(0xE3A894, 0x1700, DataType.Short);
+        await writeMemory(0xCC0D8A, 0x64, DataType.Short);
+        await writeMemory(0xE2A120, 0x10, DataType.Byte);
+        await writeMemory(0xE045F0, 1, DataType.Byte);
+        await writeMemory(0x969950, 0, DataType.Byte);
+        await writeMemory(0xCC0D89, 26, DataType.Byte);
+      }
     }
   };
 

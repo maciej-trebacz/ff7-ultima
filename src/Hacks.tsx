@@ -99,12 +99,14 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
       </Row>
 
       <Row label="Skip intros">
-        <Switch checked={ff7.introDisabled} onClick={() => ff7.introDisabled ? ff7.enableSkipIntro() : ff7.disableSkipIntro()} />
+        <Switch checked={ff7.introDisabled} onClick={() => !ff7.introDisabled ? ff7.enableSkipIntro() : ff7.disableSkipIntro()} />
       </Row>
 
-      <Row label="Unfocus patch">
-        <Switch checked={ff7.gameState.unfocusPatchEnabled} onClick={() => ff7.gameState.unfocusPatchEnabled ? ff7.unpatchWindowUnfocus() : ff7.patchWindowUnfocus()} />
-      </Row>
+      <div className={ff7.gameState.isFFnx ? "opacity-50" : ""} title="FFNx already has this feature">
+        <Row label="Unfocus patch">
+          <Switch checked={ff7.gameState.unfocusPatchEnabled} onClick={() => !ff7.gameState.isFFnx ? (ff7.gameState.unfocusPatchEnabled ? ff7.unpatchWindowUnfocus() : ff7.patchWindowUnfocus()) : null} />
+        </Row>
+      </div>
       
       <Row label="Swirl skip">
         <Switch checked={ff7.gameState.battleSwirlDisabled} onClick={() => ff7.gameState.battleSwirlDisabled ? ff7.enableBattleSwirl() : ff7.disableBattleSwirl()} />

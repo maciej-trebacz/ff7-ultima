@@ -64,31 +64,31 @@ export function QuickActions(props: { ff7: FF7 }) {
     <Button size={"sm"} variant={"secondary"} onClick={() => ff7.gameOver()}>Game Over</Button>
 
     <dialog id="start_battle_modal" className="modal">
-              <div className="modal-box overflow-visible">
-                <form method="dialog">
-                  <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4" onClick={closeStartBattleModal}>
-                    ✕
-                  </button>
-                </form>
-                <h3 className="font-bold text-lg mb-2 mt-0">Start Battle</h3>
-                <div className="relative"></div>
-                <AutocompleteInput
-                  battles={battleList}
-                  isVisible={isStartBattleModalOpen}
-                  onSelect={(id: number | null) =>
-                    setBattleId(id ? id.toString() : null)
-                  }
-                  onAccept={(e: any) => { onSubmitBattleId(battleId); e.preventDefault(); }}
-                />
-                <div className="flex gap-2 w-full">
-                  <button
-                    className="btn btn-primary btn-sm w-full"
-                    onClick={(e: any) => onSubmitBattleId(battleId)}
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-            </dialog>    
+      <div className="modal-box overflow-visible">
+        <form method="dialog">
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4" onClick={closeStartBattleModal}>
+            ✕
+          </button>
+        </form>
+        <h3 className="font-bold text-lg mb-2 mt-0">Start Battle</h3>
+        <div className="relative"></div>
+        <AutocompleteInput
+          battles={battleList}
+          isVisible={isStartBattleModalOpen}
+          onSelect={(id: number | null) =>
+            setBattleId(id ? id.toString() : null)
+          }
+          onAccept={(e: any) => { onSubmitBattleId(battleId); e.preventDefault(); }}
+        />
+        <div className="flex gap-2 w-full">
+          <button
+            className="btn btn-primary btn-sm w-full"
+            onClick={(e: any) => onSubmitBattleId(battleId)}
+          >
+            Start
+          </button>
+        </div>
+      </div>
+    </dialog>
   </>;
 }

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { Button } from "./ui/button";
 
 export function Modal(props: { open: boolean, setIsOpen: (open: boolean) => void, title: string, children: React.ReactNode, buttonText: string, callback: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -20,8 +21,8 @@ export function Modal(props: { open: boolean, setIsOpen: (open: boolean) => void
   };
 
   return (
-    <dialog className="modal" ref={ref} onKeyUp={handleKeyUp}>
-      <div className="modal-box">
+    <dialog className="modal text-xs" ref={ref} onKeyUp={handleKeyUp}>
+      <div className="modal-box p-4">
         <form method="dialog" onSubmit={() => props.setIsOpen(false)}>
           <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">
             ✕
@@ -31,13 +32,10 @@ export function Modal(props: { open: boolean, setIsOpen: (open: boolean) => void
           {props.title}
         </h3>
         {props.children}
-        <div className="flex gap-2 w-full">
-          <button
-            className="btn btn-primary btn-sm w-full"
-            onClick={props.callback}
-          >
+        <div className="flex w-full">
+          <Button variant="secondary" className="w-full" onClick={props.callback}>
             {props.buttonText}
-          </button>
+          </Button>
         </div>
       </div>
     </dialog>

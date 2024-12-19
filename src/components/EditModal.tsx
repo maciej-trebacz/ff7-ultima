@@ -53,7 +53,7 @@ export function EditModal(props: EditModalProps) {
         value={props.value}
         onChange={(e) => props.setValue(e.target.value)}
         onKeyUp={handleKeyUp}
-        className="input input-bordered w-full mb-4"
+        className="input input-bordered p-2 w-full mb-4"
       />
     </Modal>
   );

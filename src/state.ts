@@ -70,7 +70,15 @@ export const useFF7State = function() {
         const battleEnemies: any = ff7Data.battle_enemies;
         const fieldData: any = ff7Data.field_data;
         const isFFnx: any = basic.ffnx_check === 0xE9;
-        let speed = Math.floor((10000000 / basic.field_fps) as number / 30 * 100) / 100;
+
+        const fps = basic.current_module === 1 ? basic.field_fps : basic.current_module === 2 ? basic.battle_fps : basic.world_fps;
+        const normalFps = basic.current_module === 1 ? 30 : basic.current_module === 2 ? 15 : 30;
+
+        let speed = Math.floor((10000000 / fps) as number / normalFps * 100) / 100;
+        if (Math.round(speed * 10) === 10) {
+          speed = 1;
+        }
+
         if (isFFnx) {
           const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
           const addrFieldFps = await readMemory(baseAddress + 0xa, DataType.Int);

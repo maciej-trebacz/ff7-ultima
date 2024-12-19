@@ -48,9 +48,9 @@ function Home() {
 
   return (
     <SidebarProvider className="h-full">
-      <div className="flex flex-col w-full h-full text-sm">
-        <div className="flex-1 flex h-full">
-          <Sidebar collapsible="none">
+      <div className="flex flex-col w-full text-sm">
+        <div className="flex-auto flex min-h-10">
+          <Sidebar collapsible="none" className="flex-shrink-0">
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupContent>
@@ -78,7 +78,7 @@ function Home() {
               <QuickActions ff7={ff7} />
             </SidebarFooter>
           </Sidebar>
-          <div className="flex-1 p-2">
+          <div className="p-2 overflow-y-auto flex-auto">
             <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
               {currentTab}
             </h2>
