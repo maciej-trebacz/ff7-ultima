@@ -68,7 +68,7 @@ export function Battle(props: { ff7: FF7 }) {
     <div>
       <div className="flex flex-col gap-1">
         <div className="flex-1">
-          <Row label="Battle ID">
+          <Row label="Battle Scene ID">
             {state.battleId > 0 && state.battleId < 0xffff
               ? state.battleId
               : "-"}

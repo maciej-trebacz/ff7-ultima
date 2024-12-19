@@ -1,5 +1,12 @@
 "use strict";
 
+export enum Tabs {
+  General = "general",
+  Field = "field",
+  World = "world",
+  Battle = "battle",
+}
+
 export enum GameModule {
   None = 0,
   Field = 1,
@@ -20,6 +27,13 @@ export enum GameModule {
   GameOver = 26,
   Intro = 27,
   Credits = 28,
+}
+
+// export type RandomEncounters = "off" | "normal" | "max";
+export enum RandomEncounters {
+  Off = 0,
+  Normal = 1,
+  Max = 2,
 }
 
 export interface FieldModel {

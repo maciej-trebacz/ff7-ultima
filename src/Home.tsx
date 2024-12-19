@@ -1,24 +1,24 @@
 "use strict";
 
 import { useState } from "react";
-import { useFF7 } from "./useFF7";
+import { useFF7, FF7 } from "./useFF7";
 import { useFF7Context } from "./FF7Context";
-import AutocompleteInput, { BattleItem } from "./components/Autocomplete";
-import { battles } from "./ff7Battles";
-import { Info } from "./modules/Info";
+import { formatTime } from "./util";
+import Row from "./components/Row";
+import GroupButton from "./components/GroupButton";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarSeparator } from "./components/ui/sidebar";
+import { Button } from "./components/ui/button";
+import { StatusBar } from "./components/StatusBar";
+import { Hacks } from "./Hacks";
+import { Tabs } from "./types";
+import { QuickActions } from "./QuickActions";
+import { General } from "./modules/General";
 import { Field } from "./modules/Field";
 import { World } from "./modules/World";
 import { Battle } from "./modules/Battle";
-import { Hacks } from "./modules/Hacks";
-
-enum Tabs {
-  Info = "info",
-  Field = "field",
-  World = "world",
-  Battle = "battle",
-}
 
 function Home() {
+  const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.General);
   const addresses = useFF7Context();
 
   if (!addresses) {
@@ -30,164 +30,64 @@ function Home() {
     return <></>
   }
 
-  const state = ff7.gameState;
-  const [battleId, setBattleId] = useState<null | string>("");
-  const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.Info);
-  const [isStartBattleModalOpen, setIsStartBattleModalOpen] = useState(false);
-
-  const startBattle = async () => {
-    setBattleId("");
-    setIsStartBattleModalOpen(true);
-    (document.getElementById('start_battle_modal') as any)?.showModal();
-    setTimeout(() => {
-      (document.getElementById('battle-id') as any)?.focus();
-    }, 50)
-  };
-
-  const closeStartBattleModal = () => {
-    setIsStartBattleModalOpen(false);
-    (document.getElementById('start_battle_modal') as any)?.close();
-  };
-
-  const onSubmitBattleId = (battleId: string | null) => {
-    if (battleId === null) {
-      return;
+  const renderTabContent = () => {
+    switch (currentTab) {
+      case Tabs.General:
+        return <General ff7={ff7} />;
+      case Tabs.Field:
+        return <Field ff7={ff7} />;
+      case Tabs.World:
+        return <World ff7={ff7} />;
+      case Tabs.Battle:
+        return <Battle ff7={ff7} />;
+      default:
+        return <General ff7={ff7} />;
     }
-    ff7.startBattle(parseInt(battleId));
-    closeStartBattleModal();
-  }
-
-  const onBattleModalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
-      closeStartBattleModal();
-    } else if (e.key === "Enter") {
-      onSubmitBattleId(battleId);
-    }
+    return <></>
   };
-
-  const battleList: BattleItem[] = battles.map((battle, index) => {
-    const tmp = battle.split(" - ");
-    return {
-      id: parseInt(tmp[0]),
-      name: battle,
-    };
-  });
 
   return (
-    <div className="w-full h-full flex text-sm select-none">
-      <div className="flex-1 p-3">
-        <div role="tablist" className="tabs tabs-bordered">
-          <a
-            role="tab"
-            className={`tab ${currentTab === Tabs.Info ? "tab-active" : ""}`}
-            onClick={() => setCurrentTab(Tabs.Info)}
-          >
-            Info
-          </a>
-          <a
-            role="tab"
-            className={`tab ${currentTab === Tabs.Field ? "tab-active" : ""}`}
-            onClick={() => setCurrentTab(Tabs.Field)}
-          >
-            Field
-          </a>
-          <a
-            role="tab"
-            className={`tab ${currentTab === Tabs.World ? "tab-active" : ""}`}
-            onClick={() => setCurrentTab(Tabs.World)}
-          >
-            World
-          </a>
-          <a
-            role="tab"
-            className={`tab ${currentTab === Tabs.Battle ? "tab-active" : ""}`}
-            onClick={() => setCurrentTab(Tabs.Battle)}
-          >
-            Battle
-          </a>
-        </div>
-
-        {currentTab === Tabs.Info && (
-          <Info ff7={ff7} />
-        )}
-
-        {currentTab === Tabs.Field && (
-          <Field ff7={ff7} />
-        )}
-
-        {currentTab === Tabs.World && (
-          <World ff7={ff7} />
-        )}
-
-        {currentTab === Tabs.Battle && (
-          <Battle ff7={ff7} />
-        )}
-
-        <h2 className="uppercase border-b mt-4">Hacks</h2>
-        <Hacks ff7={ff7} />
-
-        <h2 className="uppercase border-b mt-4">Quick Actions</h2>
-        <div className="flex gap-1">
-          <div className="flex-1 py-1">
-            <button
-              className="btn btn-primary btn-sm w-full"
-              onClick={() => startBattle()}
-            >
-              Start Battle
-            </button>
-            <dialog id="start_battle_modal" className="modal">
-              <div className="modal-box overflow-visible">
-                <form method="dialog">
-                  <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4" onClick={closeStartBattleModal}>
-                    ✕
-                  </button>
-                </form>
-                <h3 className="font-bold text-lg mb-2 mt-0">Start Battle</h3>
-                <div className="relative"></div>
-                <AutocompleteInput
-                  battles={battleList}
-                  isVisible={isStartBattleModalOpen}
-                  onSelect={(id: number | null) =>
-                    setBattleId(id ? id.toString() : null)
-                  }
-                  onAccept={(e: any) => { onSubmitBattleId(battleId); e.preventDefault(); }}
-                />
-                <div className="flex gap-2 w-full">
-                  <button
-                    className="btn btn-primary btn-sm w-full"
-                    onClick={(e: any) => onSubmitBattleId(battleId)}
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-            </dialog>
-          </div>
-          <div className="flex flex-1 py-1">
-            <button
-              className="btn btn-primary btn-sm flex-1"
-              onClick={() => ff7.endBattle(false)}
-            >
-              Escape
-            </button>
-            <button
-              className="btn btn-primary btn-sm ml-0.5 flex-1"
-              onClick={() => ff7.endBattle(true)}
-            >
-              Win
-            </button>
-          </div>
-          <div className="flex-1 py-1">
-            <button
-              className="btn btn-primary btn-sm w-full"
-              onClick={() => ff7.skipFMV()}
-            >
-              Skip FMV
-            </button>
+    <SidebarProvider className="h-full">
+      <div className="flex flex-col w-full h-full text-sm">
+        <div className="flex-1 flex h-full">
+          <Sidebar collapsible="none">
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {Object.keys(Tabs).map((item) => (
+                      <SidebarMenuItem key={item}>
+                        <SidebarMenuButton isActive={currentTab === Tabs[item as keyof typeof Tabs]} onClick={() => setCurrentTab(Tabs[item as keyof typeof Tabs])}>
+                          {item}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+              <SidebarSeparator />
+              <SidebarGroup className="-mt-3">
+                <SidebarGroupLabel>Generic Hacks & Tweaks</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <Hacks ff7={ff7} tab={currentTab} />
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+            <SidebarSeparator />
+            <SidebarFooter>
+              <QuickActions ff7={ff7} />
+            </SidebarFooter>
+          </Sidebar>
+          <div className="flex-1 p-2">
+            <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+              {currentTab}
+            </h2>
+            {renderTabContent()}
           </div>
         </div>
+        <StatusBar ff7={ff7} />
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
 

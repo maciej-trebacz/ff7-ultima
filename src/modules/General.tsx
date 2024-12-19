@@ -5,7 +5,7 @@ import { FF7 } from "@/useFF7";
 import { formatTime } from "@/util";
 import { useState } from "react";
 
-export function Info(props: { ff7: FF7 }) {
+export function General(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
 

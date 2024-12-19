@@ -378,6 +378,10 @@ export function useFF7(addresses: FF7Addresses) {
     setApMultiplier: async (multiplier: number) => {
       await writeMemory(addresses.battle_ap_calc, [0x6B, 0xD2, multiplier, 0x01, 0x15, 0xC4, 0xE2, 0x99, 0, 0x90, 0x90, 0x90], DataType.Buffer);
     },
+    gameOver: async () => {
+      // implement game over
+      await writeMemory(0xcc0d89, 26, DataType.Byte);
+    }
   };
 
   return ff7;

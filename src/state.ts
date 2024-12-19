@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { GameModule, FieldModel, BattleCharObj, WorldModel } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters } from "./types";
 import { DataType, readMemory } from "./memory";
 import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
@@ -45,6 +45,7 @@ const defaultState = {
     worldCurrentModel: {} as WorldModel,
     expMultiplier: 1,
     apMultiplier: 1,
+    randomEncounters: RandomEncounters.Normal,
   };
 
 export const useFF7State = function() {
@@ -101,6 +102,14 @@ export const useFF7State = function() {
         const worldCurrentModel = ff7Data.world_current_model as WorldModel;
         worldCurrentModel.script = worldCurrentModel.walkmesh_type >> 5;
         worldCurrentModel.walkmesh_type = worldCurrentModel.walkmesh_type & 0x1f;
+        const battlesDisabled = basic.field_battle_check === 0x2E0E9;
+        const maxBattlesEnabled = basic.field_battle_check === 0x90909090;
+        let randomEncounters: RandomEncounters = RandomEncounters.Normal;
+        if (battlesDisabled) {
+          randomEncounters = RandomEncounters.Off;
+        } else if (maxBattlesEnabled) {
+          randomEncounters = RandomEncounters.Max;
+        }
         
         setGameState({
           currentModule: basic.current_module as number,
@@ -123,6 +132,7 @@ export const useFF7State = function() {
           battleEscapeCount: basic.battle_escape_count as number,
           battlesDisabled: basic.field_battle_check === 0x2E0E9,
           maxBattlesEnabled: basic.field_battle_check === 0x90909090,
+          randomEncounters,
           gameObjPtr: basic.game_obj_ptr as number,
           battleSwirlDisabled: basic.battle_swirl_check === 0x00,
           instantATBEnabled: basic.instant_atb_check === 0x45C7,
