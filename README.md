@@ -1,11 +1,10 @@
 # FF7 Real-time Game Editor
 
-Real-time editor for Final Fantasy VII
+Real-time editor for Final Fantasy VII.
+
+[![Screenshot](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)
 
 ## TODO
-
-* Sector 5 (Aeris' house) crashes the app
-* End Battle doesn't work
 
 * [x] Test Rust's ability to connect to a process and read/write its memory
 * Read basic game state information
@@ -31,7 +30,7 @@ Real-time editor for Final Fantasy VII
 * [x] Enable/disable menu access
 * [x] Enable all party members
 * [x] End battle 
-  * [ ] set specific battle flags
+  * [x] either win or escape
 * [x] No battles / max battles for both field and world
 * [x] Enter battle for specific battle formation id
   * [x] Field
@@ -46,7 +45,7 @@ Real-time editor for Final Fantasy VII
 * [ ] Teleport to specific place on the world map ?
 * [x] Skip FMVs
 * [x] Skip intro
-* [ ] No EXP gain
+* [x] No EXP gain
 * [x] Disable pause when unfocused
 * [ ] Save/load game state
         - player coordinates & direction

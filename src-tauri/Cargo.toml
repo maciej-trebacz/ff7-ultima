@@ -1,6 +1,6 @@
 [package]
 name = "ff7-ultima"
-version = "1.0.0"
+version = "1.0.1"
 description = "Real-time editor for Final Fantasy VII"
 authors = ["m4v3r"]
 edition = "2021"
