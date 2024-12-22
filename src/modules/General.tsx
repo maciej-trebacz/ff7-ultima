@@ -1,52 +1,61 @@
-import { EditModal } from "@/components/EditModal";
+import { EditPopover } from "@/components/EditPopover";
 import Row from "@/components/Row";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatTime } from "@/util";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function General(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
 
-  const [editInfoModalOpen, setEditInfoModalOpen] = useState(false);
-  const [editInfoModalTitle, setEditInfoModalTitle] = useState("");
-  const [editInfoModalValue, setEditInfoModalValue] = useState("");
+  const [editValue, setEditValue] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const gameModuleAsString = GameModule[state.currentModule];
 
-  const openEditInfoModal = (title: string, value: string) => {
-    setEditInfoModalTitle(title);
-    setEditInfoModalValue(value);
-    setEditInfoModalOpen(true);
+  const openEditPopover = (title: string, value: string) => {
+    setEditTitle(title);
+    setEditValue(value);
+    setPopoverOpen(true);
+    console.log("openEditPopover", title, value);
   }
 
   const submitValue = () => {
-    if (editInfoModalTitle === "Game Moment") {
-      ff7.setGameMoment(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "Party GP") {
-      ff7.setGP(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "Current Disc") {
-      ff7.setDisc(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "Party Gil") {
-      ff7.setGil(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "Battles Fought") {
-      ff7.setBattleCount(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "Battles Escaped") {
-      ff7.setBattleEscapeCount(parseInt(editInfoModalValue));
-    } else if (editInfoModalTitle === "In Game Time") {
-      ff7.setInGameTime(parseInt(editInfoModalValue));
-      // } else if (editInfoModalTitle === "HP" && currentAllyEditing !== null) {
-      //   ff7.setHP(parseInt(editInfoModalValue), currentAllyEditing);
-      // } else if (editInfoModalTitle === "MP" && currentAllyEditing !== null) {
-      //   ff7.setMP(parseInt(editInfoModalValue), currentAllyEditing);
+    if (editTitle === "Game Moment") {
+      ff7.setGameMoment(parseInt(editValue));
+    } else if (editTitle === "Party GP") {
+      ff7.setGP(parseInt(editValue));
+    } else if (editTitle === "Current Disc") {
+      ff7.setDisc(parseInt(editValue));
+    } else if (editTitle === "Party Gil") {
+      ff7.setGil(parseInt(editValue));
+    } else if (editTitle === "Battles Fought") {
+      ff7.setBattleCount(parseInt(editValue));
+    } else if (editTitle === "Battles Escaped") {
+      ff7.setBattleEscapeCount(parseInt(editValue));
+    } else if (editTitle === "In Game Time") {
+      ff7.setInGameTime(parseInt(editValue));
     }
-    setEditInfoModalOpen(false);
+    console.log("submitValue", editTitle, editValue);
+    setPopoverOpen(false);
   }
+
+  useEffect(() => {
+    console.log("General popoverOpen", popoverOpen);
+  }, [popoverOpen]);
 
   const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid']
   const Menu = ['Item', 'Magic', 'Materia', 'Equip', 'Status', 'Order', 'Limit', 'Config', 'PHS', 'Save']
@@ -58,33 +67,81 @@ export function General(props: { ff7: FF7 }) {
           <Row label="Module">{gameModuleAsString}</Row>
           <Row
             label="Party Gil"
-            onRowClick={() =>
-              openEditInfoModal("Party Gil", state.gil.toString())
-            }
+            onRowClick={() => openEditPopover("Party Gil", state.gil.toString())}
           >
-            {state.gil}
+            <EditPopover
+              open={popoverOpen && editTitle === "Party Gil"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Party Gil", state.gil.toString())}>
+                      {state.gil}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row
             label="Current Disc"
-            onRowClick={() =>
-              openEditInfoModal("Current Disc", state.discId.toString())
-            }
+            onRowClick={() => openEditPopover("Current Disc", state.discId.toString())}
           >
-            {state.discId}
+            <EditPopover
+              open={popoverOpen && editTitle === "Current Disc"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Current Disc", state.discId.toString())}>
+                      {state.discId}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row
             label="In Game Time"
-            onRowClick={() =>
-              openEditInfoModal(
-                "In Game Time",
-                formatTime(state.inGameTime)
-              )
-            }
+            onRowClick={() => openEditPopover("In Game Time", formatTime(state.inGameTime))}
           >
-            {formatTime(state.inGameTime)}
+            <EditPopover
+              open={popoverOpen && editTitle === "In Game Time"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("In Game Time", formatTime(state.inGameTime))}>
+                      {formatTime(state.inGameTime)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row label="PHS">
-          <Popover>
+            <Popover>
               <PopoverTrigger className="flex items-center">
                 Change
                 <ChevronDown className="h-3 w-3 ml-0.5 mt-0.5 opacity-50" />
@@ -105,44 +162,103 @@ export function General(props: { ff7: FF7 }) {
         <div className="flex-1">
           <Row
             label="Game Moment"
-            onRowClick={() =>
-              openEditInfoModal(
-                "Game Moment",
-                state.gameMoment.toString()
-              )
-            }
+            onRowClick={() => openEditPopover("Game Moment", state.gameMoment.toString())}
           >
-            {state.gameMoment}
+            <EditPopover
+              open={popoverOpen && editTitle === "Game Moment"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Game Moment", state.gameMoment.toString())}>
+                      {state.gameMoment}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row
             label="Party GP"
-            onRowClick={() =>
-              openEditInfoModal("Party GP", state.gp.toString())
-            }
+            onRowClick={() => openEditPopover("Party GP", state.gp.toString())}
           >
-            {state.gp}
+            <EditPopover
+              open={popoverOpen && editTitle === "Party GP"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Party GP", state.gp.toString())}>
+                      {state.gp}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row
             label="Battles Fought"
-            onRowClick={() =>
-              openEditInfoModal(
-                "Battles Fought",
-                state.battleCount.toString()
-              )
-            }
+            onRowClick={() => openEditPopover("Battles Fought", state.battleCount.toString())}
           >
-            {state.battleCount}
+            <EditPopover
+              open={popoverOpen && editTitle === "Battles Fought"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Battles Fought", state.battleCount.toString())}>
+                      {state.battleCount}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row
             label="Battles Escaped"
-            onRowClick={() =>
-              openEditInfoModal(
-                "Battles Escaped",
-                state.battleEscapeCount.toString()
-              )
-            }
+            onRowClick={() => openEditPopover("Battles Escaped", state.battleEscapeCount.toString())}
           >
-            {state.battleEscapeCount}
+            <EditPopover
+              open={popoverOpen && editTitle === "Battles Escaped"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Battles Escaped", state.battleEscapeCount.toString())}>
+                      {state.battleEscapeCount}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
           </Row>
           <Row label="Menu access">
             <Popover>
@@ -170,16 +286,6 @@ export function General(props: { ff7: FF7 }) {
           </Row>
         </div>
       </div>
-
-      <EditModal
-        open={editInfoModalOpen}
-        setIsOpen={setEditInfoModalOpen}
-        value={editInfoModalValue}
-        setValue={setEditInfoModalValue}
-        title={editInfoModalTitle}
-        buttonText="Save"
-        onSubmit={submitValue}>
-      </EditModal>
     </div>
   );
 }

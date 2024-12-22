@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { Modal } from "./Modal";
+import { Input } from "./ui/input";
 
 interface EditModalProps {
   open: boolean;
@@ -47,13 +48,13 @@ export function EditModal(props: EditModalProps) {
       buttonText={props.buttonText}
       callback={handleSubmit}
     >
-      <input
+      <Input
         ref={inputRef}
         type="text"
         value={props.value}
         onChange={(e) => props.setValue(e.target.value)}
         onKeyUp={handleKeyUp}
-        className="input input-bordered p-2 w-full mb-4"
+        className="w-full text-sm"
       />
     </Modal>
   );

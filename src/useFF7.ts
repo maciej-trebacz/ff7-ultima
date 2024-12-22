@@ -334,7 +334,7 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
     setHP: async (hp: number, index: number) => {
-      await writeMemory(addresses.battle_char_base + index * 104 + 0x2c, hp, DataType.Short);
+      await writeMemory(addresses.battle_char_base + index * 104 + 0x2c, hp, DataType.Int);
     },
     setMP: async (mp: number, index: number) => {
       await writeMemory(addresses.battle_char_base + index * 104 + 0x28, mp, DataType.Short);

@@ -25,6 +25,8 @@ impl ProcessScanner {
 
         thread::spawn(move || {
             let mut local_system = System::new_all();
+            let mut previous_pid: Option<Pid> = None;
+
             while is_scanning.load(Ordering::SeqCst) {
                 local_system.refresh_processes();
 
@@ -39,11 +41,20 @@ impl ProcessScanner {
                             && process_status == sysinfo::ProcessStatus::Run
                             && process_memory > 1024768
                     }) {
+                        if previous_pid != Some(pid) {
+                            println!("Found process PID: {}", pid);
+                            previous_pid = Some(pid);
+                        }
                         Some(pid)
                     } else {
                         None
                     }
                 });
+
+                if found_process.is_none() && previous_pid.is_some() {
+                    println!("Game disconnected");
+                    previous_pid = None;
+                }
 
                 match found_process {
                     Some(pid) => SCANNER.lock().process = Some(pid),

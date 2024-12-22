@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface BattleItem {
   id: number;
@@ -81,6 +85,9 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
           e.preventDefault();
           if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
             handleSelectSuggestion(suggestions[highlightedIndex]);
+            inputRef.current?.focus();
+          } else {
+            handleSelectSuggestion(suggestions[0]);
           }
           break;
         case 'Escape':
@@ -110,39 +117,41 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <div className="relative">
-        <input
+        <Input
           ref={inputRef}
           type="text"
-          className="input input-bordered w-full pr-10"
+          className="w-full pr-10 text-sm"
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Enter battle name"
+          placeholder="Enter enemy name or battle ID"
         />
         {input && (
-          <button
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
             onClick={handleClear}
           >
-            <span>✕</span>
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         )}
       </div>
       {isOpen && suggestions.length > 0 && (
-        <ul className="menu bg-base-200 w-full rounded-box absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto shadow-lg flex-nowrap">
-          {suggestions.map((battle, index) => (
-            <li key={battle.id}>
-              <a
-                onClick={() => handleSelectSuggestion(battle)}
-                className={`hover:bg-base-300 inline ${
-                  index === highlightedIndex ? "bg-base-300" : ""
-                }`}
-              >
-                {highlightMatch(battle.name, input)}
-              </a>
-            </li>
+        <div className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border bg-popover p-1 shadow-md">
+          {suggestions.slice(0, 25).map((battle, index) => (
+            <div
+              key={battle.id}
+              onClick={() => handleSelectSuggestion(battle)}
+              className={cn(
+                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none whitespace-nowrap overflow-hidden",
+                index === highlightedIndex ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              {highlightMatch(battle.name, input)}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
