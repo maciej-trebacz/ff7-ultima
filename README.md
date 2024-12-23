@@ -5,7 +5,7 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
 [![Screenshot](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)
 
 ## Current features
-* Display and adit basic game information
+* Display and edit basic game information
   - game moment
   - party GP
   - current disc
