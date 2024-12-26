@@ -198,8 +198,8 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
 
     Ok(WorldModel {
         x: read_memory_int(address + 0xC)?,
-        y: read_memory_int(address + 0x14)?,
-        z: read_memory_int(address + 0x10)?,
+        y: read_memory_int(address + 0x10)?,
+        z: read_memory_int(address + 0x14)?,
         direction: read_memory_signed_short(address + 0x40)?,
         model_id: read_memory_byte(address + 0x50)?,
         walkmesh_type: read_memory_byte(address + 0x4a)?,

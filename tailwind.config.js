@@ -5,6 +5,9 @@ export default {
     content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
   	extend: {
+			animation: {
+				pulse: 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+			},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
