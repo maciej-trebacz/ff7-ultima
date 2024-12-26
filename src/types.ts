@@ -58,6 +58,7 @@ export interface BattleCharObj {
 }
 
 export interface WorldModel {
+  index: number;
   x: number;
   y: number;
   z: number;
@@ -67,7 +68,7 @@ export interface WorldModel {
   script: number;
 }
 
-export enum WorldModelType {
+export enum WorldModelIds {
   Cloud = 0,
   Tifa = 1,
   Cid = 2,
@@ -75,9 +76,30 @@ export enum WorldModelType {
   WildChocobo = 4,
   TinyBronco = 5,
   Buggy = 6,
+  JunonCanon = 7,
+  CargoShip = 8,
+  HighwindPropellers = 9,
+  DiamondWeapon = 10,
+  UltimateWeapon = 11,
+  FortCondor = 12,
   Submarine = 13,
+  GoldSaucer = 14,
+  RocketTownRocket = 15,
+  RocketTownPad = 16,
+  SunkenGelnika = 17,
+  UnderwaterReactor = 18,
   Chocobo = 19,
+  MidgarCanon = 20,
+  Unknown1 = 21,
+  Unknown2 = 22,
+  Unknown3 = 23,
+  NorthCraterBarrier = 24,
+  AncientForest = 25,
+  KeyOfTheAncients = 26,
+  Unknown4 = 27,
   RedSubmarine = 28,
+  RubyWeapon = 29,
+  EmeraldWeapon = 30,
 }
 
 export enum WorldWalkmeshType {

@@ -66,8 +66,9 @@ pub struct FieldData {
 
 #[derive(Serialize)]
 pub struct WorldModel {
+    pub index: u8,
     pub x: u32,
-    pub y: u32,
+    pub y: i32,
     pub z: u32,
     pub direction: i16,
     pub model_id: u8,
@@ -151,6 +152,7 @@ pub struct EnemyData {
 pub struct FF7Data {
     pub basic: FF7BasicData,
     pub field_models: Vec<FieldModel>,
+    pub world_models: Vec<WorldModel>,
     pub battle_allies: Vec<BattleCharObj>,
     pub battle_enemies: Vec<BattleCharObj>,
     pub field_data: FieldData,

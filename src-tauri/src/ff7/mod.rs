@@ -187,6 +187,7 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
     let address = read_memory_int(addresses.world_current_obj_ptr)? as u32;
     if address == 0 {
         return Ok(WorldModel {
+            index: 0,
             x: 0,
             y: 0,
             z: 0,
@@ -197,8 +198,9 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
     }
 
     Ok(WorldModel {
+        index: 0,
         x: read_memory_int(address + 0xC)?,
-        y: read_memory_int(address + 0x10)?,
+        y: read_memory_signed_int(address + 0x10)?,
         z: read_memory_int(address + 0x14)?,
         direction: read_memory_signed_short(address + 0x40)?,
         model_id: read_memory_byte(address + 0x50)?,
@@ -206,10 +208,35 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
     })
 }
 
+fn read_world_models(addresses: &FF7Addresses) -> Result<Vec<WorldModel>, String> {
+    let mut models: Vec<WorldModel> = Vec::new();
+    let model_record_length = 192;
+
+    for i in 0..16 {
+        let model_check = read_memory_int(addresses.world_models + i * model_record_length + 188)? as u32;
+        if model_check == 0 {
+            continue;
+        }
+
+        let model = WorldModel {
+            index: i as u8,
+            x: read_memory_int(addresses.world_models + i * model_record_length + 0xC)?,
+            y: read_memory_signed_int(addresses.world_models + i * model_record_length + 0x10)?,
+            z: read_memory_int(addresses.world_models + i * model_record_length + 0x14)?,
+            direction: read_memory_signed_short(addresses.world_models + i * model_record_length + 0x40)?,
+            model_id: read_memory_byte(addresses.world_models + i * model_record_length + 0x50)?,
+            walkmesh_type: 0,
+        };
+        models.push(model);
+    }
+    Ok(models)
+}
+
 pub fn read_data() -> Result<FF7Data, String> {
     let addresses = FF7Addresses::new();
     let basic = read_basic_data(&addresses)?;
     let field_models = read_field_models(&addresses)?;
+    let world_models = read_world_models(&addresses)?;
     let battle_allies = read_battle_allies(&addresses)?;
     let battle_enemies = read_battle_enemies(&addresses)?;
     let field_data = read_field_data(&addresses)?;
@@ -218,6 +245,7 @@ pub fn read_data() -> Result<FF7Data, String> {
     Ok(FF7Data {
         basic,
         field_models,
+        world_models,
         battle_allies,
         battle_enemies,
         field_data,

@@ -60,6 +60,7 @@ export interface FF7Addresses {
   battle_exp_calc: number;
   battle_ap_calc: number;
   world_current_obj_ptr: number;
+  world_models: number;
 }
 
 export function useFF7Addresses() {

@@ -412,11 +412,20 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(0xCC0D89, 26, DataType.Byte);
       }
     },
-    setWorldmapCoordinates: async (x: number, z: number) => {
+    setCurrentEntityWorldmapCoordinates: async (x: number, z: number) => {
       const currentObjPtr = await readMemory(addresses.world_current_obj_ptr, DataType.Int);
       await writeMemory(currentObjPtr + 0xC, x, DataType.Int);
       await writeMemory(currentObjPtr + 0x14, z, DataType.Int);
     },
+    setWorldmapModelCoordinates: async (index: number, x: number, y: number, z: number, direction: number) => {
+      const base = addresses.world_models;
+      const length = 192;
+
+      await writeMemory(base + index * length + 0xC, x, DataType.Int);
+      await writeMemory(base + index * length + 0x10, y, DataType.Int);
+      await writeMemory(base + index * length + 0x14, z, DataType.Int);
+      await writeMemory(base + index * length + 0x40, direction, DataType.Int);
+    }
   };
 
   return ff7;
