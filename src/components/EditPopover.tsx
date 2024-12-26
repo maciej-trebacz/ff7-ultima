@@ -33,10 +33,6 @@ export function EditPopover({
     }
   };
 
-  useEffect(() => {
-    console.log("Popover open", open);
-  }, [open]);
-
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>

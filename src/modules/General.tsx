@@ -30,7 +30,6 @@ export function General(props: { ff7: FF7 }) {
     setEditTitle(title);
     setEditValue(value);
     setPopoverOpen(true);
-    console.log("openEditPopover", title, value);
   }
 
   const submitValue = () => {
@@ -49,13 +48,8 @@ export function General(props: { ff7: FF7 }) {
     } else if (editTitle === "In Game Time") {
       ff7.setInGameTime(parseInt(editValue));
     }
-    console.log("submitValue", editTitle, editValue);
     setPopoverOpen(false);
   }
-
-  useEffect(() => {
-    console.log("General popoverOpen", popoverOpen);
-  }, [popoverOpen]);
 
   const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid']
   const Menu = ['Item', 'Magic', 'Materia', 'Equip', 'Status', 'Order', 'Limit', 'Config', 'PHS', 'Save']

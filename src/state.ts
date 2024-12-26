@@ -46,6 +46,7 @@ const defaultState = {
     expMultiplier: 1,
     apMultiplier: 1,
     randomEncounters: RandomEncounters.Normal,
+    worldModels: [] as WorldModel[],
   };
 
 export const useFF7State = function() {
@@ -118,6 +119,7 @@ export const useFF7State = function() {
         } else if (maxBattlesEnabled) {
           randomEncounters = RandomEncounters.Max;
         }
+        const worldModels = ff7Data.world_models as WorldModel[];
         
         setGameState({
           currentModule: basic.current_module as number,
@@ -159,6 +161,7 @@ export const useFF7State = function() {
           worldCurrentModel,
           expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
           apMultiplier: !(basic.ap_multiplier === 0xe2) ? basic.ap_multiplier as number : 1,
+          worldModels,
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

@@ -1,8 +1,15 @@
 import Row from "@/components/Row";
-import { WorldModelType, WorldWalkmeshType } from "@/types";
+import { WorldModelIds, WorldWalkmeshType } from "@/types";
 import { FF7 } from "@/useFF7";
 import Worldmap from "@/assets/worldmap.png";
 import { useEffect, useRef, useState } from "react";
+import { EditPopover } from "@/components/EditPopover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const WorldBounds = {
   x: { min: 0, max: 0x48000 },
@@ -14,11 +21,23 @@ export function World(props: { ff7: FF7 }) {
   const state = ff7.gameState;
   const [coords, setCoords] = useState({ x: 0, z: 0 });
   const worldmapRef = useRef<HTMLImageElement>(null);
+  const [editValue, setEditValue] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editCoord, setEditCoord] = useState<"x" | "y" | "z" | "direction" | null>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
+
+  const convertCoordinates = (x: number, z: number) => {
+    const imageDimensions = worldmapRef.current!.getBoundingClientRect();
+    return {
+      x: x / WorldBounds.x.max * imageDimensions.width,
+      z: z / WorldBounds.z.max * imageDimensions.height,
+    };
+  };
 
   useEffect(() => {
     if (!worldmapRef.current) return;
-    const imageDimensions = worldmapRef.current.getBoundingClientRect();
-    setCoords({ x: state.worldCurrentModel.x / WorldBounds.x.max * imageDimensions.width, z: state.worldCurrentModel.z / WorldBounds.z.max * imageDimensions.height });
+    setCoords(convertCoordinates(state.worldCurrentModel.x, state.worldCurrentModel.z));
   }, [state.worldCurrentModel]);
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -28,9 +47,60 @@ export function World(props: { ff7: FF7 }) {
     const z = e.clientY - imageDimensions.top;
     const xCoord = Math.round(x / imageDimensions.width * WorldBounds.x.max);
     const zCoord = Math.round(z / imageDimensions.height * WorldBounds.z.max);
-    console.log({ x, z, xCoord, zCoord });
-    ff7.setWorldmapCoordinates(xCoord, zCoord);
+    ff7.setCurrentEntityWorldmapCoordinates(xCoord, zCoord);
   };
+
+  const isUnderwater = state.worldCurrentModel.y < -1000;
+
+  const openEditPopover = (title: string, value: string, modelIndex: number, coord: "x" | "y" | "z" | "direction") => {
+    setEditValue(value);
+    setEditTitle(title);
+    setCurrentModelEditing(modelIndex);
+    setEditCoord(coord);
+    setPopoverOpen(true);
+  }
+
+  const submitValue = () => {
+    if (currentModelEditing !== null && editCoord) {
+      const model = state.worldModels[currentModelEditing];
+      ff7.setWorldmapModelCoordinates(
+        model.index,
+        editCoord === "x" ? parseInt(editValue) : model.x,
+        editCoord === "y" ? parseInt(editValue) : model.y,
+        editCoord === "z" ? parseInt(editValue) : model.z,
+        editCoord === "direction" ? parseInt(editValue) : model.direction
+      );
+    }
+    setPopoverOpen(false);
+  }
+
+  const modelsToRender = [WorldModelIds.Buggy, WorldModelIds.Highwind, WorldModelIds.Submarine, WorldModelIds.Chocobo, WorldModelIds.WildChocobo, WorldModelIds.TinyBronco, WorldModelIds.UltimateWeapon, WorldModelIds.DiamondWeapon, WorldModelIds.RubyWeapon, WorldModelIds.EmeraldWeapon];
+  const icons = modelsToRender.map((model, index) => {
+    const modelIndex = state.worldModels.findIndex((m) => m.model_id === model);
+    if (modelIndex === -1) return null;
+    if (model === state.worldCurrentModel.model_id) return null;
+
+    return (
+      <div key={model} style={{
+        left: `${state.worldModels[modelIndex].x / WorldBounds.x.max * 100}%`,
+        top: `${state.worldModels[modelIndex].z / WorldBounds.z.max * 100}%`,
+        transform: `translate(-50%, -50%)`,
+        position: "absolute",
+        zIndex: 40
+      }}>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <div className="h-2.5 w-2.5 text-center rounded-full text-[8px] leading-[10px] text-white bg-slate-800 border border-white box-content">
+              {WorldModelIds[model][0]}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">{WorldModelIds[model]}</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    );
+  });
 
   return (
     <div>
@@ -49,7 +119,7 @@ export function World(props: { ff7: FF7 }) {
       <div className="flex gap-1">
         <div className="flex-1">
           <Row label="Direction">{ff7.gameState.worldCurrentModel.direction}</Row>
-          <Row label="Model">{WorldModelType[ff7.gameState.worldCurrentModel.model_id]}</Row>
+          <Row label="Model">{WorldModelIds[ff7.gameState.worldCurrentModel.model_id]}</Row>
         </div>
         <div className="flex-1">
           <Row label="Terrain">
@@ -58,11 +128,131 @@ export function World(props: { ff7: FF7 }) {
           <Row label="Script ID">{ff7.gameState.worldCurrentModel.script}</Row>
         </div>
       </div>
+
       <h4 className="text-center mt-2 mb-1 font-medium">Map</h4>
       <div className="relative select-none" onClick={handleMapClick}>
         <img src={Worldmap} ref={worldmapRef} />
-        <div className="absolute w-2 h-2 bg-orange-600 border-2 border-white rounded-full animate-pulse" style={{ top: `${coords.z - 4}px`, left: `${coords.x - 4}px` }}></div>
+        {icons}
+        <div className="absolute z-50 w-2 h-2 bg-orange-600 border-2 border-white rounded-full animate-pulse" style={{ top: `${coords.z - 4}px`, left: `${coords.x - 4}px` }}></div>
       </div>
+
+      {state.worldModels && state.worldModels.length > 0 && <>
+        <h4 className="text-center mt-2 mb-1 font-medium">World Models</h4>
+        <table className="w-full">
+          <thead className="bg-zinc-800 text-xs text-left">
+            <tr>
+              <th className="p-1">Model</th>
+              <th className="p-1 px-2">X</th>
+              <th className="p-1 px-2">Y</th>
+              <th className="p-1 px-2">Z</th>
+              <th className="p-1">Direction</th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.worldModels.map((model, index) => {
+              return (
+                <tr
+                  key={index}
+                  className={`bg-zinc-800 text-xs ${model.model_id === state.worldCurrentModel.model_id && (!isUnderwater || model.y < -2500)
+                      ? 'bg-slate-700 font-bold'
+                      : ''
+                    }`}
+                >
+                  <td className="p-1 text-nowrap w-14 font-bold">{WorldModelIds[model.model_id]}</td>
+                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                    <EditPopover
+                      open={popoverOpen && currentModelEditing === index && editCoord === "x"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span onClick={() => openEditPopover("X", model.x.toString(), index, "x")}>
+                              {model.x}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </td>
+                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                    <EditPopover
+                      open={popoverOpen && currentModelEditing === index && editCoord === "y"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span onClick={() => openEditPopover("Y", model.y.toString(), index, "y")}>
+                              {model.y}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </td>
+                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                    <EditPopover
+                      open={popoverOpen && currentModelEditing === index && editCoord === "z"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span onClick={() => openEditPopover("Z", model.z.toString(), index, "z")}>
+                              {model.z}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </td>
+                  <td className="p-1 cursor-pointer">
+                    <EditPopover
+                      open={popoverOpen && currentModelEditing === index && editCoord === "direction"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span onClick={() => openEditPopover("Direction", model.direction.toString(), index, "direction")}>
+                              {model.direction}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </>}
     </div>
   );
 }

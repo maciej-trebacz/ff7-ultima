@@ -27,7 +27,6 @@ export function QuickActions(props: { ff7: FF7 }) {
   };
 
   const onSubmitBattleId = (battleId: string | null) => {
-    console.log("onSubmitBattleId", battleId);
     if (battleId === null) {
       return;
     }
@@ -77,7 +76,6 @@ export function QuickActions(props: { ff7: FF7 }) {
           isVisible={isStartBattleModalOpen}
           onSelect={(id: number | null) => {
             setBattleId(id ? id.toString() : null)
-            console.log("Selected battle:", id)
           }}
           onAccept={(e: any) => { onSubmitBattleId(battleId); e.preventDefault(); }}
         />
