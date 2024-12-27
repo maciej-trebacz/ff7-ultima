@@ -44,7 +44,7 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
   - Countdown timer
   - Love points
   - Fort condor - battles fought, won, lost, rank, funds
-* Great Glacier step counter
+  - Great Glacier step counter
 * World map
   - show world map models with their coordinates
 * Chocobos
