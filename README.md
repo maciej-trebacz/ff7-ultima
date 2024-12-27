@@ -39,16 +39,18 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
   - show enemy stats, elemental affinities and item drop/steal rates
 
 ## Planned features
+* Field
+  - Random encounter table
+  - Countdown timer
+  - Love points
+  - Fort condor - battles fought, won, lost, rank, funds
+* Great Glacier step counter
 * World map
   - show world map models with their coordinates
 * Chocobos
   - fenced chocobos (with their rating: wonderful, great, good, etc.)
   - chocobos at the stable - gender, color, rating, races won
   - indicate whether you can breed a chocobo
-* Countdown timer
-* Love points
-* Fort condor - battles fought, won, lost, rank, funds
-* Great Glacier step counter
 * RNG info (seed, joker, animation index, etc.)
 * Battle log (display a log of attacks, status changes, etc.)
 * One Hit Kill hack
