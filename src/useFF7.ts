@@ -8,6 +8,19 @@ import { EnemyData, GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { statuses } from "./ff7Statuses";
 
+type ModelObj = {
+  data: number[];
+  ptrData: number[];
+}
+
+type SaveState = {
+  savemap: number[];
+  fieldData: number[];
+  models: Array<ModelObj>;
+}
+
+const SaveStates: SaveState[] = [];
+
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
 
@@ -425,6 +438,75 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(base + index * length + 0x10, y, DataType.Int);
       await writeMemory(base + index * length + 0x14, z, DataType.Int);
       await writeMemory(base + index * length + 0x40, direction, DataType.Int);
+    },
+    async saveState() {
+      const memory = await readMemoryBuffer(0x99d000, 0x563000)
+      const models = [];
+      const fieldModelsBase = await readMemory(0xCFF738, DataType.Int);
+      const fieldModelNum = await readMemory(0xcff73e, DataType.Byte);
+
+      for (let i = 0; i < fieldModelNum; i++) {
+        const model = await readMemoryBuffer(fieldModelsBase + i * 400, 400);
+        const ptr = await readMemory(fieldModelsBase + i * 400 + 0x178, DataType.Int);
+        const ptrData = await readMemoryBuffer(ptr, 144);
+        models.push({
+          data: model,
+          ptrData
+        });
+      }
+
+      const fieldDataPtr = await readMemory(0xCFF594, DataType.Int);
+      const section9Offset = await readMemory(fieldDataPtr + 38, DataType.Int);
+      const section9Length = await readMemory(fieldDataPtr + section9Offset, DataType.Int);
+      const totalLength = section9Offset + section9Length + 17;
+      const fieldData = await readMemoryBuffer(fieldDataPtr, totalLength);
+
+      SaveStates.push({
+        savemap: memory,
+        models: models,
+        fieldData
+      });
+    },
+    async loadState() {
+      if (SaveStates.length === 0) return;
+      const state = SaveStates[SaveStates.length - 1];
+      if (state) {
+        await writeMemory(0x99d000, state.savemap, DataType.Buffer);
+        const fieldModelsBase = await readMemory(0xCFF738, DataType.Int);
+        for (let i = 0; i < state.models.length; i++) {
+          const model = state.models[i];
+          await writeMemory(fieldModelsBase + i * 400, model.data, DataType.Buffer);
+          const ptr = await readMemory(fieldModelsBase + i * 400 + 0x178, DataType.Int);
+          await writeMemory(ptr, model.ptrData, DataType.Buffer);
+        }
+
+        const fieldDataPtr = await readMemory(0xCFF594, DataType.Int);
+        await writeMemory(fieldDataPtr, state.fieldData, DataType.Buffer);
+
+        const scrollX = await readMemory(0xCC15F0, DataType.Short);
+        const scrollY = await readMemory(0xCC15F4, DataType.Short);
+        await writeMemory(0xCC0D92, scrollX + 1, DataType.Short);
+        await writeMemory(0xCC0D94, scrollY, DataType.Short);
+        await writeMemory(0xCC0DA5, 4, DataType.Byte);
+        await writeMemory(0xCC0DA7, 0, DataType.Byte);
+        setTimeout(async () => {
+          await writeMemory(0xCC0DA5, 0, DataType.Byte);
+          await writeMemory(0xCC0DA7, 0, DataType.Byte);
+        }, 25);
+      }
+    },
+    async warpToFieldId(id: number, destination?: {x: number, y: number, triangleId: number, direction?: number}) {
+      if (destination) {
+        await writeMemory(0x0cc0d8c, destination.x, DataType.SignedShort);
+        await writeMemory(0x0cc0d8e, destination.y, DataType.SignedShort);
+        await writeMemory(0x0cc0daa, destination.triangleId, DataType.Short);
+        if (destination.direction) {
+          await writeMemory(0x0cc0dac, destination.direction, DataType.Short);
+        }
+      }
+
+      await writeMemory(0xcc0d89, 1, DataType.Byte);
+      await writeMemory(0x0cc0d8a, id, DataType.Short);
     }
   };
 

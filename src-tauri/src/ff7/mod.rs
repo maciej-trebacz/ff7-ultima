@@ -46,12 +46,13 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
 fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String> {
     let mut models: Vec<FieldModel> = Vec::new();
 
+    let models_num = read_memory_byte(addresses.field_num_models)? as u32;
     let model_ptr = read_memory_int(addresses.field_models_ptr)?;
     if model_ptr == 0 {
         return Ok(models);
     }
 
-    for i in 0..16 {
+    for i in 0..models_num {
         let base_address = model_ptr + i * 400;
         let model = FieldModel {
             x: read_memory_signed_int(base_address + 4)?,
