@@ -46,6 +46,11 @@ fn write_memory_short(address: u32, new_value: u16) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn write_memory_signed_short(address: u32, new_value: i16) -> Result<(), String> {
+    memory::write_memory_signed_short(address, new_value)
+}
+
+#[tauri::command]
 fn write_memory_int(address: u32, new_value: u32) -> Result<(), String> {
     memory::write_memory_int(address, new_value)
 }
@@ -56,7 +61,7 @@ fn write_memory_float(address: u32, new_value: f64) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn write_memory_buffer(address: u32, buffer: Vec<u64>) -> Result<(), String> {
+fn write_memory_buffer(address: u32, buffer: Vec<u8>) -> Result<(), String> {
     memory::write_memory_buffer(address, buffer)
 }
 
@@ -103,6 +108,7 @@ fn main() {
             read_memory_buffer,
             write_memory_byte,
             write_memory_short,
+            write_memory_signed_short,
             write_memory_int,
             write_memory_float,
             write_memory_buffer,

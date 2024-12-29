@@ -1,5 +1,5 @@
 use crate::process;
-use process_memory::{DataMember, Memory, Pid, TryIntoProcessHandle};
+use process_memory::{CopyAddress, DataMember, Memory, Pid, PutAddress, TryIntoProcessHandle};
 use winapi::um::memoryapi::VirtualProtectEx;
 use winapi::um::winnt::{PAGE_READWRITE, PVOID};
 
@@ -39,20 +39,6 @@ fn write_memory<T: Copy>(address: u32, new_value: T) -> Result<(), String> {
     Ok(())
 }
 
-pub fn write_memory_buffer(address: u32, buffer: Vec<u64>) -> Result<(), String> {
-    let buffer: Vec<u8> = buffer.into_iter().map(|n| n as u8).collect();
-    let handle = get_process_handle()?;
-    let mut value = DataMember::<u8>::new(handle);
-
-    for (i, &byte) in buffer.iter().enumerate() {
-        value.set_offset(vec![(address as usize) + i]);
-        value
-            .write(&byte)
-            .map_err(|e| format!("Failed to write byte at offset {}: {}", i, e))?;
-    }
-    Ok(())
-}
-
 pub fn read_memory_int(address: u32) -> Result<u32, String> {
     read_memory::<u32>(address)
 }
@@ -78,11 +64,17 @@ pub fn read_memory_float(address: u32) -> Result<f64, String> {
 }
 
 pub fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> {
-    let mut buffer = Vec::new();
-    for i in 0..size {
-        buffer.push(read_memory_byte(address + i as u32)?);
-    }
-    Ok(buffer)
+    let handle = get_process_handle()?;
+    let mut buf = vec![0u8; size];
+    handle.copy_address(address as usize, &mut buf)
+        .map_err(|_| format!("Could not read {} bytes at address 0x{:08X}", size, address))?;
+    Ok(buf)
+}
+
+pub fn write_memory_buffer(address: u32, mut buffer: Vec<u8>) -> Result<(), String> {
+    let handle = get_process_handle()?;
+    handle.put_address(address as usize, &mut buffer);
+    Ok(())
 }
 
 pub fn write_memory_int(address: u32, new_value: u32) -> Result<(), String> {
@@ -91,6 +83,10 @@ pub fn write_memory_int(address: u32, new_value: u32) -> Result<(), String> {
 
 pub fn write_memory_short(address: u32, new_value: u16) -> Result<(), String> {
     write_memory::<u16>(address, new_value)
+}
+
+pub fn write_memory_signed_short(address: u32, new_value: i16) -> Result<(), String> {
+    write_memory::<i16>(address, new_value)
 }
 
 pub fn write_memory_byte(address: u32, new_value: u8) -> Result<(), String> {

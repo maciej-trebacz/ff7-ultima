@@ -73,11 +73,10 @@ export function QuickActions(props: { ff7: FF7 }) {
       <div className="relative">
         <AutocompleteInput
           battles={battleList}
-          isVisible={isStartBattleModalOpen}
-          onSelect={(id: number | null) => {
-            setBattleId(id ? id.toString() : null)
-          }}
-          onAccept={(e: any) => { onSubmitBattleId(battleId); e.preventDefault(); }}
+          isVisible={true}
+          onSelect={(id) => setBattleId(id?.toString() ?? "")}
+          onAccept={onBattleModalKeyDown}
+          placeholder="Enter enemy name or battle ID"
         />
       </div>
     </Modal>

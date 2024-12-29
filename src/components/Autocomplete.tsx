@@ -14,9 +14,10 @@ interface AutocompleteInputProps {
   isVisible: boolean;
   onSelect: (id: number | null) => void;
   onAccept?: (e: any) => void;
+  placeholder?: string;
 }
 
-const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisible, onSelect, onAccept }) => {
+const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisible, onSelect, onAccept, placeholder = "Search..." }) => {
   const [input, setInput] = useState<string>('');
   const [suggestions, setSuggestions] = useState<BattleItem[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
@@ -120,11 +121,11 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
         <Input
           ref={inputRef}
           type="text"
-          className="w-full pr-10 text-sm"
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Enter enemy name or battle ID"
+          className={cn("w-full", !isVisible && "hidden")}
+          placeholder={placeholder}
         />
         {input && (
           <Button
