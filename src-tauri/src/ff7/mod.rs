@@ -22,7 +22,8 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         menu_locks: read_memory_short(addresses.menu_locks)?,
         field_movement_disabled: read_memory_byte(addresses.field_movement_disabled)?,
         field_menu_access_enabled: read_memory_byte(addresses.field_menu_access_enabled)?,
-        party_bitmask: read_memory_short(addresses.party_bitmask)?,
+        party_locking_mask: read_memory_short(addresses.party_locking_mask)?,
+        party_visibility_mask: read_memory_short(addresses.party_visibility_mask)?,
         gil: read_memory_int(addresses.gil)?,
         gp: read_memory_short(addresses.gp)?,
         battle_count: read_memory_short(addresses.battle_count)?,
@@ -41,6 +42,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         exp_multiplier: read_memory_byte(addresses.battle_exp_calc + 8)?,
         ap_multiplier: read_memory_byte(addresses.battle_ap_calc + 2)?,
         battle_chocobo_rating: read_memory_byte(addresses.battle_chocobo_rating)?,
+        menu_always_enabled: read_memory_byte(addresses.menu_always_enabled)?,
     })
 }
 

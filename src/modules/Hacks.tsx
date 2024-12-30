@@ -262,61 +262,61 @@ export function Hacks(props: { ff7: FF7 }) {
           </GroupButton>
         </div>
       </Row>
-      <Row label="PHS" onLabelClick={() => ff7.togglePHS(-1)}>
+      <Row label="PHS" onLabelClick={() => ff7.togglePartyMemberVisibility(-1)}>
         <div className="join">
           <GroupButton
-            active={ff7.partyMemberEnabled(0)}
-            onClick={() => ff7.togglePHS(0)}
+            active={ff7.partyMemberVisible(0)}
+            onClick={() => ff7.togglePartyMemberVisibility(0)}
           >
             Cloud
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(1)}
-            onClick={() => ff7.togglePHS(1)}
+            active={ff7.partyMemberVisible(1)}
+            onClick={() => ff7.togglePartyMemberVisibility(1)}
           >
             Barret
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(2)}
-            onClick={() => ff7.togglePHS(2)}
+            active={ff7.partyMemberVisible(2)}
+            onClick={() => ff7.togglePartyMemberVisibility(2)}
           >
             Tifa
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(3)}
-            onClick={() => ff7.togglePHS(3)}
+            active={ff7.partyMemberVisible(3)}
+            onClick={() => ff7.togglePartyMemberVisibility(3)}
           >
             Aeris
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(4)}
-            onClick={() => ff7.togglePHS(4)}
+            active={ff7.partyMemberVisible(4)}
+            onClick={() => ff7.togglePartyMemberVisibility(4)}
           >
             Red
           </GroupButton>
         </div>
         <div className="join">
           <GroupButton
-            active={ff7.partyMemberEnabled(5)}
-            onClick={() => ff7.togglePHS(5)}
+            active={ff7.partyMemberVisible(5)}
+            onClick={() => ff7.togglePartyMemberVisibility(5)}
           >
             Yuffie
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(6)}
-            onClick={() => ff7.togglePHS(6)}
+            active={ff7.partyMemberVisible(6)}
+            onClick={() => ff7.togglePartyMemberVisibility(6)}
           >
             Cait Sith
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(7)}
-            onClick={() => ff7.togglePHS(7)}
+            active={ff7.partyMemberVisible(7)}
+            onClick={() => ff7.togglePartyMemberVisibility(7)}
           >
             Vincent
           </GroupButton>
           <GroupButton
-            active={ff7.partyMemberEnabled(8)}
-            onClick={() => ff7.togglePHS(8)}
+            active={ff7.partyMemberVisible(8)}
+            onClick={() => ff7.togglePartyMemberVisibility(8)}
           >
             Cid
           </GroupButton>

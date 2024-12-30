@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 
 export function General(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -145,10 +146,20 @@ export function General(props: { ff7: FF7 }) {
                   <label className="flex bg-zinc-800 p-1 px-2 rounded-sm flex-col gap-2" key={index}>
                     <div className="flex gap-2 items-center">
                       <div className="flex-1">{ally}</div>
-                      <Checkbox checked={ff7.partyMemberEnabled(index)} onClick={(e) => ff7.togglePHS(index)} />
+                      <label className="flex gap-1 items-center">
+                      show
+                      <Checkbox checked={ff7.partyMemberVisible(index)} onClick={(e) => ff7.togglePartyMemberVisibility(index)} />
+                      </label>
+                      <label className="flex gap-1 items-center">
+                      lock
+                      <Checkbox checked={ff7.partyMemberLocked(index)} onClick={(e) => ff7.togglePartyMemberLocking(index)} />
+                      </label>
                     </div>
                   </label>
                 ))}
+                <div className="flex justify-center">
+                  <a className="cursor-pointer hover:underline" onClick={() => {ff7.togglePartyMemberVisibility(-1); ff7.togglePartyMemberLocking(-1)}}>Toggle all</a>
+                </div>                
               </PopoverContent>
             </Popover>
           </Row>
@@ -265,10 +276,14 @@ export function General(props: { ff7: FF7 }) {
                   <div className="flex bg-zinc-800 p-1 px-2 rounded-sm flex-col gap-2" key={index}>
                     <div className="flex gap-2 items-center">
                       <div className="flex-1">{menu}</div>
-                      show
-                      <Checkbox checked={ff7.menuVisibilityEnabled(index)} onClick={(e) => ff7.toggleMenuVisibility(index)} />
-                      lock
-                      <Checkbox checked={ff7.menuLockEnabled(index)} onClick={(e) => ff7.toggleMenuLock(index)} />
+                      <label className="flex gap-1 items-center">
+                        show
+                        <Checkbox checked={ff7.menuVisibilityEnabled(index)} onClick={(e) => ff7.toggleMenuVisibility(index)} />
+                      </label>
+                      <label className="flex gap-1 items-center">
+                        lock
+                        <Checkbox checked={ff7.menuLockEnabled(index)} onClick={(e) => ff7.toggleMenuLock(index)} />
+                      </label>
                     </div>
                   </div>
                 ))}
@@ -277,6 +292,9 @@ export function General(props: { ff7: FF7 }) {
                 </div>
               </PopoverContent>
             </Popover>
+          </Row>
+          <Row label="Enable all menus">
+            <Switch checked={state.menuAlwaysEnabled} onClick={() => state.menuAlwaysEnabled ? ff7.disableMenuAlwaysEnabled() : ff7.enableMenuAlwaysEnabled()} />
           </Row>
         </div>
       </div>

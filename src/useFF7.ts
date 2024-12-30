@@ -47,6 +47,17 @@ export function useFF7(addresses: FF7Addresses) {
     }, 0);
   }
 
+  const toggleBitmaskValue = (bitmask: number, index: number) => {
+    if (index === -1) {
+      bitmask = bitmask & 1 ? 0 : 0xffff;
+    } else if (bitmask & (1 << index)) {
+      bitmask &= ~(1 << index);
+    } else {
+      bitmask |= 1 << index;
+    }    
+    return bitmask;
+  }
+
   const ff7 = {
     connected,
     gameState,
@@ -280,30 +291,27 @@ export function useFF7(addresses: FF7Addresses) {
       setHacks({ ...hacks, skipIntro: false });
     },
     introDisabled: hacks.skipIntro,
-    togglePHS: async (index: number) => {
-      let bitmask = gameState.partyBitmask;
-      if (index === -1) {
-        bitmask = bitmask & 1 ? 0 : 0xffff;
-      } else if (bitmask & (1 << index)) {
-        bitmask &= ~(1 << index);
-      } else {
-        bitmask |= 1 << index;
-      }
-      await writeMemory(addresses.party_bitmask, bitmask, DataType.Short);
+    togglePartyMemberLocking: async (index: number) => {
+      let bitmask = gameState.partyLockingBitmask;
+      bitmask = toggleBitmaskValue(bitmask, index);
+      await writeMemory(addresses.party_locking_mask, bitmask, DataType.Short);
     },
-    partyMemberEnabled: (index: number) => {
-      let bitmask = gameState.partyBitmask;
+    partyMemberLocked: (index: number) => {
+      let bitmask = gameState.partyLockingBitmask;
+      return Boolean(bitmask & (1 << index));
+    },
+    togglePartyMemberVisibility: async (index: number) => {
+      let bitmask = gameState.partyVisibilityBitmask;
+      bitmask = toggleBitmaskValue(bitmask, index);
+      await writeMemory(addresses.party_visibility_mask, bitmask, DataType.Short);
+    },
+    partyMemberVisible: (index: number) => {
+      let bitmask = gameState.partyVisibilityBitmask;
       return Boolean(bitmask & (1 << index));
     },
     toggleMenuVisibility: async (index: number) => {
       let menuVisibility = gameState.menuVisibility;
-      if (index === -1) {
-        menuVisibility = menuVisibility & 1 ? 0 : 0xffff;
-      } else if (menuVisibility & (1 << index)) {
-        menuVisibility &= ~(1 << index);
-      } else {
-        menuVisibility |= 1 << index;
-      }
+      menuVisibility = toggleBitmaskValue(menuVisibility, index);
       await writeMemory(addresses.menu_visibility, menuVisibility, DataType.Short);
     },
     menuVisibilityEnabled: (index: number) => {
@@ -312,18 +320,20 @@ export function useFF7(addresses: FF7Addresses) {
     },
     toggleMenuLock: async (index: number) => {
       let menuLocks = gameState.menuLocks;
-      if (index === -1) {
-        menuLocks = menuLocks & 1 ? 0 : 0xffff;
-      } else if (menuLocks & (1 << index)) {
-        menuLocks &= ~(1 << index);
-      } else {
-        menuLocks |= 1 << index;
-      }
+      menuLocks = toggleBitmaskValue(menuLocks, index);
       await writeMemory(addresses.menu_locks, menuLocks, DataType.Short);
     },
     menuLockEnabled: (index: number) => {
       let menuLocks = gameState.menuLocks;
       return Boolean(menuLocks & (1 << index));
+    },
+    enableMenuAlwaysEnabled: async () => {
+      const code = [0xc7, 0x05, 0x30, 0x11, 0xdc, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc7, 0x05, 0x1c, 0x11, 0xdc, 0x00, 0xff, 0xff, 0x00, 0x00, 0xeb, 0x5f];
+      await writeMemory(addresses.menu_always_enabled, code, DataType.Buffer);
+    },
+    disableMenuAlwaysEnabled: async () => {
+      const code = [0x66, 0x0f, 0xb6, 0x05, 0xf8, 0x08, 0xdc, 0x00, 0x66, 0xa3, 0x1c, 0x11, 0xdc, 0x00, 0x33, 0xc9, 0x8a, 0x0d, 0xf9, 0x08, 0xdc, 0x00];
+      await writeMemory(addresses.menu_always_enabled, code, DataType.Buffer);
     },
     setGameMoment: async (gameMoment: number) => {
       await writeMemory(addresses.game_moment, gameMoment, DataType.Short);

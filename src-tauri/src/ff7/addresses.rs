@@ -14,7 +14,8 @@ pub struct FF7Addresses {
     pub menu_locks: u32,
     pub field_movement_disabled: u32,
     pub field_menu_access_enabled: u32,
-    pub party_bitmask: u32,
+    pub party_locking_mask: u32,
+    pub party_visibility_mask: u32,
     pub gil: u32,
     pub gp: u32,
     pub battle_count: u32,
@@ -71,6 +72,7 @@ pub struct FF7Addresses {
     pub intro_skip: u32,
     pub battle_exp_calc: u32,
     pub battle_ap_calc: u32,
+    pub menu_always_enabled: u32,
 }
 
 impl FF7Addresses {
@@ -88,7 +90,8 @@ impl FF7Addresses {
             menu_locks: 0xdc08fa,
             field_movement_disabled: 0xcc0dba,
             field_menu_access_enabled: 0xcc0dbc,
-            party_bitmask: 0xdc0dde,
+            party_locking_mask: 0xdc0ddc,
+            party_visibility_mask: 0xdc0dde,
             gil: 0xdc08b4,
             gp: 0xdc0a26,
             battle_count: 0xdc08f4,
@@ -145,6 +148,7 @@ impl FF7Addresses {
             intro_skip: 0xf4f448,
             battle_exp_calc: 0x43153f,
             battle_ap_calc: 0x431576,
+            menu_always_enabled: 0x6ca38c,
         }
     }
 }

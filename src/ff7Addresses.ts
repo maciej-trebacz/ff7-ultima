@@ -14,7 +14,8 @@ export interface FF7Addresses {
   menu_locks: number;
   field_movement_disabled: number;
   field_menu_access_enabled: number;
-  party_bitmask: number;
+  party_locking_mask: number;
+  party_visibility_mask: number;
   gil: number;
   gp: number;
   battle_count: number;
@@ -61,6 +62,7 @@ export interface FF7Addresses {
   battle_ap_calc: number;
   world_current_obj_ptr: number;
   world_models: number;
+  menu_always_enabled: number;
 }
 
 export function useFF7Addresses() {

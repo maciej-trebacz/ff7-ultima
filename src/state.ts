@@ -20,7 +20,8 @@ const defaultState = {
     menuLocks: 0,
     fieldMovementDisabled: 0,
     fieldMenuAccessEnabled: 0,
-    partyBitmask: 0,
+    partyLockingBitmask: 0,
+    partyVisibilityBitmask: 0,
     gil: 0,
     gp: 0,
     battleCount: 0,
@@ -48,6 +49,7 @@ const defaultState = {
     randomEncounters: RandomEncounters.Normal,
     worldModels: [] as WorldModel[],
     battleChocoboRating: 0,
+    menuAlwaysEnabled: false,
   };
 
 export const useFF7State = function() {
@@ -136,7 +138,8 @@ export const useFF7State = function() {
           menuLocks: basic.menu_locks as number,
           fieldMovementDisabled: basic.field_movement_disabled as number,
           fieldMenuAccessEnabled: basic.field_menu_access_enabled as number,
-          partyBitmask: basic.party_bitmask as number,
+          partyLockingBitmask: basic.party_locking_mask as number,
+          partyVisibilityBitmask: basic.party_visibility_mask as number,
           gil: basic.gil as number,
           gp: basic.gp as number,
           battleCount: basic.battle_count as number,
@@ -163,7 +166,8 @@ export const useFF7State = function() {
           expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
           apMultiplier: !(basic.ap_multiplier === 0xe2) ? basic.ap_multiplier as number : 1,
           worldModels,
-          battleChocoboRating: basic.battle_chocobo_rating as number
+          battleChocoboRating: basic.battle_chocobo_rating as number,
+          menuAlwaysEnabled: basic.menu_always_enabled === 0xc7,
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

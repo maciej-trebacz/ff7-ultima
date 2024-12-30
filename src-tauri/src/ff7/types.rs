@@ -14,7 +14,8 @@ pub struct FF7BasicData {
     pub menu_locks: u16,
     pub field_movement_disabled: u8,
     pub field_menu_access_enabled: u8,
-    pub party_bitmask: u16,
+    pub party_locking_mask: u16,
+    pub party_visibility_mask: u16,
     pub gil: u32,
     pub gp: u16,
     pub battle_count: u16,
@@ -33,6 +34,7 @@ pub struct FF7BasicData {
     pub exp_multiplier: u8,
     pub ap_multiplier: u8,
     pub battle_chocobo_rating: u8,
+    pub menu_always_enabled: u8,
 }
 
 #[derive(Serialize)]

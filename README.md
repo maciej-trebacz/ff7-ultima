@@ -35,8 +35,9 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
   - invincibility mode (sets physical and magic immunity)
   - instant ATB mode
   - EXP/AP multipliers
-  - show and edit ally and enemy information (HP, MP, statuses, ATB)
+  - show and edit ally and enemy information (HP, MP, statuses, ATB), instant kill
   - show enemy stats, elemental affinities and item drop/steal rates
+  - view chocobo rating during battle
 
 ## Planned features
 * Field
