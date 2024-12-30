@@ -32,6 +32,7 @@ pub struct FF7BasicData {
     pub invincibility_check: u16,
     pub exp_multiplier: u8,
     pub ap_multiplier: u8,
+    pub battle_chocobo_rating: u8,
 }
 
 #[derive(Serialize)]
@@ -73,6 +74,7 @@ pub struct WorldModel {
     pub direction: i16,
     pub model_id: u8,
     pub walkmesh_type: u8,
+    pub location_id: u8,
 }
 
 #[derive(Serialize)]

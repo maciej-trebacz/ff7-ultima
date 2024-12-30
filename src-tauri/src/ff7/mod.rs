@@ -40,6 +40,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         invincibility_check: read_memory_short(addresses.battle_init_chars_call)?,
         exp_multiplier: read_memory_byte(addresses.battle_exp_calc + 8)?,
         ap_multiplier: read_memory_byte(addresses.battle_ap_calc + 2)?,
+        battle_chocobo_rating: read_memory_byte(addresses.battle_chocobo_rating)?,
     })
 }
 
@@ -195,8 +196,12 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
             direction: 0,
             model_id: 0,
             walkmesh_type: 0,
+            location_id: 0,
         });
     }
+
+    let triangle_ptr = read_memory_int(address + 0x60)? as u32;
+    let location_id = ((read_memory_byte(triangle_ptr + 0xb)? as u8) & 0x7f) >> 1;
 
     Ok(WorldModel {
         index: 0,
@@ -206,6 +211,7 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
         direction: read_memory_signed_short(address + 0x40)?,
         model_id: read_memory_byte(address + 0x50)?,
         walkmesh_type: read_memory_byte(address + 0x4a)?,
+        location_id,
     })
 }
 
@@ -227,6 +233,7 @@ fn read_world_models(addresses: &FF7Addresses) -> Result<Vec<WorldModel>, String
             direction: read_memory_signed_short(addresses.world_models + i * model_record_length + 0x40)?,
             model_id: read_memory_byte(addresses.world_models + i * model_record_length + 0x50)?,
             walkmesh_type: 0,
+            location_id: 0,
         };
         models.push(model);
     }

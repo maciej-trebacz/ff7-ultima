@@ -1,6 +1,6 @@
 import Row from "@/components/Row";
 import { statuses } from "@/ff7Statuses";
-import { BattleCharObj, ElementalEffect, EnemyData } from "@/types";
+import { BattleCharObj, ChocoboRating, ElementalEffect, EnemyData } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatStatus, getElementName } from "@/util";
 import { useState } from "react";
@@ -69,6 +69,11 @@ export function Battle(props: { ff7: FF7 }) {
     setEnemyName(name);
     setSelectedEnemy(sceneId);
     setIsEnemyInfoModalOpen(true);
+  }
+
+  const killCharacter = (index: number) => {
+    ff7.setStatus(statuses.Dead, index);
+    ff7.setHP(0, index);
   }
 
   const actors = currentAllyEditing !== null && currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
@@ -176,6 +181,16 @@ export function Battle(props: { ff7: FF7 }) {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1 cursor-pointer" onClick={(e) => {killCharacter(index); e.stopPropagation()}}>💀</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Kill ally</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>                    
                     </EditPopover>
                   </td>
                   <td className="p-1 cursor-pointer px-2 text-nowrap">
@@ -223,7 +238,8 @@ export function Battle(props: { ff7: FF7 }) {
               return (
                 <tr key={index} className="bg-zinc-800 text-xs group">
                   <td className="p-1 pl-2 text-nowrap w-[130px] font-bold cursor-pointer group-last:pb-2" onClick={() => { showEnemyInfoModal(char.scene_id, char.name) }}>
-                    {parseEnemyName(char)}
+                    {parseEnemyName(char)} 
+                    {parseEnemyName(char) === "Chocobo" && <span className="font-light"> ({ChocoboRating[ff7.gameState.battleChocoboRating]})</span>}
                     <div className="w-full h-0 relative top-[-10px]">
                       <progress
                         className="progress w-full h-[2px] [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-gray-200"
@@ -249,6 +265,16 @@ export function Battle(props: { ff7: FF7 }) {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">Click to edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1 cursor-pointer" onClick={(e) => {killCharacter(index + 4); e.stopPropagation()}}>💀</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Kill enemy</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

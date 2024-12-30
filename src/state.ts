@@ -47,6 +47,7 @@ const defaultState = {
     apMultiplier: 1,
     randomEncounters: RandomEncounters.Normal,
     worldModels: [] as WorldModel[],
+    battleChocoboRating: 0,
   };
 
 export const useFF7State = function() {
@@ -162,6 +163,7 @@ export const useFF7State = function() {
           expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
           apMultiplier: !(basic.ap_multiplier === 0xe2) ? basic.ap_multiplier as number : 1,
           worldModels,
+          battleChocoboRating: basic.battle_chocobo_rating as number
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {
