@@ -67,6 +67,7 @@ export interface WorldModel {
   walkmesh_type: number;
   script: number;
   location_id?: number;
+  chocobo_tracks: boolean;
 }
 
 export enum WorldModelIds {
@@ -228,12 +229,12 @@ export enum LocationName {
 }
 
 export enum ChocoboRating {
-  "terrible" = 1,
-  "bad" = 2,
-  "poor" = 3,
-  "average" = 4,
-  "so-so" = 5,
-  "good" = 6,
-  "great" = 7,
-  "wonderful" = 8,
+  "wonderful" = 1,
+  "great" = 2,
+  "good" = 3,
+  "so-so" = 4,
+  "average" = 5,
+  "not bad" = 6,
+  "bad" = 7,
+  "terrible" = 8,
 }

@@ -35,6 +35,9 @@ pub struct FF7BasicData {
     pub ap_multiplier: u8,
     pub battle_chocobo_rating: u8,
     pub menu_always_enabled: u8,
+    pub world_zoom_tilt_enabled: u8,
+    pub world_zoom: u16,
+    pub world_tilt: u16,
 }
 
 #[derive(Serialize)]
@@ -77,6 +80,7 @@ pub struct WorldModel {
     pub model_id: u8,
     pub walkmesh_type: u8,
     pub location_id: u8,
+    pub chocobo_tracks: bool,
 }
 
 #[derive(Serialize)]

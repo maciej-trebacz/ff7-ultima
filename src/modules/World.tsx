@@ -2,6 +2,7 @@ import Row from "@/components/Row";
 import { LocationName, WorldModelIds, WorldWalkmeshType } from "@/types";
 import { FF7 } from "@/useFF7";
 import Worldmap from "@/assets/worldmap.png";
+import Chocobo from "@/assets/chocobo.png";
 import { useEffect, useRef, useState } from "react";
 import { EditPopover } from "@/components/EditPopover";
 import {
@@ -10,6 +11,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 
 export const WorldBounds = {
   x: { min: 0, max: 0x48000 },
@@ -20,6 +23,8 @@ export function World(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
   const [coords, setCoords] = useState({ x: 0, z: 0 });
+  const [zoom, setZoom] = useState(0);
+  const [tilt, setTilt] = useState(0);
   const worldmapRef = useRef<HTMLImageElement>(null);
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -128,13 +133,63 @@ export function World(props: { ff7: FF7 }) {
         </div>
       </div>
       <div className="flex gap-1">
-          <Row label="Location & Terrain">
-            {ff7.gameState.worldCurrentModel.location_id !== undefined && LocationName[ff7.gameState.worldCurrentModel.location_id]}
-            {" - "}
-            {WorldWalkmeshType[ff7.gameState.worldCurrentModel.walkmesh_type] || ff7.gameState.worldCurrentModel.walkmesh_type}
-          </Row>
+        <Row label="Location & Terrain">
+          {ff7.gameState.worldCurrentModel.location_id !== undefined && LocationName[ff7.gameState.worldCurrentModel.location_id]}
+          {" - "}
+          {WorldWalkmeshType[ff7.gameState.worldCurrentModel.walkmesh_type] || ff7.gameState.worldCurrentModel.walkmesh_type}
+          {ff7.gameState.worldCurrentModel.chocobo_tracks && <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <img src={Chocobo} className="inline ml-1.5 h-4" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">On Chocobo tracks</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>}
+        </Row>
       </div>
-
+      <div className="flex gap-1">
+        <div className="flex-1">
+          <Row label="Enable Zoom & Tilt">
+            <Switch checked={ff7.gameState.worldZoomTiltEnabled} onCheckedChange={(checked) => ff7.setWorldZoomTiltEnabled(checked)} />
+          </Row>
+        </div>
+      </div>
+      {ff7.gameState.worldZoomTiltEnabled && (
+        <>
+          <div className="flex gap-2 p-2 bg-zinc-800 rounded-md text-xs">
+            <div className="flex-1 flex items-center gap-2">
+              <div>Zoom</div>
+                <Slider 
+                  value={[zoom]} 
+                  onValueChange={async (value) => {
+                    setZoom(value[0]);
+                    await ff7.setWorldZoom(value[0]);
+                  }}
+                  min={1000}
+                  max={15000}
+                  step={100}
+                  className="w-full"
+                />
+            </div>
+            <div className="flex-1 flex items-center gap-2">
+              <div>Tilt</div>
+                <Slider 
+                  value={[tilt]} 
+                  onValueChange={async (value) => {
+                    setTilt(value[0]);
+                    await ff7.setWorldTilt(value[0]);
+                  }}
+                  min={1160}
+                  max={1920}
+                  step={20}
+                  className="w-full"
+                />
+            </div>
+          </div>
+        </>
+      )}
       <h4 className="text-center mt-2 mb-1 font-medium">Map</h4>
       <div className="relative select-none" onClick={handleMapClick}>
         <img src={Worldmap} ref={worldmapRef} />
@@ -160,8 +215,8 @@ export function World(props: { ff7: FF7 }) {
                 <tr
                   key={index}
                   className={`bg-zinc-800 text-xs ${model.model_id === state.worldCurrentModel.model_id && (!isUnderwater || model.y < -2500)
-                      ? 'bg-slate-700 font-bold'
-                      : ''
+                    ? 'bg-slate-700 font-bold'
+                    : ''
                     }`}
                 >
                   <td className="p-1 text-nowrap w-14 font-bold">{WorldModelIds[model.model_id]}</td>

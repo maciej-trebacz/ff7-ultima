@@ -43,6 +43,9 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         ap_multiplier: read_memory_byte(addresses.battle_ap_calc + 2)?,
         battle_chocobo_rating: read_memory_byte(addresses.battle_chocobo_rating)?,
         menu_always_enabled: read_memory_byte(addresses.menu_always_enabled)?,
+        world_zoom_tilt_enabled: read_memory_byte(addresses.world_zoom_tilt_enabled)?,
+        world_zoom: read_memory_short(addresses.world_zoom)?,
+        world_tilt: read_memory_short(addresses.world_tilt)?,
     })
 }
 
@@ -199,6 +202,7 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
             model_id: 0,
             walkmesh_type: 0,
             location_id: 0,
+            chocobo_tracks: false,
         });
     }
 
@@ -214,6 +218,7 @@ fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, Stri
         model_id: read_memory_byte(address + 0x50)?,
         walkmesh_type: read_memory_byte(address + 0x4a)?,
         location_id,
+        chocobo_tracks: (read_memory_byte(address + 0x4b)? >> 7 & 1) != 0,
     })
 }
 
@@ -236,6 +241,7 @@ fn read_world_models(addresses: &FF7Addresses) -> Result<Vec<WorldModel>, String
             model_id: read_memory_byte(addresses.world_models + i * model_record_length + 0x50)?,
             walkmesh_type: 0,
             location_id: 0,
+            chocobo_tracks: false,
         };
         models.push(model);
     }

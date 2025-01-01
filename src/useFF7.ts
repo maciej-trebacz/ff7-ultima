@@ -124,7 +124,8 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.menu_locks, 0, DataType.Short);
     },
     enableAllPartyMembers: async () => {
-      await writeMemory(addresses.party_bitmask, 0x7ff, DataType.Short);
+      await writeMemory(addresses.party_visibility_mask, 0x7ff, DataType.Short);
+      await writeMemory(addresses.party_locking_mask, 0, DataType.Short);
     },
     disableBattles: async () => {
       // Field
@@ -517,7 +518,16 @@ export function useFF7(addresses: FF7Addresses) {
 
       await writeMemory(0xcc0d89, 1, DataType.Byte);
       await writeMemory(0x0cc0d8a, id, DataType.Short);
-    }
+    },
+    async setWorldZoomTiltEnabled(enabled: boolean) {
+      await writeMemory(addresses.world_zoom_tilt_enabled, enabled ? 0x01 : 0x00, DataType.Byte);
+    },
+    async setWorldZoom(zoom: number) {
+      await writeMemory(addresses.world_zoom, zoom, DataType.Short);
+    },
+    async setWorldTilt(tilt: number) {
+      await writeMemory(addresses.world_tilt, tilt, DataType.Short);
+    },
   };
 
   return ff7;

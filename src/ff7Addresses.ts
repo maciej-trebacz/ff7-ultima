@@ -63,6 +63,9 @@ export interface FF7Addresses {
   world_current_obj_ptr: number;
   world_models: number;
   menu_always_enabled: number;
+  world_zoom_tilt_enabled: number;
+  world_zoom: number;
+  world_tilt: number;
 }
 
 export function useFF7Addresses() {

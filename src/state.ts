@@ -50,6 +50,9 @@ const defaultState = {
     worldModels: [] as WorldModel[],
     battleChocoboRating: 0,
     menuAlwaysEnabled: false,
+    worldZoomTiltEnabled: false,
+    worldZoom: 0,
+    worldTilt: 0,
   };
 
 export const useFF7State = function() {
@@ -168,6 +171,9 @@ export const useFF7State = function() {
           worldModels,
           battleChocoboRating: basic.battle_chocobo_rating as number,
           menuAlwaysEnabled: basic.menu_always_enabled === 0xc7,
+          worldZoomTiltEnabled: basic.world_zoom_tilt_enabled === 1,
+          worldZoom: basic.world_zoom as number,
+          worldTilt: basic.world_tilt as number
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

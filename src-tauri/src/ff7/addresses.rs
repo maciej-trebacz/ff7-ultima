@@ -49,6 +49,9 @@ pub struct FF7Addresses {
     pub kernel_read_fn_call: u32,
     pub world_models: u32,
     pub battle_chocobo_rating: u32,
+    pub world_zoom_tilt_enabled: u32,
+    pub world_zoom: u32,
+    pub world_tilt: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -125,6 +128,9 @@ impl FF7Addresses {
             kernel_read_fn_call: 0x419458,
             world_models: 0xe39bc8,
             battle_chocobo_rating: 0xdc0cd8,
+            world_zoom_tilt_enabled: 0xdfc48c,
+            world_zoom: 0xdfc47c,
+            world_tilt: 0xde6a0c,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,
