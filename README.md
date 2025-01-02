@@ -27,9 +27,12 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
   - enable/disable character movement
   - show field models with their coordinates
 * World module
-  - show current model's position and triangle information
-  - show the world map with your current position on it
-  - click on the world map to teleport to that position
+  - show current model's position and triangle information, and current region name
+  - show an indicator when walking over chocobo tracks
+  - view the world map with all relevant models marked on it
+  - ability to click on the world map to teleport to that position
+  - view a list of all loaded world models and edit the coordinates
+  - custom zoom/tilt camera controls
 * Battle module
   - show current battle ID
   - invincibility mode (sets physical and magic immunity)
@@ -47,14 +50,14 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
   - Fort condor - battles fought, won, lost, rank, funds
   - Great Glacier step counter
 * World map
-  - show world map models with their coordinates
+  - zoomed-in version of the world map
+  - encounter table for current region/triangle type
 * Chocobos
   - fenced chocobos (with their rating: wonderful, great, good, etc.)
   - chocobos at the stable - gender, color, rating, races won
   - indicate whether you can breed a chocobo
 * RNG info (seed, joker, animation index, etc.)
 * Battle log (display a log of attacks, status changes, etc.)
-* One Hit Kill hack
 * Remember last used hacks
 * Auto-apply hacks on game start
 * Teleport to specific field
