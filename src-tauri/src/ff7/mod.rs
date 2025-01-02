@@ -46,6 +46,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         world_zoom_tilt_enabled: read_memory_byte(addresses.world_zoom_tilt_enabled)?,
         world_zoom: read_memory_short(addresses.world_zoom)?,
         world_tilt: read_memory_short(addresses.world_tilt)?,
+        world_speed_multiplier: read_memory_byte(addresses.world_speed_multiplier)?,
     })
 }
 

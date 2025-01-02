@@ -12,6 +12,7 @@ export const waitFor = async (condition: () => Promise<boolean>) => {
           resolve(true);
         }
       } catch (e) {
+        // This one's for mushroom
         console.log("Error: ", e);
         clearInterval(intervalId);
       }

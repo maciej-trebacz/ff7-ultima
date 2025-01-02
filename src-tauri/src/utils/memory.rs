@@ -73,7 +73,7 @@ pub fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> 
 
 pub fn write_memory_buffer(address: u32, mut buffer: Vec<u8>) -> Result<(), String> {
     let handle = get_process_handle()?;
-    handle.put_address(address as usize, &mut buffer);
+    let _ = handle.put_address(address as usize, &mut buffer);
     Ok(())
 }
 

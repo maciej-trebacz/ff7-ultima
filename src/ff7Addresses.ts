@@ -66,6 +66,9 @@ export interface FF7Addresses {
   world_zoom_tilt_enabled: number;
   world_zoom: number;
   world_tilt: number;
+  world_speed_multiplier: number;
+  field_global_obj: number;
+  world_mode: number;
 }
 
 export function useFF7Addresses() {

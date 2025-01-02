@@ -26,7 +26,7 @@ export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
   const [fieldId, setFieldId] = useState<string>("");
-  const [selectedDestination, setSelectedDestination] = useState<SceneDestination | undefined>();
+  const [selectedDestination, setSelectedDestination] = useState<number | undefined>();
   const [availableDestinations, setAvailableDestinations] = useState<SceneSource[]>([]);
   const [isWarpModalOpen, setIsWarpModalOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export function Field(props: { ff7: FF7 }) {
       if (selectedField) {
         const destinations = selectedField.sources.filter(source => source.destination);
         setAvailableDestinations(destinations);
-        setSelectedDestination(destinations[0]?.destination);
+        setSelectedDestination(destinations[0]?.id);
       }
     } else {
       setAvailableDestinations([]);
@@ -62,8 +62,8 @@ export function Field(props: { ff7: FF7 }) {
     if (id === null) {
       return;
     }
-    debugger;
-    ff7.warpToFieldId(id, selectedDestination);
+    const destination = availableDestinations.find(source => source.id === selectedDestination);
+    ff7.warpToFieldId(id, destination?.destination);
     closeWarpModal();
   };
 
@@ -86,12 +86,17 @@ export function Field(props: { ff7: FF7 }) {
             <TooltipProvider>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <span className="cursor-pointer" onClick={openWarpModal}>
-                    {state.fieldId}
-                    {state.fieldId > 0 && (
-                      <span className="text-zinc-400 ml-1">({state.fieldName})</span>
-                    )}
-                  </span>
+                  <div className="h-4">
+                    <span className="cursor-pointer" onClick={openWarpModal}>
+                      {state.fieldId}
+                      {state.fieldId > 0 && (
+                        <span className="text-zinc-400 ml-1">({state.fieldName})</span>
+                      )}
+                    </span>
+                    <Button size="xs" className="ml-2" onClick={openWarpModal}>
+                      Warp
+                    </Button>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-xs">Click to warp to another field</p>
@@ -130,8 +135,10 @@ export function Field(props: { ff7: FF7 }) {
 
           {availableDestinations.length > 0 && (
             <Select
-              value={selectedDestination ? JSON.stringify(selectedDestination) : undefined}
-              onValueChange={(value) => setSelectedDestination(value ? JSON.parse(value) : undefined)}
+              value={"" + selectedDestination}
+              onValueChange={(value) => setSelectedDestination(
+                parseInt(value)
+              )}
             >
               <SelectTrigger>
                 <SelectValue placeholder="No destinations available" />
@@ -140,7 +147,7 @@ export function Field(props: { ff7: FF7 }) {
                 {availableDestinations.map((source, index) => (
                   <SelectItem 
                     key={index} 
-                    value={JSON.stringify(source.destination)}
+                    value={"" + source.id}
                   >
                     From: {source.fieldName}
                   </SelectItem>

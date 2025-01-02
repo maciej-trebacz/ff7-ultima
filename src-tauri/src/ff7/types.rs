@@ -38,6 +38,7 @@ pub struct FF7BasicData {
     pub world_zoom_tilt_enabled: u8,
     pub world_zoom: u16,
     pub world_tilt: u16,
+    pub world_speed_multiplier: u8,
 }
 
 #[derive(Serialize)]

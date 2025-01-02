@@ -52,6 +52,9 @@ pub struct FF7Addresses {
     pub world_zoom_tilt_enabled: u32,
     pub world_zoom: u32,
     pub world_tilt: u32,
+    pub world_speed_multiplier: u32,
+    pub field_global_obj: u32,
+    pub world_mode: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -131,6 +134,9 @@ impl FF7Addresses {
             world_zoom_tilt_enabled: 0xdfc48c,
             world_zoom: 0xdfc47c,
             world_tilt: 0xde6a0c,
+            world_speed_multiplier: 0xdfc480,
+            field_global_obj: 0xcc0d88,
+            world_mode: 0xe045e4,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,

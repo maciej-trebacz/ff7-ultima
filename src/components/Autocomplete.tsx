@@ -145,7 +145,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
               key={battle.id}
               onClick={() => handleSelectSuggestion(battle)}
               className={cn(
-                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none whitespace-nowrap overflow-hidden",
+                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none whitespace-break-spaces overflow-hidden",
                 index === highlightedIndex ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground"
               )}
             >

@@ -15256,7 +15256,6 @@
     "id": 466,
     "fieldName": "mtcrl_8",
     "mapNames": [
-      "{Aeris}<br/>“How cute!!”"
     ],
     "sources": [
       {
@@ -25330,7 +25329,7 @@
     "id": 715,
     "fieldName": "itown2",
     "mapNames": [
-      "{Cid}<br/>“Damn!!<br/>\tThat &%$^%$ Weapon!!”{PAUSE}“Of all the times to show up!”"
+      "Mideel"
     ],
     "sources": [
       {
@@ -25637,7 +25636,7 @@
     "id": 723,
     "fieldName": "life",
     "mapNames": [
-      "akao! , # ∂28Bdw!     {Cloud} H¿  l   "
+      "Lifestream descent"
     ],
     "sources": [
       {
@@ -25668,7 +25667,7 @@
     "id": 724,
     "fieldName": "life2",
     "mapNames": [
-      "akao! , # ∂28Bdw!     {Cloud} H¿  F   "
+      "Lifestream ascent"
     ],
     "sources": [
       {
@@ -25757,7 +25756,6 @@
     "id": 727,
     "fieldName": "zmind3",
     "mapNames": [
-      "“A promise under a starry sky…<br/>   But what if that was just a<br/>   memory {Tifa} imagined?”"
     ],
     "sources": [
       {

@@ -1,6 +1,6 @@
 {
   "productName": "FF7 Ultima",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "identifier": "org.m4v3r.ff7-ultima",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -16,7 +16,9 @@
         "height": 525,
         "theme": "Dark",
         "visible": true,
-        "center": true
+        "center": true,
+        "resizable": false,
+        "minimizable": false
       }
     ],
     "security": {

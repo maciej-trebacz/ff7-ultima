@@ -155,6 +155,14 @@ export function World(props: { ff7: FF7 }) {
             <Switch checked={ff7.gameState.worldZoomTiltEnabled} onCheckedChange={(checked) => ff7.setWorldZoomTiltEnabled(checked)} />
           </Row>
         </div>
+        <div className="flex-1">
+          <Row label="Super Speed">
+            <Switch 
+              checked={ff7.gameState.worldSpeedMultiplier === 12} 
+              onCheckedChange={(checked) => ff7.setWorldSpeedMultiplier(checked ? 12 : 2)} 
+            />
+          </Row>
+        </div>
       </div>
       {ff7.gameState.worldZoomTiltEnabled && (
         <>

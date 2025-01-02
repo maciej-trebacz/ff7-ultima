@@ -53,6 +53,7 @@ const defaultState = {
     worldZoomTiltEnabled: false,
     worldZoom: 0,
     worldTilt: 0,
+    worldSpeedMultiplier: 2,
   };
 
 export const useFF7State = function() {
@@ -173,7 +174,8 @@ export const useFF7State = function() {
           menuAlwaysEnabled: basic.menu_always_enabled === 0xc7,
           worldZoomTiltEnabled: basic.world_zoom_tilt_enabled === 1,
           worldZoom: basic.world_zoom as number,
-          worldTilt: basic.world_tilt as number
+          worldTilt: basic.world_tilt as number,
+          worldSpeedMultiplier: basic.world_speed_multiplier as number,
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

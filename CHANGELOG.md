@@ -1,5 +1,24 @@
 # Change Log
 
+## 1.0.7 (2025-01-02)
+
+### General
+
+* added version number to the status bar and a simple About dialog
+
+### Field
+
+* fixed some UI bugs in the Warp to Field dialog
+* "Warp to Field" now also works from the world map
+
+### World Map
+
+* added "Super Speed" option for 6x the normal movement speed
+
+### Battle
+
+* fixed a bunch of battle description in the Start Battle dialog
+
 ## 1.0.6 (2025-01-01)
 
 ### World Map

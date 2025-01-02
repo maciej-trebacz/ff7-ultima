@@ -507,17 +507,23 @@ export function useFF7(addresses: FF7Addresses) {
       }
     },
     async warpToFieldId(id: number, destination?: {x: number, y: number, triangleId: number, direction?: number}) {
+      await writeMemory(addresses.field_global_obj + 2, id, DataType.Short);
+
       if (destination) {
-        await writeMemory(0x0cc0d8c, destination.x, DataType.SignedShort);
-        await writeMemory(0x0cc0d8e, destination.y, DataType.SignedShort);
-        await writeMemory(0x0cc0daa, destination.triangleId, DataType.Short);
+        await writeMemory(addresses.field_global_obj + 4, destination.x, DataType.SignedShort);
+        await writeMemory(addresses.field_global_obj + 6, destination.y, DataType.SignedShort);
+        await writeMemory(addresses.field_global_obj + 0x22, destination.triangleId, DataType.Short);
         if (destination.direction) {
-          await writeMemory(0x0cc0dac, destination.direction, DataType.Short);
+          await writeMemory(addresses.field_global_obj + 0x24, destination.direction, DataType.Short);
         }
       }
 
-      await writeMemory(0xcc0d89, 1, DataType.Byte);
-      await writeMemory(0x0cc0d8a, id, DataType.Short);
+      if (gameState.currentModule === GameModule.Field) {
+        await writeMemory(addresses.field_global_obj + 1, 1, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.World) {
+        await writeMemory(addresses.world_mode, 2, DataType.Byte);
+        await writeMemory(addresses.world_mode + 0xC, 1, DataType.Byte);
+      }
     },
     async setWorldZoomTiltEnabled(enabled: boolean) {
       await writeMemory(addresses.world_zoom_tilt_enabled, enabled ? 0x01 : 0x00, DataType.Byte);
@@ -527,6 +533,9 @@ export function useFF7(addresses: FF7Addresses) {
     },
     async setWorldTilt(tilt: number) {
       await writeMemory(addresses.world_tilt, tilt, DataType.Short);
+    },
+    async setWorldSpeedMultiplier(multiplier: number) {
+      await writeMemory(addresses.world_speed_multiplier, multiplier, DataType.Byte);
     },
   };
 
