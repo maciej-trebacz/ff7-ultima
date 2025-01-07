@@ -69,6 +69,7 @@ export interface FF7Addresses {
   world_speed_multiplier: number;
   field_global_obj: number;
   world_mode: number;
+  battle_chocobo_rating: number;
 }
 
 export function useFF7Addresses() {

@@ -228,7 +228,7 @@ export function World(props: { ff7: FF7 }) {
                     }`}
                 >
                   <td className="p-1 text-nowrap w-14 font-bold">{WorldModelIds[model.model_id]}</td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "x"}
                       onOpenChange={setPopoverOpen}
@@ -250,7 +250,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "y"}
                       onOpenChange={setPopoverOpen}
@@ -272,7 +272,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer">
+                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "z"}
                       onOpenChange={setPopoverOpen}
@@ -294,7 +294,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 cursor-pointer">
+                  <td className="p-1 cursor-pointer hover:bg-zinc-700">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "direction"}
                       onOpenChange={setPopoverOpen}

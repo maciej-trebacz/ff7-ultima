@@ -17,7 +17,7 @@
 
 ### Battle
 
-* fixed a bunch of battle description in the Start Battle dialog
+* fixed a bunch of battle descriptions in the Start Battle dialog
 
 ## 1.0.6 (2025-01-01)
 

@@ -81,233 +81,243 @@ export function Battle(props: { ff7: FF7 }) {
 
   return (
     <div>
-        <div className="flex-1">
-          <Row label="Scene ID">
-            {state.battleId > 0 && state.battleId < 0xffff
-              ? state.battleId
-              : "-"}
+      <div className="flex-1">
+        <Row label="Scene ID">
+          {state.battleId > 0 && state.battleId < 0xffff
+            ? state.battleId
+            : "-"}
 
+        </Row>
+      </div>
+      <div className="flex gap-1">
+        <div className="flex-1">
+          <Row label="Invincibility">
+            <Switch checked={ff7.gameState.invincibilityEnabled} onClick={() => ff7.gameState.invincibilityEnabled ? ff7.disableInvincibility() : ff7.enableInvincibility()} />
           </Row>
         </div>
-        <div className="flex gap-1">
-          <div className="flex-1">
-            <Row label="Invincibility">
-              <Switch checked={ff7.gameState.invincibilityEnabled} onClick={() => ff7.gameState.invincibilityEnabled ? ff7.disableInvincibility() : ff7.enableInvincibility()} />
-            </Row>
-          </div>
-          <div className="flex-1">
-            <Row label="Instant ATB">
-              <Switch checked={ff7.gameState.instantATBEnabled} onClick={() => ff7.gameState.instantATBEnabled ? ff7.disableInstantATB() : ff7.enableInstantATB()} />
-            </Row>
-          </div>
+        <div className="flex-1">
+          <Row label="Instant ATB">
+            <Switch checked={ff7.gameState.instantATBEnabled} onClick={() => ff7.gameState.instantATBEnabled ? ff7.disableInstantATB() : ff7.enableInstantATB()} />
+          </Row>
         </div>
-        <div className="flex gap-1">
-          <div className="flex-1">
-            <Row label="EXP Multiplier">
-              <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => ff7.setExpMultiplier(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">0</SelectItem>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                </SelectContent>
-              </Select>
-            </Row>
-          </div>
-          <div className="flex-1">
-            <Row label="AP Multiplier">
-              <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => ff7.setApMultiplier(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">0</SelectItem>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                </SelectContent>
-              </Select>
-            </Row>
-          </div>
+      </div>
+      <div className="flex gap-1">
+        <div className="flex-1">
+          <Row label="EXP Multiplier">
+            <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => ff7.setExpMultiplier(parseInt(value))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+              </SelectContent>
+            </Select>
+          </Row>
         </div>
+        <div className="flex-1">
+          <Row label="AP Multiplier">
+            <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => ff7.setApMultiplier(parseInt(value))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+              </SelectContent>
+            </Select>
+          </Row>
+        </div>
+      </div>
 
-        <h4 className="text-center mt-2 mb-1 font-medium">Allies</h4>
-        <table className="w-full">
-          <thead className="bg-zinc-800 text-xs text-left">
-            <tr>
-              <th className="p-2 pb-1">Name</th>
-              <th className="p-1 px-2">HP</th>
-              <th className="p-1 px-2">MP</th>
-              <th className="p-1">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ff7.gameState.battleAllies.map((char, index) => {
-              if (!char.name.trim()) return null;
-              return (
-                <tr key={index} className="bg-zinc-800 text-xs group">
-                  <td className="p-1 pl-2 text-nowrap w-[130px] font-bold group-last:pb-2">
-                    {char.name}
-                    <div className="w-full h-0 relative top-[-10px]">
-                      <progress
-                        className="progress w-full h-[2px] [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-gray-200"
-                        value={(char.atb / 0xFFFF) * 100}
-                        max="100"
-                      ></progress>
-                    </div>
-                  </td>
-                  <td className="p-1 cursor-pointer px-2 text-nowrap">
-                    <EditPopover
-                      open={popoverOpen && currentAllyEditing === index && editTitle === "HP"}
-                      onOpenChange={setPopoverOpen}
-                      value={editValue}
-                      onValueChange={setEditValue}
-                      onSubmit={submitValue}
-                    >
-                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index)}>
-                              {char.hp} / {char.max_hp}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Click to edit</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+      <h4 className="text-center mt-2 mb-1 font-medium">Allies</h4>
+      <table className="w-full">
+        <thead className="bg-zinc-800 text-xs text-left">
+          <tr>
+            <th className="p-2 pb-1">Name</th>
+            <th className="p-1 px-2">HP</th>
+            <th className="p-1 px-2">MP</th>
+            <th className="p-1">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ff7.gameState.battleAllies.map((char, index) => {
+            if (!char.name.trim()) return null;
+            return (
+              <tr key={index} className="bg-zinc-800 text-xs group">
+                <td className="p-1 pl-2 text-nowrap w-[130px] font-bold group-last:pb-2">
+                  {char.name}
+                  <div className="w-full h-0 relative top-[-10px]">
+                    <progress
+                      className="progress w-full h-[2px] [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-gray-200"
+                      value={(char.atb / 0xFFFF) * 100}
+                      max="100"
+                    ></progress>
+                  </div>
+                </td>
+                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                  <EditPopover
+                    open={popoverOpen && currentAllyEditing === index && editTitle === "HP"}
+                    onOpenChange={setPopoverOpen}
+                    value={editValue}
+                    onValueChange={setEditValue}
+                    onSubmit={submitValue}
+                  >
                     <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="ml-1 cursor-pointer" onClick={(e) => {killCharacter(index); e.stopPropagation()}}>💀</span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Kill ally</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>                    
-                    </EditPopover>
-                  </td>
-                  <td className="p-1 cursor-pointer px-2 text-nowrap">
-                    <EditPopover
-                      open={popoverOpen && currentAllyEditing === index && editTitle === "MP"}
-                      onOpenChange={setPopoverOpen}
-                      value={editValue}
-                      onValueChange={setEditValue}
-                      onSubmit={submitValue}
-                    >
-                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index)}>
-                              {char.mp} / {char.max_mp}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Click to edit</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </EditPopover>
-                  </td>
-                  <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index)}>
+                            {char.hp} / {char.max_hp}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Click to edit</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index); e.stopPropagation() }}>💀</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Kill ally</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </EditPopover>
+                </td>
+                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                  <EditPopover
+                    open={popoverOpen && currentAllyEditing === index && editTitle === "MP"}
+                    onOpenChange={setPopoverOpen}
+                    value={editValue}
+                    onValueChange={setEditValue}
+                    onSubmit={submitValue}
+                  >
+                    <TooltipProvider>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index)}>
+                            {char.mp} / {char.max_mp}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Click to edit</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </EditPopover>
+                </td>
+                <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
 
-        <h4 className="text-center mt-2 mb-1 font-medium">Enemies</h4>
-        <table className="w-full">
-          <thead className="bg-zinc-800 text-xs text-left">
-            <tr>
-              <th className="p-2 pb-1">Name</th>
-              <th className="p-1 px-2">HP</th>
-              <th className="p-1 px-2">MP</th>
-              <th className="p-1">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ff7.gameState.battleEnemies.map((char, index) => {
-              if (!char.name.trim()) return null;
-              return (
-                <tr key={index} className="bg-zinc-800 text-xs group">
-                  <td className="p-1 pl-2 text-nowrap w-[130px] font-bold cursor-pointer group-last:pb-2" onClick={() => { showEnemyInfoModal(char.scene_id, char.name) }}>
-                    {parseEnemyName(char)} 
-                    {parseEnemyName(char) === "Chocobo" && <span className="font-light"> ({ChocoboRating[ff7.gameState.battleChocoboRating]})</span>}
-                    <div className="w-full h-0 relative top-[-10px]">
-                      <progress
-                        className="progress w-full h-[2px] [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-gray-200"
-                        value={(char.atb / 0xFFFF) * 100}
-                        max="100"
-                      ></progress>
-                    </div>
-                  </td>
-                  <td className="p-1 cursor-pointer px-2 text-nowrap">
-                    <EditPopover
-                      open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "HP"}
-                      onOpenChange={setPopoverOpen}
-                      value={editValue}
-                      onValueChange={setEditValue}
-                      onSubmit={submitValue}
-                    >
-                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index + 4)}>
-                              {char.hp} / {char.max_hp}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Click to edit</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="ml-1 cursor-pointer" onClick={(e) => {killCharacter(index + 4); e.stopPropagation()}}>💀</span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Kill enemy</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </EditPopover>
-                  </td>
-                  <td className="p-1 cursor-pointer px-2 text-nowrap">
-                    <EditPopover
-                      open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "MP"}
-                      onOpenChange={setPopoverOpen}
-                      value={editValue}
-                      onValueChange={setEditValue}
-                      onSubmit={submitValue}
-                    >
-                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index + 4)}>
-                              {char.mp} / {char.max_mp}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">Click to edit</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </EditPopover>
-                  </td>
-                  <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <h4 className="text-center mt-2 mb-1 font-medium">Enemies</h4>
+      <table className="w-full">
+        <thead className="bg-zinc-800 text-xs text-left">
+          <tr>
+            <th className="p-2 pb-1">Name</th>
+            <th className="p-1 px-2">HP</th>
+            <th className="p-1 px-2">MP</th>
+            <th className="p-1">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ff7.gameState.battleEnemies.map((char, index) => {
+            if (!char.name.trim()) return null;
+            return (
+              <tr key={index} className="bg-zinc-800 text-xs group">
+                <td className="p-1 pl-2 text-nowrap w-[130px] font-bold cursor-pointer group-last:pb-2 hover:bg-zinc-700" onClick={() => { showEnemyInfoModal(char.scene_id, char.name) }}>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={250}>
+                      <TooltipTrigger asChild><div>
+                        {parseEnemyName(char)}
+                        {parseEnemyName(char) === "Chocobo" && <span className="font-light"> ({ChocoboRating[ff7.gameState.battleChocoboRating]})</span>}
+                      </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Click to show info & stats</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="w-full h-0 relative top-[-10px]">
+                    <progress
+                      className="progress w-full h-[2px] [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-gray-200"
+                      value={(char.atb / 0xFFFF) * 100}
+                      max="100"
+                    ></progress>
+                  </div>
+                </td>
+                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                  <EditPopover
+                    open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "HP"}
+                    onOpenChange={setPopoverOpen}
+                    value={editValue}
+                    onValueChange={setEditValue}
+                    onSubmit={submitValue}
+                  >
+                    <TooltipProvider>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index + 4)}>
+                            {char.hp} / {char.max_hp}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Click to edit</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index + 4); e.stopPropagation() }}>💀</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Kill enemy</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </EditPopover>
+                </td>
+                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                  <EditPopover
+                    open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "MP"}
+                    onOpenChange={setPopoverOpen}
+                    value={editValue}
+                    onValueChange={setEditValue}
+                    onSubmit={submitValue}
+                  >
+                    <TooltipProvider>
+                      <Tooltip delayDuration={250}>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index + 4)}>
+                            {char.mp} / {char.max_mp}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Click to edit</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </EditPopover>
+                </td>
+                <td className="p-1 cursor-pointer hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
 
       <Modal
         open={editStatusModalOpen}

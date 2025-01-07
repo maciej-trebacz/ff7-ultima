@@ -7,6 +7,7 @@ import { useFF7State } from "./state";
 import { EnemyData, GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { statuses } from "./ff7Statuses";
+import { battles } from "./ff7Battles";
 
 type ModelObj = {
   data: number[];
@@ -67,8 +68,6 @@ export function useFF7(addresses: FF7Addresses) {
         const baseAddress = await readMemory(addresses.ffnx_check + 1, DataType.Int) + addresses.ffnx_check + 5;
         const code = await readMemoryBuffer(baseAddress, 256);
         const opcodes = [0xF2, 0x0F, 0x10, 0x05];
-
-        debugger;
 
         const fps30index = code.findIndex((byte, i) =>
           opcodes.every((opcode, j) => code[i + j] === opcode)
@@ -261,7 +260,12 @@ export function useFF7(addresses: FF7Addresses) {
           await writeMemory(addresses.world_battle_flag2, 0, DataType.Int);
           await writeMemory(addresses.world_battle_flag3, 1, DataType.Int);
           await writeMemory(addresses.world_battle_flag4, 3, DataType.Int);
-          
+
+          if (battles[battleId].indexOf("Chocobo") > -1) {
+            const chocoboRating = await invoke("get_chocobo_rating_for_scene", { sceneId: battleId }) as number;
+            await writeMemory(addresses.battle_chocobo_rating, chocoboRating, DataType.Byte);
+          }
+
           break;
         default:
           return;

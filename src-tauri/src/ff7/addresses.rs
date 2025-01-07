@@ -55,6 +55,7 @@ pub struct FF7Addresses {
     pub world_speed_multiplier: u32,
     pub field_global_obj: u32,
     pub world_mode: u32,
+    pub world_enc_w_bin_data: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -137,6 +138,7 @@ impl FF7Addresses {
             world_speed_multiplier: 0xdfc480,
             field_global_obj: 0xcc0d88,
             world_mode: 0xe045e4,
+            world_enc_w_bin_data: 0xde6b78,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,

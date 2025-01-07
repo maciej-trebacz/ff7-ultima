@@ -408,3 +408,17 @@ pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
         morph,
     })
 }
+
+pub fn get_chocobo_rating_for_scene(scene_id: u32) -> Result<u32, String> {
+    let addresses = FF7Addresses::new();
+    let chocobo_ratings_base = addresses.world_enc_w_bin_data + 0x20;
+
+    for i in 0..32 {
+        let scene_id_from_memory = read_memory_byte(chocobo_ratings_base + i * 4)? as u32;
+        if scene_id_from_memory == scene_id {
+            return Ok(read_memory_byte(chocobo_ratings_base + i * 4 + 2)? as u32);
+        }
+    }
+
+    Ok(0)
+}
