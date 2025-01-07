@@ -223,7 +223,6 @@ export function General(props: { ff7: FF7 }) {
                 onSelect={(id) => setGameMomentId(id?.toString() ?? "")}
                 onAccept={onGameMomentModalKeyDown}
                 placeholder="Enter game moment name or ID"
-                id="game-moment-id"
                 value={gameMomentList.find(moment => moment.id === state.gameMoment)}
               />
             </div>

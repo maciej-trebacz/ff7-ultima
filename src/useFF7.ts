@@ -232,7 +232,7 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(fieldObjPtr + 0x1f, 0x0, DataType.Byte);
       }
     },
-    startBattle: async (battleId: number) => {
+    startBattle: async (battleId: number, musicId: number) => {
       if (isNaN(battleId)) {
         return;
       }
@@ -245,6 +245,10 @@ export function useFF7(addresses: FF7Addresses) {
           await writeMemory(fieldObjPtr + 2, battleId, DataType.Short);
           await writeMemory(fieldObjPtr + 38, 0, DataType.Short);
           await writeMemory(addresses.battle_module_field, 1, DataType.Byte);
+
+          if (musicId) {
+            await writeMemory(fieldObjPtr + 68, musicId - 1, DataType.Byte);
+          }
 
           // Wait for the battle to start
           await waitFor(async () => {

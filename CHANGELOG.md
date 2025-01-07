@@ -1,5 +1,21 @@
 # Change Log
 
+## 1.0.8 (2025-01-07)
+
+### General
+
+* fixed a couple of UI bugs and made it clearer when a value can be clicked to edit
+* added a picker with a list of game moments to choose from
+
+### Battle
+
+* chocobo rating is now set up correctly when starting a chocobo battle
+* added a picker for battle music when starting a battle from the field
+
+### Field
+
+* you can now edit field model coordinates and direction
+
 ## 1.0.7 (2025-01-02)
 
 ### General
