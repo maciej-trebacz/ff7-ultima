@@ -16,6 +16,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
+import AutocompleteInput from "@/components/Autocomplete";
+import { Modal } from "@/components/Modal";
+import { gameMoments } from "@/ff7GameMoments";
 
 export function General(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -24,6 +27,8 @@ export function General(props: { ff7: FF7 }) {
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [gameMomentId, setGameMomentId] = useState<string>("");
+  const [isGameMomentModalOpen, setIsGameMomentModalOpen] = useState(false);
 
   const gameModuleAsString = GameModule[state.currentModule];
 
@@ -51,6 +56,39 @@ export function General(props: { ff7: FF7 }) {
     }
     setPopoverOpen(false);
   }
+
+  const openGameMomentModal = () => {
+    setGameMomentId(state.gameMoment.toString());
+    setIsGameMomentModalOpen(true);
+  };
+
+  const closeGameMomentModal = () => {
+    setIsGameMomentModalOpen(false);
+  };
+
+  const onSubmitGameMoment = (momentId: string | null) => {
+    if (momentId === null) {
+      return;
+    }
+    ff7.setGameMoment(parseInt(momentId));
+    closeGameMomentModal();
+  };
+
+  const onGameMomentModalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      closeGameMomentModal();
+    } else if (e.key === "Enter") {
+      onSubmitGameMoment(gameMomentId);
+    }
+  };
+
+  const gameMomentList = gameMoments.map((moment) => {
+    const [id, name] = moment.split(" - ");
+    return {
+      id: parseInt(id),
+      name: moment,
+    };
+  });
 
   const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid']
   const Menu = ['Item', 'Magic', 'Materia', 'Equip', 'Status', 'Order', 'Limit', 'Config', 'PHS', 'Save']
@@ -165,31 +203,31 @@ export function General(props: { ff7: FF7 }) {
           </Row>
         </div>
         <div className="flex-1">
-          <Row
+          <Row 
             label="Game Moment"
-            onRowClick={() => openEditPopover("Game Moment", state.gameMoment.toString())}
+            onRowClick={openGameMomentModal}
           >
-            <EditPopover
-              open={popoverOpen && editTitle === "Game Moment"}
-              onOpenChange={setPopoverOpen}
-              value={editValue}
-              onValueChange={setEditValue}
-              onSubmit={submitValue}
-            >
-              <TooltipProvider>
-                <Tooltip delayDuration={250}>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-pointer" onClick={() => openEditPopover("Game Moment", state.gameMoment.toString())}>
-                      {state.gameMoment}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">Click to edit</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </EditPopover>
+            {state.gameMoment}
           </Row>
+          <Modal 
+            open={isGameMomentModalOpen} 
+            setIsOpen={setIsGameMomentModalOpen}
+            title="Set Game Moment"
+            buttonText="Set"
+            callback={() => onSubmitGameMoment(gameMomentId)}
+          >
+            <div className="relative">
+              <AutocompleteInput
+                battles={gameMomentList}
+                isVisible={true}
+                onSelect={(id) => setGameMomentId(id?.toString() ?? "")}
+                onAccept={onGameMomentModalKeyDown}
+                placeholder="Enter game moment name or ID"
+                id="game-moment-id"
+                value={gameMomentList.find(moment => moment.id === state.gameMoment)}
+              />
+            </div>
+          </Modal>
           <Row
             label="Party GP"
             onRowClick={() => openEditPopover("Party GP", state.gp.toString())}

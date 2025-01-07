@@ -15,10 +15,18 @@ interface AutocompleteInputProps {
   onSelect: (id: number | null) => void;
   onAccept?: (e: any) => void;
   placeholder?: string;
+  value?: BattleItem;
 }
 
-const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisible, onSelect, onAccept, placeholder = "Search..." }) => {
-  const [input, setInput] = useState<string>('');
+const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ 
+  battles, 
+  isVisible, 
+  onSelect, 
+  onAccept, 
+  placeholder = "Search...",
+  value
+}) => {
+  const [input, setInput] = useState<string>(value?.name ?? '');
   const [suggestions, setSuggestions] = useState<BattleItem[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -37,12 +45,35 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
     };
   }, []);
 
+  useEffect(() => {
+    if (isVisible) {
+      setInput(value?.name ?? '');
+      setHighlightedIndex(-1);
+      inputRef.current?.focus();
+      if (inputRef.current) {
+        inputRef.current.select();
+      }
+    }
+  }, [isVisible, value?.name]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
+    
+    // Filter existing battles
     const filteredSuggestions = battles.filter(battle =>
       battle.name.toLowerCase().includes(value.toLowerCase())
     );
+
+    // Add custom entry if input is a number and doesn't exist in battles
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && !battles.some(b => b.id === numValue)) {
+      filteredSuggestions.unshift({
+        id: numValue,
+        name: `${numValue} - Custom value`
+      });
+    }
+
     setSuggestions(filteredSuggestions);
     setIsOpen(true);
     setHighlightedIndex(-1);
@@ -63,14 +94,6 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
     inputRef.current?.focus();
   };
 
-  useEffect(() => {
-    if (isVisible) {
-      setInput('');
-      setHighlightedIndex(-1);
-      inputRef.current?.focus();
-    }
-  }, [isVisible]);
-
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (isOpen) {
       switch (e.key) {
@@ -88,7 +111,16 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
             handleSelectSuggestion(suggestions[highlightedIndex]);
             inputRef.current?.focus();
           } else {
-            handleSelectSuggestion(suggestions[0]);
+            // If input is a number but no suggestion is selected, treat it as a custom value
+            const numValue = parseInt(input);
+            if (!isNaN(numValue)) {
+              handleSelectSuggestion({
+                id: numValue,
+                name: `${numValue} (custom value)`
+              });
+            } else if (suggestions.length > 0) {
+              handleSelectSuggestion(suggestions[0]);
+            }
           }
           break;
         case 'Escape':
@@ -98,6 +130,14 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ battles, isVisibl
       }
     }
     else if (e.key === 'Enter' && highlightedIndex === -1) {
+      // If input is a number, allow it as a custom value even when suggestions are closed
+      const numValue = parseInt(input);
+      if (!isNaN(numValue)) {
+        handleSelectSuggestion({
+          id: numValue,
+          name: `${numValue} (custom value)`
+        });
+      }
       onAccept?.(e);
     }
   };

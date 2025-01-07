@@ -42,7 +42,7 @@ impl ProcessScanner {
                             && process_memory > 1024768
                     }) {
                         if previous_pid != Some(pid) {
-                            println!("Found process PID: {}", pid);
+                            println!("Found process PID: {} with path {:?}", pid, process.cwd());
                             previous_pid = Some(pid);
                         }
                         Some(pid)
