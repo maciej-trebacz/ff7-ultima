@@ -33,6 +33,18 @@ export function EditPopover({
     }
   };
 
+  useEffect(() => {
+    if (open) {
+      // Use setTimeout to ensure the input is mounted
+      setTimeout(() => {
+        const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (input) {
+          input.select();
+        }
+      }, 0);
+    }
+  }, [open]);
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>

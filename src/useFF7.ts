@@ -454,6 +454,15 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(base + index * length + 0x14, z, DataType.Int);
       await writeMemory(base + index * length + 0x40, direction, DataType.Int);
     },
+    setFieldModelCoordinates: async (index: number, x: number, y: number, z: number, direction: number) => {
+      const base = addresses.field_models_coords;
+      const length = 0x88;
+
+      await writeMemory(base + index * length, x << 12, DataType.SignedInt);
+      await writeMemory(base + index * length + 4, y << 12, DataType.SignedInt);
+      await writeMemory(base + index * length + 8, z << 12, DataType.SignedInt);
+      await writeMemory(base + index * length + 44, direction, DataType.Byte);
+    },
     async saveState() {
       const memory = await readMemoryBuffer(0x99d000, 0x563000)
       const models = [];
@@ -525,6 +534,7 @@ export function useFF7(addresses: FF7Addresses) {
       if (gameState.currentModule === GameModule.Field) {
         await writeMemory(addresses.field_global_obj + 1, 1, DataType.Byte);
       } else if (gameState.currentModule === GameModule.World) {
+        await writeMemory(addresses.world_battle_flag3, 0, DataType.Byte);
         await writeMemory(addresses.world_mode, 2, DataType.Byte);
         await writeMemory(addresses.world_mode + 0xC, 1, DataType.Byte);
       }

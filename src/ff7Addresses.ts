@@ -70,6 +70,7 @@ export interface FF7Addresses {
   field_global_obj: number;
   world_mode: number;
   battle_chocobo_rating: number;
+  field_models_coords: number;
 }
 
 export function useFF7Addresses() {

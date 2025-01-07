@@ -80,6 +80,7 @@ pub struct FF7Addresses {
     pub battle_exp_calc: u32,
     pub battle_ap_calc: u32,
     pub menu_always_enabled: u32,
+    pub field_models_coords: u32,
 }
 
 impl FF7Addresses {
@@ -163,6 +164,7 @@ impl FF7Addresses {
             battle_exp_calc: 0x43153f,
             battle_ap_calc: 0x431576,
             menu_always_enabled: 0x6ca38c,
+            field_models_coords: 0xcc167c,
         }
     }
 }

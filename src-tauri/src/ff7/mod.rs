@@ -64,7 +64,7 @@ fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String
         let model = FieldModel {
             x: read_memory_signed_int(base_address + 4)?,
             y: read_memory_signed_int(base_address + 8)?,
-            z: read_memory_signed_int(base_address + 0xc)?,
+            z: read_memory_signed_int(base_address + 0xc)? + 10, // field model Z coords are offset by 10
             direction: read_memory_byte(base_address + 0x1c)?,
         };
         models.push(model);

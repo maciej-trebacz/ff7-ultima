@@ -89,6 +89,10 @@ pub fn write_memory_signed_short(address: u32, new_value: i16) -> Result<(), Str
     write_memory::<i16>(address, new_value)
 }
 
+pub fn write_memory_signed_int(address: u32, new_value: i32) -> Result<(), String> {
+    write_memory::<i32>(address, new_value)
+}
+
 pub fn write_memory_byte(address: u32, new_value: u8) -> Result<(), String> {
     write_memory::<u8>(address, new_value)
 }

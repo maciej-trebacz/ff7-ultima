@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EditPopover } from "@/components/EditPopover";
 
 // Transform scenes data into a format suitable for autocomplete
 const fieldList = Object.values(scenes).map(scene => ({
@@ -29,6 +30,11 @@ export function Field(props: { ff7: FF7 }) {
   const [selectedDestination, setSelectedDestination] = useState<number | undefined>();
   const [availableDestinations, setAvailableDestinations] = useState<SceneSource[]>([]);
   const [isWarpModalOpen, setIsWarpModalOpen] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editCoord, setEditCoord] = useState<"x" | "y" | "z" | "direction" | null>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
 
   useEffect(() => {
     if (fieldId) {
@@ -74,6 +80,29 @@ export function Field(props: { ff7: FF7 }) {
       onSubmitFieldId(parseInt(fieldId));
     }
   };
+
+  const openEditPopover = (title: string, value: string, modelIndex: number, coord: "x" | "y" | "z" | "direction") => {
+    console.log(`openEditPopover(${title}, ${value}, ${modelIndex}, ${coord})`);
+    setEditValue(value);
+    setEditTitle(title);
+    setCurrentModelEditing(modelIndex);
+    setEditCoord(coord);
+    setPopoverOpen(true);
+  }
+
+  const submitValue = () => {
+    if (currentModelEditing !== null && editCoord) {
+      const model = state.fieldModels[currentModelEditing];
+      ff7.setFieldModelCoordinates(
+        currentModelEditing,
+        editCoord === "x" ? parseInt(editValue) : model.x,
+        editCoord === "y" ? parseInt(editValue) : model.y,
+        editCoord === "z" ? parseInt(editValue) : model.z,
+        editCoord === "direction" ? parseInt(editValue) : model.direction
+      );
+    }
+    setPopoverOpen(false);
+  }
 
   return (
     <div>
@@ -170,6 +199,7 @@ export function Field(props: { ff7: FF7 }) {
 
       {state.fieldModels.length > 0 && state.fieldModels[0] && (
         <>
+
           <h4 className="text-center mt-2 mb-1 font-medium">Field Models</h4>
           <table className="w-full">
             <thead className="bg-zinc-800 text-xs text-left">
@@ -186,10 +216,94 @@ export function Field(props: { ff7: FF7 }) {
                 return model && (Math.abs(model.x) < 10000 && Math.abs(model.y) < 10000 && Math.abs(model.z) < 10000) ? (
                   <tr key={index} className="bg-zinc-800 text-xs">
                     <td className="p-1 text-nowrap w-14 font-bold">{model.name}</td>
-                    <td className="p-1 px-2 text-nowrap">{model.x}</td>
-                    <td className="p-1 px-2 text-nowrap">{model.y}</td>
-                    <td className="p-1 px-2 text-nowrap">{model.z}</td>
-                    <td className="p-1">{model.direction}</td>
+                    <td className="text-nowrap">
+                      <EditPopover
+                        open={popoverOpen && currentModelEditing === index && editCoord === "x"}
+                        onOpenChange={setPopoverOpen}
+                        value={editValue}
+                        onValueChange={setEditValue}
+                        onSubmit={submitValue}
+                      >
+                        <TooltipProvider>
+                          <Tooltip delayDuration={250}>
+                            <TooltipTrigger asChild>
+                              <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("X", model.x.toString(), index, "x")}>
+                                {model.x}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Click to edit</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </EditPopover>
+                    </td>
+                    <td className="text-nowrap">
+                      <EditPopover
+                        open={popoverOpen && currentModelEditing === index && editCoord === "y"}
+                        onOpenChange={setPopoverOpen}
+                        value={editValue}
+                        onValueChange={setEditValue}
+                        onSubmit={submitValue}
+                      >
+                        <TooltipProvider>
+                          <Tooltip delayDuration={250}>
+                            <TooltipTrigger asChild>
+                              <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Y", model.y.toString(), index, "y")}>
+                                {model.y}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Click to edit</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </EditPopover>
+                    </td>
+                    <td className="text-nowrap">
+                      <EditPopover
+                        open={popoverOpen && currentModelEditing === index && editCoord === "z"}
+                        onOpenChange={setPopoverOpen}
+                        value={editValue}
+                        onValueChange={setEditValue}
+                        onSubmit={submitValue}
+                      >
+                        <TooltipProvider>
+                          <Tooltip delayDuration={250}>
+                            <TooltipTrigger asChild>
+                              <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Z", model.z.toString(), index, "z")}>
+                                {model.z}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Click to edit</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </EditPopover>
+                    </td>
+                    <td className="text-nowrap">
+                      <EditPopover
+                        open={popoverOpen && currentModelEditing === index && editCoord === "direction"}
+                        onOpenChange={setPopoverOpen}
+                        value={editValue}
+                        onValueChange={setEditValue}
+                        onSubmit={submitValue}
+                      >
+                        <TooltipProvider>
+                          <Tooltip delayDuration={250}>
+                            <TooltipTrigger asChild>
+                              <div className="p-1 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Direction", model.direction.toString(), index, "direction")}>
+                                {model.direction}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Click to edit</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </EditPopover>
+                    </td>
                   </tr>
                 ) : (
                   <tr key={index} className="bg-zinc-800 text-xs">
@@ -199,11 +313,12 @@ export function Field(props: { ff7: FF7 }) {
                     <td className="p-1 px-2 text-nowrap">N/A</td>
                     <td className="p-1">N/A</td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         </>
+
       )}
     </div>
   );
