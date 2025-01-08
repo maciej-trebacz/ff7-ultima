@@ -73,7 +73,8 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
 
 ## Acknowledgements
 
-* **DLPB** - author of Ochu editor, the inspiration for this app
+* **DLPB** - author of Ochu editor, the inspiration for this app, and for the list of battle formations
 * **Phantasm** - testing and ideas
+* **petfriendamy** - ideas, support and the list of game moments
 * **picklejar76** - for the Kujata project, using which the scenes data was extracted
 * **FF7 Wiki authors** - invaluable resource for learning about FF7 internals
