@@ -1,10 +1,10 @@
 {
-  "version": "1.0.8",
-  "pub_date": "2025-01-07T23:00:00+00:00",
+  "version": "1.0.9",
+  "pub_date": "2025-01-08T21:45:00+00:00",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjEvYlhsTzJPMDlWRVVtZC8zNUlieTYvSUxUZG1FanJONi8yN2huSSs5aTYvRXI2RTUxVFN5VE93WlNMN3k4UVRmazZKby9pKzBNOGpBMFpKT2JYN1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM2Mjg4ODI4CWZpbGU6RkY3IFVsdGltYV8xLjAuOF94NjQtc2V0dXAuZXhlCnZ1YS9mZ2pEUksvNHJiZWVjN1YzSGhLOXF6R0pCNWUxMmJ6dUlaRXVCYWpzTlVCSnd6RWtxWU1tamo2U1hPZm5UdGQ5TEI5c2RQSWozS2pLY2MzZEN3PT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.0.8/FF7.Ultima_1.0.8_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjRtcVdYcWlLcmRodXBPKy9BMHZ4ZzJGdy9oNFhBOFJJOXdzRmdJU2hlKzF5ZUNkM3BxakhSU3lCMzV0YXJXV3FMSGE3b0hjcTR2Q1pTMnRKb28vWEFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM2MzY5MjAwCWZpbGU6RkY3IFVsdGltYV8xLjAuOV94NjQtc2V0dXAuZXhlCmhHbk5PanozNmI3UzBRYzZDeE5CNGFXckpGeExsWFVibzdEVEFIbTBTVGUycWVDaXdkZVFtSU5nRmRvYnJqS1E4OGxNazdSOThZb3J2cE52UFZISkR3PT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.0.9/FF7.Ultima_1.0.9_x64-setup.exe"
     }
   }
 }

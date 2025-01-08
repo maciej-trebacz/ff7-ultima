@@ -71,6 +71,8 @@ export interface FF7Addresses {
   world_mode: number;
   battle_chocobo_rating: number;
   field_models_coords: number;
+  party_member_ids: number;
+  party_member_names: number;
 }
 
 export function useFF7Addresses() {

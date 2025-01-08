@@ -2,8 +2,7 @@ import { EditPopover } from "@/components/EditPopover";
 import Row from "@/components/Row";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatTime } from "@/util";
@@ -109,6 +108,18 @@ export function General(props: { ff7: FF7 }) {
   const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid']
   const Menu = ['Item', 'Magic', 'Materia', 'Equip', 'Status', 'Order', 'Limit', 'Config', 'PHS', 'Save']
 
+  const partyMemberSelect = function (slot: number) {
+    return <Select value={('' + ff7.gameState.partyMembers[slot]) || "1"} onValueChange={v => ff7.setPartyMemberSlot(slot, parseInt(v))}>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="h-[250px]">
+        <SelectItem value="255">Empty</SelectItem>
+        {PHS.map((p, i) => <SelectItem key={i} value={"" + i}>{p}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  }
+
   return (
     <div>
       <div className="flex gap-1">
@@ -201,32 +212,32 @@ export function General(props: { ff7: FF7 }) {
                     <div className="flex gap-2 items-center">
                       <div className="flex-1">{ally}</div>
                       <label className="flex gap-1 items-center">
-                      show
-                      <Checkbox checked={ff7.partyMemberVisible(index)} onClick={(e) => ff7.togglePartyMemberVisibility(index)} />
+                        show
+                        <Checkbox checked={ff7.partyMemberVisible(index)} onClick={(e) => ff7.togglePartyMemberVisibility(index)} />
                       </label>
                       <label className="flex gap-1 items-center">
-                      lock
-                      <Checkbox checked={ff7.partyMemberLocked(index)} onClick={(e) => ff7.togglePartyMemberLocking(index)} />
+                        lock
+                        <Checkbox checked={ff7.partyMemberLocked(index)} onClick={(e) => ff7.togglePartyMemberLocking(index)} />
                       </label>
                     </div>
                   </label>
                 ))}
                 <div className="flex justify-center">
-                  <a className="cursor-pointer hover:underline" onClick={() => {ff7.togglePartyMemberVisibility(-1); ff7.togglePartyMemberLocking(-1)}}>Toggle all</a>
-                </div>                
+                  <a className="cursor-pointer hover:underline" onClick={() => { ff7.togglePartyMemberVisibility(-1); ff7.togglePartyMemberLocking(-1) }}>Toggle all</a>
+                </div>
               </PopoverContent>
             </Popover>
           </Row>
         </div>
         <div className="flex-1">
-          <Row 
+          <Row
             label="Game Moment"
             onRowClick={openGameMomentModal}
           >
             {state.gameMoment}
           </Row>
-          <Modal 
-            open={isGameMomentModalOpen} 
+          <Modal
+            open={isGameMomentModalOpen}
             setIsOpen={setIsGameMomentModalOpen}
             title="Set Game Moment"
             buttonText="Set"
@@ -341,13 +352,39 @@ export function General(props: { ff7: FF7 }) {
                   </div>
                 ))}
                 <div className="flex justify-center">
-                  <a className="cursor-pointer hover:underline" onClick={() => {ff7.toggleMenuVisibility(-1); ff7.toggleMenuLock(-1)}}>Toggle all</a>
+                  <a className="cursor-pointer hover:underline" onClick={() => { ff7.toggleMenuVisibility(-1); ff7.toggleMenuLock(-1) }}>Toggle all</a>
                 </div>
               </PopoverContent>
             </Popover>
           </Row>
           <Row label="Enable all menus">
             <Switch checked={state.menuAlwaysEnabled} onClick={() => state.menuAlwaysEnabled ? ff7.disableMenuAlwaysEnabled() : ff7.enableMenuAlwaysEnabled()} />
+          </Row>
+        </div>
+      </div>
+      <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+        Party
+      </h2>
+      <div className="flex gap-1">
+        <div className="flex-1">
+          <Row
+            label="Slot 1"
+          >
+            {partyMemberSelect(0)}
+          </Row>
+        </div>
+        <div className="flex-1">
+          <Row
+            label="Slot 2"
+          >
+            {partyMemberSelect(1)}
+          </Row>
+        </div>
+        <div className="flex-1">
+          <Row
+            label="Slot 3"
+          >
+            {partyMemberSelect(2)}
           </Row>
         </div>
       </div>

@@ -54,6 +54,7 @@ const defaultState = {
     worldZoom: 0,
     worldTilt: 0,
     worldSpeedMultiplier: 2,
+    partyMembers: [] as number[],
   };
 
 export const useFF7State = function() {
@@ -176,6 +177,7 @@ export const useFF7State = function() {
           worldZoom: basic.world_zoom as number,
           worldTilt: basic.world_tilt as number,
           worldSpeedMultiplier: basic.world_speed_multiplier as number,
+          partyMembers: basic.party_members as number[],
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

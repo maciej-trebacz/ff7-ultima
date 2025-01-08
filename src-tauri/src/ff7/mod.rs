@@ -9,6 +9,8 @@ use types::*;
 use crate::utils::memory::*;
 
 fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
+    let party_member_ids_vec = vec![read_memory_byte(addresses.party_member_ids)?, read_memory_byte(addresses.party_member_ids + 1)?, read_memory_byte(addresses.party_member_ids + 2)?];
+
     Ok(FF7BasicData {
         current_module: read_memory_short(addresses.current_module)?,
         game_moment: read_memory_short(addresses.game_moment)?,
@@ -47,6 +49,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         world_zoom: read_memory_short(addresses.world_zoom)?,
         world_tilt: read_memory_short(addresses.world_tilt)?,
         world_speed_multiplier: read_memory_byte(addresses.world_speed_multiplier)?,
+        party_members: party_member_ids_vec,
     })
 }
 

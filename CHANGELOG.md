@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.9 (2025-01-08)
+
+### General
+
+* ability to change current party members
+* editing in-game time now accepts time in format `[HH:][MM:]SS`
+
+### World
+
+* fixed editing world model coordinates
+
 ## 1.0.8 (2025-01-07)
 
 ### General

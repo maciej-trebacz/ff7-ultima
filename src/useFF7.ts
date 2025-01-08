@@ -555,6 +555,9 @@ export function useFF7(addresses: FF7Addresses) {
     async setWorldSpeedMultiplier(multiplier: number) {
       await writeMemory(addresses.world_speed_multiplier, multiplier, DataType.Byte);
     },
+    async setPartyMemberSlot(slot: number, id: number) {
+      await writeMemory(addresses.party_member_ids + slot, id, DataType.Byte);
+    }
   };
 
   return ff7;
