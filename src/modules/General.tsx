@@ -52,7 +52,23 @@ export function General(props: { ff7: FF7 }) {
     } else if (editTitle === "Battles Escaped") {
       ff7.setBattleEscapeCount(parseInt(editValue));
     } else if (editTitle === "In Game Time") {
-      ff7.setInGameTime(parseInt(editValue));
+      // Parse time in format "[HH:][MM:]SS"
+      const segments = editValue.split(":");
+      let totalSeconds = 0;
+      if (segments.length === 3) {
+        const hours = parseInt(segments[0]);
+        const minutes = parseInt(segments[1]);
+        const seconds = parseInt(segments[2]);
+        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      } else if (segments.length === 2) {
+        const minutes = parseInt(segments[0]);
+        const seconds = parseInt(segments[1]);
+        totalSeconds = minutes * 60 + seconds;
+      } else if (segments.length === 1) {
+        const seconds = parseInt(segments[0]);
+        totalSeconds = seconds;
+      }
+      ff7.setInGameTime(totalSeconds);
     }
     setPopoverOpen(false);
   }
