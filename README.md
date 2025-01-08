@@ -4,7 +4,12 @@ Real-time editor for Final Fantasy VII PC. Currently supports English Steam vers
 
 [![Screenshot](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)
 
+## Having issues? Want other features?
+
+You can file issues directly using the [Issues](https://github.com/maciej-trebacz/ff7-ultima/issues) tab if you have a GitHub account. Otherwise, you can also join my Discord server: [https://discord.gg/YyecaMa7Wf](https://discord.gg/YyecaMa7Wf).
+
 ## Current features
+
 * Display and adit basic game information
   - game moment
   - party GP

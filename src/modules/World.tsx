@@ -228,7 +228,7 @@ export function World(props: { ff7: FF7 }) {
                     }`}
                 >
                   <td className="p-1 text-nowrap w-14 font-bold">{WorldModelIds[model.model_id]}</td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
+                  <td className="text-nowrap">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "x"}
                       onOpenChange={setPopoverOpen}
@@ -239,9 +239,9 @@ export function World(props: { ff7: FF7 }) {
                       <TooltipProvider>
                         <Tooltip delayDuration={250}>
                           <TooltipTrigger asChild>
-                            <span onClick={() => openEditPopover("X", model.x.toString(), index, "x")}>
+                            <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("X", model.x.toString(), index, "x")}>
                               {model.x}
-                            </span>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">Click to edit</p>
@@ -250,7 +250,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
+                  <td className="text-nowrap">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "y"}
                       onOpenChange={setPopoverOpen}
@@ -261,9 +261,9 @@ export function World(props: { ff7: FF7 }) {
                       <TooltipProvider>
                         <Tooltip delayDuration={250}>
                           <TooltipTrigger asChild>
-                            <span onClick={() => openEditPopover("Y", model.y.toString(), index, "y")}>
+                            <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Y", model.y.toString(), index, "y")}>
                               {model.y}
-                            </span>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">Click to edit</p>
@@ -272,7 +272,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 px-2 text-nowrap cursor-pointer hover:bg-zinc-700">
+                  <td className="text-nowrap">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "z"}
                       onOpenChange={setPopoverOpen}
@@ -283,9 +283,9 @@ export function World(props: { ff7: FF7 }) {
                       <TooltipProvider>
                         <Tooltip delayDuration={250}>
                           <TooltipTrigger asChild>
-                            <span onClick={() => openEditPopover("Z", model.z.toString(), index, "z")}>
+                            <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Z", model.z.toString(), index, "z")}>
                               {model.z}
-                            </span>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">Click to edit</p>
@@ -294,7 +294,7 @@ export function World(props: { ff7: FF7 }) {
                       </TooltipProvider>
                     </EditPopover>
                   </td>
-                  <td className="p-1 cursor-pointer hover:bg-zinc-700">
+                  <td className="text-nowrap">
                     <EditPopover
                       open={popoverOpen && currentModelEditing === index && editCoord === "direction"}
                       onOpenChange={setPopoverOpen}
@@ -305,9 +305,9 @@ export function World(props: { ff7: FF7 }) {
                       <TooltipProvider>
                         <Tooltip delayDuration={250}>
                           <TooltipTrigger asChild>
-                            <span onClick={() => openEditPopover("Direction", model.direction.toString(), index, "direction")}>
+                            <div className="p-1 px-2 cursor-pointer hover:bg-zinc-700 w-full" onClick={() => openEditPopover("Direction", model.direction.toString(), index, "direction")}>
                               {model.direction}
-                            </span>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-xs">Click to edit</p>
