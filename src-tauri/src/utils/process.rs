@@ -42,9 +42,10 @@ impl ProcessScanner {
                             && process_memory > 1024768
                     }) {
                         if previous_pid != Some(pid) {
+                            // When FF7 crashes the process.cwd() returns None
                             println!("Found process PID: {} with path {:?}", pid, process.cwd());
                             previous_pid = Some(pid);
-                        }
+                            }
                         Some(pid)
                     } else {
                         None

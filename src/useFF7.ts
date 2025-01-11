@@ -189,7 +189,6 @@ export function useFF7(addresses: FF7Addresses) {
         return tickFunctionPtr <= 0xffffff;
       });
 
-      debugger; 
       // Find the function responsible for halting the game when unfocused
       const gfxFlipPtr = await getGfxFlipPtr();
 
@@ -230,6 +229,8 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(fieldObjPtr + 0x0c, 0x23, DataType.Byte);
         await writeMemory(fieldObjPtr + 0x1d, 0x4, DataType.Byte);
         await writeMemory(fieldObjPtr + 0x1f, 0x0, DataType.Byte);
+
+        // TODO: Play opening bombing mission music
       }
     },
     startBattle: async (battleId: number, musicId: number) => {
