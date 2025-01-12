@@ -164,6 +164,12 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onClick={() => {
+            if (!input) {
+              setSuggestions(battles);
+              setIsOpen(true);
+            }
+          }}
           className={cn("w-full", !isVisible && "hidden")}
           placeholder={placeholder}
         />

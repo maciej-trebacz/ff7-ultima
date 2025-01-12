@@ -8,6 +8,8 @@ import { EnemyData, GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
+import { useEffect } from "react";
+import { OpcodeWriter } from "./opcodewriter";
 
 type ModelObj = {
   data: number[];
@@ -22,8 +24,52 @@ type SaveState = {
 
 const SaveStates: SaveState[] = [];
 
+const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
+
+export function swap32(val: number) {
+  return ((val & 0xFF) << 24)
+         | ((val & 0xFF00) << 8)
+         | ((val >> 8) & 0xFF00)
+         | ((val >> 24) & 0xFF);
+}
+
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
+
+  // Add the proxy function where we can inject our own code that runs every frame
+  useEffect(() => {
+    async function initializeGfxFlip() {
+      if (connected) {
+        // Call GfxFlip and return
+        let code = hex("55 8B EC 8B 45 08 50 E8 90 45 24 00 83 C4 04 5D C3");
+        await writeMemory(addresses.code_cave2, code, DataType.Buffer);
+
+        // Replace the call to GfxFlip in WinMain
+        code = hex("e8 3d e2 d9 ff");
+        await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
+
+        // Add a function for overwriting code once it runs
+        code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
+        await writeMemory(addresses.code_cave2 - 0x2f, code, DataType.Buffer);
+
+        setMemoryProtection(addresses.code_cave2, 0x30);
+      }
+    }
+
+    initializeGfxFlip();
+  }, [connected]);
+
+  const callFunctionOnce = async (address: number, params: number[]) => {
+    const startOffset = addresses.code_cave2 + 15;
+    const writer = new OpcodeWriter(startOffset);
+
+    writer.writeCall(address, params);
+    const length = writer.offset - startOffset;
+    writer.writeCall(addresses.code_cave2 - 0x2f, [length], true);
+
+    writer.writeReturn();
+    await writeMemory(startOffset, writer.opcodes, DataType.Buffer);
+  };
 
   const getFieldObjPtr = async () => {
     const fieldObjPtr = await readMemory(addresses.field_obj_ptr, DataType.Int);
@@ -558,6 +604,20 @@ export function useFF7(addresses: FF7Addresses) {
     },
     async setPartyMemberSlot(slot: number, id: number) {
       await writeMemory(addresses.party_member_ids + slot, id, DataType.Byte);
+    },
+    async getItemNames() {
+      return invoke("read_item_names");
+    },
+    async getMateriaNames() {
+      return invoke("read_materia_names");
+    },
+    async addItem(id: number, quantity: number) {
+      const itemId = id | quantity << 9;
+      await callFunctionOnce(addresses.party_add_item_fn, [itemId]);
+    },
+    async addMateria(id: number, ap: number) {
+      const materiaId = (id | ap << 8) >>> 0; // Convert to unsigned
+      await callFunctionOnce(addresses.party_add_materia_fn, [materiaId]);
     }
   };
 

@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.1.0 (2025-01-12)
+
+### General
+
+* add/remove any item to the party (works with custom modded items)
+* add any materia to the party (works with custom modded materias)
+
 ## 1.0.9 (2025-01-08)
 
 ### General

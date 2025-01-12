@@ -1,7 +1,8 @@
 use crate::process;
 use process_memory::{CopyAddress, DataMember, Memory, Pid, PutAddress, TryIntoProcessHandle};
 use winapi::um::memoryapi::VirtualProtectEx;
-use winapi::um::winnt::{PAGE_READWRITE, PVOID};
+use winapi::um::winnt::{PAGE_EXECUTE_READWRITE, PVOID};
+use std::backtrace::Backtrace;
 
 fn get_process_handle() -> Result<process_memory::ProcessHandle, String> {
     process::get_pid()
@@ -27,7 +28,7 @@ fn read_memory<T: Copy>(address: u32) -> Result<T, String> {
     access_memory(address, |value| unsafe {
         value
             .read()
-            .map_err(|_| format!("Could not read memory at address 0x{:08X}", address))
+            .map_err(|_| format!("Could not read memory at address 0x{:08X}\nBacktrace: {}", address, Backtrace::force_capture()))
     })
 }
 
@@ -67,7 +68,7 @@ pub fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> 
     let handle = get_process_handle()?;
     let mut buf = vec![0u8; size];
     handle.copy_address(address as usize, &mut buf)
-        .map_err(|_| format!("Could not read {} bytes at address 0x{:08X}", size, address))?;
+        .map_err(|_| format!("Could not read {} bytes at address 0x{:08X}\nBacktrace: {}", size, address, Backtrace::force_capture()))?;
     Ok(buf)
 }
 
@@ -110,7 +111,7 @@ pub fn set_memory_protection(address: u32, size: usize) -> Result<(), String> {
             handle.0,
             address as PVOID,
             size,
-            PAGE_READWRITE,
+            PAGE_EXECUTE_READWRITE,
             &mut old_protect,
         )
     };

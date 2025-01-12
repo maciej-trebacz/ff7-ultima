@@ -56,6 +56,7 @@ export interface FF7Addresses {
   battle_atb_base: number;
   intro_skip: number;
   code_cave: number;
+  code_cave2: number;
   battle_init_chars_fn: number;
   battle_init_chars_call: number;
   battle_exp_calc: number;
@@ -73,6 +74,9 @@ export interface FF7Addresses {
   field_models_coords: number;
   party_member_ids: number;
   party_member_names: number;
+  main_gfx_flip_call: number;
+  party_add_item_fn: number;
+  party_add_materia_fn: number;
 }
 
 export function useFF7Addresses() {

@@ -1,5 +1,5 @@
-import { Modal } from "./Modal";
-import { version } from "../../src-tauri/tauri.conf.json";
+import { Modal } from "@/components/Modal";
+import { version } from "../../../src-tauri/tauri.conf.json";
 
 interface AboutModalProps {
   isOpen: boolean;

@@ -16,6 +16,7 @@ export function Modal(props: {
   buttonText?: string;
   size?: 'sm' | 'md' | 'lg';
   callback: () => void;
+  buttonDisabled?: boolean;
 }) {
   const sizes = {
     sm: 'max-w-[300px]',
@@ -35,7 +36,12 @@ export function Modal(props: {
         {props.children}
         {props.buttonText &&
           <div className="flex w-full">
-            <Button variant="secondary" className="w-full" onClick={props.callback}>
+            <Button 
+              variant="secondary" 
+              className="w-full" 
+              onClick={props.callback}
+              disabled={props.buttonDisabled}
+            >
               {props.buttonText}
             </Button>
           </div>

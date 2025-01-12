@@ -95,6 +95,16 @@ fn get_chocobo_rating_for_scene(scene_id: u32) -> Result<u32, String> {
     ff7::get_chocobo_rating_for_scene(scene_id)
 }
 
+#[tauri::command]
+fn read_item_names() -> Result<Vec<String>, String> {
+    ff7::read_item_names(&FF7Addresses::new())
+}
+
+#[tauri::command]
+fn read_materia_names() -> Result<Vec<String>, String> {
+    ff7::read_materia_names(&FF7Addresses::new())
+}
+
 fn main() {
     let process_names = vec!["ff7.exe".to_string(), "ff7_en.exe".to_string()];
     process::initialize(process_names);
@@ -128,6 +138,8 @@ fn main() {
             get_ff7_addresses,
             read_enemy_data,
             get_chocobo_rating_for_scene,
+            read_item_names,
+            read_materia_names,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

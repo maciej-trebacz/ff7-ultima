@@ -78,7 +78,7 @@ fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String
 fn read_name(address: u32) -> Result<String, String> {
     let mut name = Vec::new();
     let mut i = 0;
-    while i < 16 {
+    while i < 24 {
         let byte = read_memory_byte(address + i)?;
         if byte == 0xFF {
             break;
@@ -289,11 +289,11 @@ fn read_item_names_section(
     Ok(pos)
 }
 
-fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
+pub fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     let mut items: Vec<String> = Vec::new();
-    let mut addr = addresses.item_names_base;
+    let mut addr = addresses.kernel_texts_base;
 
-    let ffnx_check = read_memory_int(addresses.item_names_base)? as u32;
+    let ffnx_check = read_memory_int(addr)? as u32;
     let mut kernel_sections_tbl: u32 = 0;
     if ffnx_check == 0 {
         let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
@@ -301,6 +301,9 @@ fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
             + 4;
         kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
         addr = read_memory_int(kernel_sections_tbl + (4 * 10))? as u32;
+    }
+    else {
+        addr += read_memory_short(addresses.kernel_section_offsets + (2 * 10))? as u32;
     }
 
     // Items
@@ -325,6 +328,26 @@ fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     read_item_names_section(&mut items, addr, 32)?;
 
     Ok(items)
+}
+
+pub fn read_materia_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
+    let mut materia: Vec<String> = Vec::new();
+    let mut addr = addresses.kernel_texts_base;
+
+    let ffnx_check = read_memory_int(addr)? as u32;
+    let mut kernel_sections_tbl: u32 = 0;
+    if ffnx_check == 0 {
+        let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
+            + addresses.kernel_read_fn_call
+            + 4;
+        kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
+        addr = read_memory_int(kernel_sections_tbl + (4 * 14))? as u32;
+    }
+    else {
+        addr += read_memory_short(addresses.kernel_section_offsets + (2 * 14))? as u32;
+    }
+    read_item_names_section(&mut materia, addr, 96)?;
+    Ok(materia)
 }
 
 pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {

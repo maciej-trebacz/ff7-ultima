@@ -4,7 +4,7 @@ import { FF7 } from "@/useFF7";
 import { formatTime } from "@/util";
 import { useState } from "react";
 import { version } from "../../src-tauri/tauri.conf.json";
-import { AboutModal } from "./AboutModal";
+import { AboutModal } from "./modals/AboutModal";
 
 export function StatusBar(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
