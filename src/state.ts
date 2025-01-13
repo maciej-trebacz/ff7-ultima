@@ -55,6 +55,7 @@ const defaultState = {
     worldTilt: 0,
     worldSpeedMultiplier: 2,
     partyMembers: [] as number[],
+    keyItems: [] as number[],
   };
 
 export const useFF7State = function() {
@@ -69,6 +70,16 @@ export const useFF7State = function() {
     if (isLoading || error || !addresses) {
       return;
     }
+
+    const parseKeyItemsBitmask = (bytes: number[]) => {
+      const keyItems: number[] = [];
+      for (let i = 0; i < 64; i++) {
+        if (bytes[Math.floor(i / 8)] & (1 << (i % 8))) {
+          keyItems.push(i);
+        }
+      }
+      return keyItems;
+    };
 
     const updateGameState = async () => {
       try {
@@ -178,6 +189,7 @@ export const useFF7State = function() {
           worldTilt: basic.world_tilt as number,
           worldSpeedMultiplier: basic.world_speed_multiplier as number,
           partyMembers: basic.party_members as number[],
+          keyItems: parseKeyItemsBitmask(basic.key_items),
         });
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

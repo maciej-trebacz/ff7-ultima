@@ -50,6 +50,7 @@ fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
         world_tilt: read_memory_short(addresses.world_tilt)?,
         world_speed_multiplier: read_memory_byte(addresses.world_speed_multiplier)?,
         party_members: party_member_ids_vec,
+        key_items: read_memory_buffer(addresses.key_items, 8)?,
     })
 }
 
@@ -273,81 +274,63 @@ pub fn read_data() -> Result<FF7Data, String> {
     })
 }
 
-fn read_item_names_section(
+fn read_kernel_section(
     items: &mut Vec<String>,
-    base_address: u32,
+    addresses: &FF7Addresses,
+    section_id: u32,
     count: u32,
-) -> Result<u32, String> {
-    let mut pos = 0;
-    for i in 0..count {
-        let offset = read_memory_short(base_address + i * 2)? as u16;
-        let address = base_address + offset as u32;
-        let name = read_name(address).unwrap_or_else(|_| String::from("???"));
-        pos = address + name.len() as u32 + 1;
-        items.push(name);
-    }
-    Ok(pos)
-}
-
-pub fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
-    let mut items: Vec<String> = Vec::new();
+) -> Result<(), String> {
     let mut addr = addresses.kernel_texts_base;
-
     let ffnx_check = read_memory_int(addr)? as u32;
-    let mut kernel_sections_tbl: u32 = 0;
+    
     if ffnx_check == 0 {
         let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
             + addresses.kernel_read_fn_call
             + 4;
-        kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
-        addr = read_memory_int(kernel_sections_tbl + (4 * 10))? as u32;
-    }
-    else {
-        addr += read_memory_short(addresses.kernel_section_offsets + (2 * 10))? as u32;
+        let kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
+        addr = read_memory_int(kernel_sections_tbl + (4 * section_id))? as u32;
+    } else {
+        addr += read_memory_short(addresses.kernel_section_offsets + (2 * section_id))? as u32;
     }
 
+    for i in 0..count {
+        let offset = read_memory_short(addr + i * 2)? as u16;
+        let address = addr + offset as u32;
+        let name = read_name(address).unwrap_or_else(|_| String::from("???"));
+        items.push(name);
+    }
+
+    Ok(())
+}
+
+pub fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
+    let mut items: Vec<String> = Vec::new();
+    
     // Items
-    addr = read_item_names_section(&mut items, addr, 128)?;
-
+    read_kernel_section(&mut items, addresses, 10, 128)?;
+    
     // Weapons
-    if ffnx_check == 0 {
-        addr = read_memory_int(kernel_sections_tbl + (4 * 11))? as u32;
-    }
-    addr = read_item_names_section(&mut items, addr, 128)?;
-
+    read_kernel_section(&mut items, addresses, 11, 128)?;
+    
     // Armors
-    if ffnx_check == 0 {
-        addr = read_memory_int(kernel_sections_tbl + (4 * 12))? as u32;
-    }
-    addr = read_item_names_section(&mut items, addr, 32)?;
-
+    read_kernel_section(&mut items, addresses, 12, 32)?;
+    
     // Accessories
-    if ffnx_check == 0 {
-        addr = read_memory_int(kernel_sections_tbl + (4 * 13))? as u32;
-    }
-    read_item_names_section(&mut items, addr, 32)?;
-
+    read_kernel_section(&mut items, addresses, 13, 32)?;
+    
     Ok(items)
 }
 
 pub fn read_materia_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     let mut materia: Vec<String> = Vec::new();
-    let mut addr = addresses.kernel_texts_base;
-
-    let ffnx_check = read_memory_int(addr)? as u32;
-    let mut kernel_sections_tbl: u32 = 0;
-    if ffnx_check == 0 {
-        let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
-            + addresses.kernel_read_fn_call
-            + 4;
-        kernel_sections_tbl = read_memory_int(kernel_read_fn_addr + 0x1B)? as u32;
-        addr = read_memory_int(kernel_sections_tbl + (4 * 14))? as u32;
-    }
-    else {
-        addr += read_memory_short(addresses.kernel_section_offsets + (2 * 14))? as u32;
-    }
-    read_item_names_section(&mut materia, addr, 96)?;
+    read_kernel_section(&mut materia, addresses, 14, 96)?;
     Ok(materia)
+}
+
+pub fn read_key_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
+    let mut items: Vec<String> = Vec::new();
+    read_kernel_section(&mut items, addresses, 15, 64)?;
+    Ok(items)
 }
 
 pub fn read_enemy_data(id: u32) -> Result<EnemyData, String> {

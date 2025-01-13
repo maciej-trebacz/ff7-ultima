@@ -56,7 +56,7 @@ export function useFF7(addresses: FF7Addresses) {
     initializeGfxFlip();
   }, [connected]);
 
-  type FnCall = { address: number; params: number[] };
+  type FnCall = { address: number; params?: number[] };
 
   const callGameFns = async (fns: FnCall[]) => {
     const startOffset = fnCallerAfterFlipAddr;
@@ -75,7 +75,7 @@ export function useFF7(addresses: FF7Addresses) {
     await writeMemory(startOffset, writer.opcodes, DataType.Buffer);
   };
 
-  const callGameFn = async (address: number, params: number[]) => {
+  const callGameFn = async (address: number, params?: number[]) => {
     await callGameFns([{ address, params }]);
   };
 
@@ -632,6 +632,9 @@ export function useFF7(addresses: FF7Addresses) {
     async getMateriaNames() {
       return invoke("read_materia_names");
     },
+    async getKeyItemNames() {
+      return invoke("read_key_item_names");
+    },
     async addItem(id: number, quantity: number) {
       const itemId = id | quantity << 9;
       await callGameFn(addresses.party_add_item_fn, [itemId]);
@@ -639,6 +642,21 @@ export function useFF7(addresses: FF7Addresses) {
     async addMateria(id: number, ap: number) {
       const materiaId = (id | ap << 8) >>> 0; // Convert to unsigned
       await callGameFn(addresses.party_add_materia_fn, [materiaId]);
+    },
+    async setKeyItems(keyItemIds: number[]) {
+      const bytes = new Array(8).fill(0);
+      
+      // Set bits for each key item
+      for (const id of keyItemIds) {
+        const byteIndex = Math.floor(id / 8);
+        const bitIndex = id % 8;
+        bytes[byteIndex] |= (1 << bitIndex);
+      }
+      
+      await writeMemory(addresses.key_items, bytes, DataType.Buffer);
+
+      // Reload the key items in memory if the menu is currently open
+      await callGameFn(addresses.menu_load_key_items_fn, []);
     }
   };
 

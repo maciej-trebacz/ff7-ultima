@@ -5,6 +5,7 @@ import { FF7 } from "@/useFF7";
 import { useState } from "react";
 import { AddItemModal } from "@/components/modals/AddItemModal";
 import { AddMateriaModal } from "@/components/modals/AddMateriaModal";
+import { KeyItemsModal } from "@/components/modals/KeyItemsModal";
 
 const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid'];
 
@@ -15,6 +16,7 @@ interface PartyProps {
 export function Party({ ff7 }: PartyProps) {
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [isAddMateriaModalOpen, setIsAddMateriaModalOpen] = useState(false);
+  const [isKeyItemsModalOpen, setIsKeyItemsModalOpen] = useState(false);
 
   const handleAddItem = async (itemId: string | null, quantity: number) => {
     if (itemId) {
@@ -70,17 +72,27 @@ export function Party({ ff7 }: PartyProps) {
       <div className="flex gap-2 mt-1">
         <Button
           variant="outline"
+          className="flex-1"
           onClick={() => setIsAddItemModalOpen(true)}
           size="sm"
         >
-          Add Item or Equipment
+          Add Items
         </Button>
         <Button
           variant="outline"
+          className="flex-1"
           onClick={() => setIsAddMateriaModalOpen(true)}
           size="sm"
         >
           Add Materia
+        </Button>
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => setIsKeyItemsModalOpen(true)}
+          size="sm"
+        >
+          Manage Key Items
         </Button>
       </div>
 
@@ -94,6 +106,11 @@ export function Party({ ff7 }: PartyProps) {
         isOpen={isAddMateriaModalOpen}
         onClose={() => setIsAddMateriaModalOpen(false)}
         onSubmit={handleAddMateria}
+        ff7={ff7}
+      />
+      <KeyItemsModal
+        isOpen={isKeyItemsModalOpen}
+        setIsOpen={setIsKeyItemsModalOpen}
         ff7={ff7}
       />
     </>

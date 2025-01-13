@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.1.1 (2025-01-13)
+
+### General
+
+* key item management
+
+### Field
+
+* fixed an issue with looping sounds when warping from specific fields
+
 ## 1.1.0 (2025-01-12)
 
 ### General

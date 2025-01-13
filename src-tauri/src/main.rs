@@ -105,6 +105,11 @@ fn read_materia_names() -> Result<Vec<String>, String> {
     ff7::read_materia_names(&FF7Addresses::new())
 }
 
+#[tauri::command]
+fn read_key_item_names() -> Result<Vec<String>, String> {
+    ff7::read_key_item_names(&FF7Addresses::new())
+}
+
 fn main() {
     let process_names = vec!["ff7.exe".to_string(), "ff7_en.exe".to_string()];
     process::initialize(process_names);
@@ -140,6 +145,7 @@ fn main() {
             get_chocobo_rating_for_scene,
             read_item_names,
             read_materia_names,
+            read_key_item_names,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

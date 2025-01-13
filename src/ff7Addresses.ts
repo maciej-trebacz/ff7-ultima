@@ -78,6 +78,8 @@ export interface FF7Addresses {
   party_add_item_fn: number;
   party_add_materia_fn: number;
   sound_command_fn: number;
+  key_items: number;
+  menu_load_key_items_fn: number;
 }
 
 export function useFF7Addresses() {

@@ -40,6 +40,7 @@ pub struct FF7BasicData {
     pub world_tilt: u16,
     pub world_speed_multiplier: u8,
     pub party_members: Vec<u8>,
+    pub key_items: Vec<u8>,
 }
 
 #[derive(Serialize)]

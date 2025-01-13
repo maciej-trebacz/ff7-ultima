@@ -62,6 +62,7 @@ pub struct FF7Addresses {
     pub party_add_item_fn: u32,
     pub party_add_materia_fn: u32,
     pub sound_command_fn: u32,
+    pub key_items: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -87,6 +88,7 @@ pub struct FF7Addresses {
     pub battle_ap_calc: u32,
     pub menu_always_enabled: u32,
     pub field_models_coords: u32,
+    pub menu_load_key_items_fn: u32,
 }
 
 impl FF7Addresses {
@@ -152,6 +154,7 @@ impl FF7Addresses {
             party_add_item_fn: 0x6cbffa,
             party_add_materia_fn: 0x6cc0ea,
             sound_command_fn: 0x740d80,
+            key_items: 0xdc091c,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,
@@ -177,6 +180,7 @@ impl FF7Addresses {
             battle_ap_calc: 0x431576,
             menu_always_enabled: 0x6ca38c,
             field_models_coords: 0xcc167c,
+            menu_load_key_items_fn: 0x714fa3,
         }
     }
 }
