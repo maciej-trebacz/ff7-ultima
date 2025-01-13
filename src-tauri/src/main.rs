@@ -71,13 +71,13 @@ fn write_memory_buffer(address: u32, buffer: Vec<u8>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn read_ff7_data() -> Result<ff7::types::FF7Data, String> {
+fn read_ff7_data() -> Result<ff7::FF7Data, String> {
     ff7::read_data()
 }
 
 #[tauri::command]
 fn read_enemy_data(id: u32) -> Result<EnemyData, String> {
-    ff7::read_enemy_data(id)
+    ff7::data::read_enemy_data(id)
 }
 
 #[tauri::command]
@@ -92,22 +92,22 @@ fn get_ff7_addresses() -> FF7Addresses {
 
 #[tauri::command]
 fn get_chocobo_rating_for_scene(scene_id: u32) -> Result<u32, String> {
-    ff7::get_chocobo_rating_for_scene(scene_id)
+    ff7::data::get_chocobo_rating_for_scene(scene_id)
 }
 
 #[tauri::command]
 fn read_item_names() -> Result<Vec<String>, String> {
-    ff7::read_item_names(&FF7Addresses::new())
+    ff7::data::read_item_names(&FF7Addresses::new())
 }
 
 #[tauri::command]
 fn read_materia_names() -> Result<Vec<String>, String> {
-    ff7::read_materia_names(&FF7Addresses::new())
+    ff7::data::read_materia_names(&FF7Addresses::new())
 }
 
 #[tauri::command]
 fn read_key_item_names() -> Result<Vec<String>, String> {
-    ff7::read_key_item_names(&FF7Addresses::new())
+    ff7::data::read_key_item_names(&FF7Addresses::new())
 }
 
 fn main() {
