@@ -1,12 +1,12 @@
 use crate::ff7::addresses::FF7Addresses;
-use crate::utils::memory::*;
 use crate::ff7::types::basic::FF7BasicData;
+use crate::utils::memory::*;
 
 pub fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String> {
     let party_member_ids_vec = vec![
         read_memory_byte(addresses.party_member_ids)?,
         read_memory_byte(addresses.party_member_ids + 1)?,
-        read_memory_byte(addresses.party_member_ids + 2)?
+        read_memory_byte(addresses.party_member_ids + 2)?,
     ];
 
     Ok(FF7BasicData {

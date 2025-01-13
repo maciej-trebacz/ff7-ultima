@@ -24,7 +24,7 @@ fn read_kernel_section(
 ) -> Result<(), String> {
     let mut addr = addresses.kernel_texts_base;
     let ffnx_check = read_memory_int(addr)? as u32;
-    
+
     if ffnx_check == 0 {
         let kernel_read_fn_addr = read_memory_int(addresses.kernel_read_fn_call)? as u32
             + addresses.kernel_read_fn_call
@@ -47,19 +47,19 @@ fn read_kernel_section(
 
 pub fn read_item_names(addresses: &FF7Addresses) -> Result<Vec<String>, String> {
     let mut items: Vec<String> = Vec::new();
-    
+
     // Items
     read_kernel_section(&mut items, addresses, 10, 128)?;
-    
+
     // Weapons
     read_kernel_section(&mut items, addresses, 11, 128)?;
-    
+
     // Armors
     read_kernel_section(&mut items, addresses, 12, 32)?;
-    
+
     // Accessories
     read_kernel_section(&mut items, addresses, 13, 32)?;
-    
+
     Ok(items)
 }
 

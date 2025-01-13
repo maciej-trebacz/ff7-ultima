@@ -1,12 +1,12 @@
 pub mod addresses;
-pub mod ff7text;
 pub mod data;
+pub mod ff7text;
 pub mod types;
 
 use addresses::FF7Addresses;
 use data::*;
-use types::*;
 use serde::Serialize;
+use types::*;
 
 #[derive(Serialize)]
 pub struct FF7Data {

@@ -39,7 +39,8 @@ pub fn read_world_models(addresses: &FF7Addresses) -> Result<Vec<WorldModel>, St
     let model_record_length = 192;
 
     for i in 0..16 {
-        let model_check = read_memory_int(addresses.world_models + i * model_record_length + 188)? as u32;
+        let model_check =
+            read_memory_int(addresses.world_models + i * model_record_length + 188)? as u32;
         if model_check == 0 {
             continue;
         }
@@ -49,7 +50,9 @@ pub fn read_world_models(addresses: &FF7Addresses) -> Result<Vec<WorldModel>, St
             x: read_memory_int(addresses.world_models + i * model_record_length + 0xC)?,
             y: read_memory_signed_int(addresses.world_models + i * model_record_length + 0x10)?,
             z: read_memory_int(addresses.world_models + i * model_record_length + 0x14)?,
-            direction: read_memory_signed_short(addresses.world_models + i * model_record_length + 0x40)?,
+            direction: read_memory_signed_short(
+                addresses.world_models + i * model_record_length + 0x40,
+            )?,
             model_id: read_memory_byte(addresses.world_models + i * model_record_length + 0x50)?,
             walkmesh_type: 0,
             location_id: 0,

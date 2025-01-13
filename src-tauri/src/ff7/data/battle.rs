@@ -1,8 +1,8 @@
 use crate::ff7::addresses::FF7Addresses;
+use crate::ff7::data::kernel::read_name;
 use crate::ff7::types::battle::{BattleCharObj, EnemyData};
 use crate::ff7::types::items::{Item, ItemType};
 use crate::ff7::types::kernel::Elemental;
-use crate::ff7::data::kernel::read_name;
 use crate::utils::memory::*;
 
 pub fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>, String> {

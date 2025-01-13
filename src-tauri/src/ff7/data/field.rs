@@ -1,6 +1,6 @@
 use crate::ff7::addresses::FF7Addresses;
+use crate::ff7::types::field::{FieldData, FieldModel};
 use crate::utils::memory::*;
-use crate::ff7::types::field::{FieldModel, FieldData};
 
 pub fn read_field_models(addresses: &FF7Addresses) -> Result<Vec<FieldModel>, String> {
     let mut models: Vec<FieldModel> = Vec::new();

@@ -1,6 +1,6 @@
-use serde::Serialize;
 use super::items::Item;
 use super::kernel::Elemental;
+use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct BattleCharObj {
