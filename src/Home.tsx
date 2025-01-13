@@ -26,6 +26,9 @@ function Home() {
   }
   const ff7 = useFF7(addresses);
 
+  // For debugging purposes
+  ((window as unknown) as any).FF7 = ff7;
+
   if (!ff7.gameState) {
     return <></>
   }
