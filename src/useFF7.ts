@@ -56,12 +56,16 @@ export function useFF7(addresses: FF7Addresses) {
     initializeGfxFlip();
   }, [connected]);
 
-  const callGameFn = async (address: number, params: number[]) => {
+  type FnCall = { address: number; params: number[] };
+
+  const callGameFns = async (fns: FnCall[]) => {
     const startOffset = fnCallerAfterFlipAddr;
     const writer = new OpcodeWriter(startOffset);
 
-    // Call the requested function
-    writer.writeCall(address, params);
+    // Call the requested functions
+    fns.forEach((fn) => {
+      writer.writeCall(fn.address, fn.params);
+    });
 
     // Call the overwrite function to make sure we call only once
     const length = writer.offset - startOffset;
@@ -69,6 +73,10 @@ export function useFF7(addresses: FF7Addresses) {
 
     writer.writeReturn();
     await writeMemory(startOffset, writer.opcodes, DataType.Buffer);
+  };
+
+  const callGameFn = async (address: number, params: number[]) => {
+    await callGameFns([{ address, params }]);
   };
 
   const getFieldObjPtr = async () => {
@@ -109,6 +117,7 @@ export function useFF7(addresses: FF7Addresses) {
     connected,
     gameState,
     callGameFn,
+    callGameFns,
     setSpeed: async (speed: number) => {
       const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
       if (ffnxCheck === 0xE9) {
@@ -591,6 +600,16 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(addresses.world_mode, 2, DataType.Byte);
         await writeMemory(addresses.world_mode + 0xC, 1, DataType.Byte);
       }
+
+      // Reset all sound channel volumes to cancel looping sounds
+      setTimeout(async () => {
+        const fns = Array(4).fill(0).map((_, i) => ({
+          address: addresses.sound_command_fn, 
+          params: [40 + i, 0, 0, 0, 0, 0]
+        }));
+        await callGameFns(fns);
+      }, 100);
+
     },
     async setWorldZoomTiltEnabled(enabled: boolean) {
       await writeMemory(addresses.world_zoom_tilt_enabled, enabled ? 0x01 : 0x00, DataType.Byte);

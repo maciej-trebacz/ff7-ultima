@@ -77,6 +77,7 @@ export interface FF7Addresses {
   main_gfx_flip_call: number;
   party_add_item_fn: number;
   party_add_materia_fn: number;
+  sound_command_fn: number;
 }
 
 export function useFF7Addresses() {

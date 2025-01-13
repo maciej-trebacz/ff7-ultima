@@ -61,6 +61,7 @@ pub struct FF7Addresses {
     pub main_gfx_flip_call: u32,
     pub party_add_item_fn: u32,
     pub party_add_materia_fn: u32,
+    pub sound_command_fn: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -150,6 +151,7 @@ impl FF7Addresses {
             main_gfx_flip_call: 0x67ddbe,
             party_add_item_fn: 0x6cbffa,
             party_add_materia_fn: 0x6cc0ea,
+            sound_command_fn: 0x740d80,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,
