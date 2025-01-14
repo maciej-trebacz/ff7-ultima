@@ -1,13 +1,10 @@
 "use strict";
 
-import { useState } from "react";
-import { useFF7, FF7 } from "./useFF7";
+import { register, unregister, isRegistered } from '@tauri-apps/plugin-global-shortcut';
+import { useEffect, useState } from "react";
+import { FF7, useFF7 } from "./useFF7";
 import { useFF7Context } from "./FF7Context";
-import { formatTime } from "./util";
-import Row from "./components/Row";
-import GroupButton from "./components/GroupButton";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarSeparator } from "./components/ui/sidebar";
-import { Button } from "./components/ui/button";
 import { StatusBar } from "./components/StatusBar";
 import { Hacks } from "./Hacks";
 import { Tabs } from "./types";
@@ -33,6 +30,49 @@ function Home() {
     return <></>
   }
 
+  const hotkeys: Record<string, (ff7: FF7) => void> = {
+    "F1": async (ff7) => {
+      await ff7.skipFMV();
+    },
+    "F2": async (ff7) => {
+      await ff7.endBattle(false);
+    },
+    "F3": async (ff7) => {
+      await ff7.setSpeed(4);
+    },
+    "F4": async (ff7) => {
+      await ff7.setSpeed(1);
+    },
+    "F5": async (ff7) => {
+      await ff7.loadState();
+    },
+    "F6": async (ff7) => {
+      await ff7.saveState();
+    },
+    "F7": async (ff7) => {
+      await ff7.fullHeal();
+    },
+    "F9": async (ff7) => {
+      await ff7.gameOver();
+    },
+  }
+
+  useEffect(() => {
+    const registerHotkeys = async () => {
+      for (const [hotkey, callback] of Object.entries(hotkeys)) {
+        if (await isRegistered(hotkey)) {
+          await unregister(hotkey);
+        }
+        await register(hotkey, (event) => {
+          // FIXME: This is hacky but what can you do
+          // The problem is that the ff7 object is stale in the callback so we use the global one
+          event.state === "Pressed" && callback(((window as unknown) as any).FF7);
+        });
+      }
+    }
+    registerHotkeys();
+  }, [])
+
   const renderTabContent = () => {
     switch (currentTab) {
       case Tabs.General:
@@ -46,7 +86,6 @@ function Home() {
       default:
         return <General ff7={ff7} />;
     }
-    return <></>
   };
 
   return (

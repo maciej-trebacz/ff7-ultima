@@ -1,6 +1,6 @@
 [package]
 name = "ff7-ultima"
-version = "1.1.1"
+version = "1.1.2"
 description = "Real-time editor for Final Fantasy VII"
 authors = ["m4v3r"]
 edition = "2021"
@@ -25,4 +25,5 @@ windows-hotkeys = "0.2.1"
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"
 

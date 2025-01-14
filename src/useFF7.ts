@@ -6,7 +6,7 @@ import { waitFor } from "./util";
 import { useFF7State } from "./state";
 import { EnemyData, GameModule } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
-import { statuses } from "./ff7Statuses";
+import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
 import { useEffect } from "react";
 import { OpcodeWriter } from "./opcodewriter";
@@ -657,6 +657,28 @@ export function useFF7(addresses: FF7Addresses) {
 
       // Reload the key items in memory if the menu is currently open
       await callGameFn(addresses.menu_load_key_items_fn, []);
+    },
+    async fullHeal() {
+      if (gameState.currentModule === GameModule.Battle) {
+        for (let charIdx = 0; charIdx < 3; charIdx++) {
+          const maxHp = ff7.gameState.battleAllies[charIdx].max_hp;
+          const maxMp = ff7.gameState.battleAllies[charIdx].max_mp;
+          const status = ff7.gameState.battleAllies[charIdx].status;
+          await ff7.setHP(maxHp, charIdx);
+          await ff7.setMP(maxMp, charIdx);
+          await ff7.setStatus(status & PositiveStatuses, charIdx);
+        }
+        await ff7.callGameFn(0x745606, [64, 263, 0, 0, 0]);
+      } else {
+        // Call PartyFullHealClearStatus() and then play the cure sound
+        await ff7.callGameFns([{
+          address: 0x61f6b0,
+          params: [],
+        }, {
+          address: 0x745606,
+          params: [64, 263, 0, 0, 0],
+        }]);
+      }
     }
   };
 

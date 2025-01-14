@@ -5,11 +5,13 @@ import { formatTime } from "@/util";
 import { useState } from "react";
 import { version } from "../../src-tauri/tauri.conf.json";
 import { AboutModal } from "./modals/AboutModal";
+import { HelpModal } from "./modals/HelpModal";
 
 export function StatusBar(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const connected = ff7.connected;
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   return (
     <>
@@ -36,14 +38,24 @@ export function StatusBar(props: { ff7: FF7 }) {
             Disc: {ff7.gameState.discId}
           </div>
         </>}
-        <div 
-          className="ml-auto flex items-center text-zinc-400 hover:text-zinc-200 cursor-pointer" 
-          onClick={() => setIsAboutModalOpen(true)}
-        >
-          v{version}
+        <div className="ml-auto flex items-center gap-2">
+          <div 
+            className="text-zinc-400 hover:text-zinc-200 cursor-pointer" 
+            onClick={() => setIsHelpModalOpen(true)}
+          >
+            Shortcuts
+          </div>
+          <div className="h-4 w-px bg-zinc-600"></div>
+          <div 
+            className="text-zinc-400 hover:text-zinc-200 cursor-pointer" 
+            onClick={() => setIsAboutModalOpen(true)}
+          >
+            v{version}
+          </div>
         </div>
       </div>
       <AboutModal isOpen={isAboutModalOpen} setIsOpen={setIsAboutModalOpen} />
+      <HelpModal isOpen={isHelpModalOpen} setIsOpen={setIsHelpModalOpen} />
     </>
   );
 }

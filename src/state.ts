@@ -140,7 +140,8 @@ export const useFF7State = function() {
         }
         const worldModels = ff7Data.world_models as WorldModel[];
         
-        setGameState({
+        setGameState(prevState => ({
+          ...prevState,
           currentModule: basic.current_module as number,
           gameMoment: basic.game_moment as number,
           fieldId: basic.field_id as number,
@@ -190,7 +191,7 @@ export const useFF7State = function() {
           worldSpeedMultiplier: basic.world_speed_multiplier as number,
           partyMembers: basic.party_members as number[],
           keyItems: parseKeyItemsBitmask(basic.key_items),
-        });
+        }));
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {
         console.warn("Could not read FF7 data: ", e);

@@ -32,3 +32,5 @@ export const statuses = {
   LuckyGirl: 1073741824,
   Imprisoned: 2147483648
 }
+
+export const PositiveStatuses = statuses.Sadness | statuses.Haste | statuses.Regen | statuses.Barrier | statuses.MBarrier | statuses.Reflect | statuses.Shield | statuses.Berserk | statuses.Peerless | statuses.Resist | statuses.LuckyGirl

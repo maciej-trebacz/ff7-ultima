@@ -12,6 +12,7 @@ fn main() {
     println!("FF7 scanner started");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
             let handle = app.handle().clone();

@@ -1,7 +1,7 @@
 {
   "name": "ff7-ultima",
   "private": true,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "@tauri-apps/plugin-global-shortcut": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.0.1",
     "@tauri-apps/plugin-updater": "^2.3.0",
+    "@tauri-apps/plugin-window-state": "^2.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",

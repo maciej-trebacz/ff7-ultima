@@ -13,6 +13,10 @@
     "core:menu:default",
     "core:tray:default",
     "shell:allow-open",
-    "updater:default"
+    "updater:default",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "window-state:default"
   ]
 }

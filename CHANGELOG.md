@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.1.2 (2025-01-14)
+
+### General
+
+* keyboard shortcuts (list available by clicking on the Shortcuts button in the status bar)
+* full cure and remove bad status effects (both in and out of battle)
+
 ## 1.1.1 (2025-01-13)
 
 ### General
