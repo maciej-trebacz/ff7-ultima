@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.3 (2025-01-17)
+
+### General
+
+* fixed an issue with PHS dropdown
+* PHS and Party slot selectors now show actual character names from game's memory
+* toggle limit bars to be either full or empty
+
 ## 1.1.2 (2025-01-14)
 
 ### General

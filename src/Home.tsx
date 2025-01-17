@@ -52,6 +52,9 @@ function Home() {
     "F7": async (ff7) => {
       await ff7.fullHeal();
     },
+    "F8": async (ff7) => {
+      await ff7.toggleLimitBar();
+    },
     "F9": async (ff7) => {
       await ff7.gameOver();
     },

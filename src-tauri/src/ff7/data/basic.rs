@@ -47,7 +47,7 @@ pub fn read_basic_data(addresses: &FF7Addresses) -> Result<FF7BasicData, String>
         world_zoom: read_memory_short(addresses.world_zoom)?,
         world_tilt: read_memory_short(addresses.world_tilt)?,
         world_speed_multiplier: read_memory_byte(addresses.world_speed_multiplier)?,
-        party_members: party_member_ids_vec,
+        party_member_ids: party_member_ids_vec,
         key_items: read_memory_buffer(addresses.key_items, 8)?,
     })
 }

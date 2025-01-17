@@ -17,6 +17,7 @@ pub struct FF7Data {
     pub battle_enemies: Vec<BattleCharObj>,
     pub field_data: FieldData,
     pub world_current_model: WorldModel,
+    pub party_members: Vec<PartyMember>,
 }
 
 pub fn read_data() -> Result<FF7Data, String> {
@@ -29,5 +30,6 @@ pub fn read_data() -> Result<FF7Data, String> {
         battle_enemies: read_battle_enemies(&addresses)?,
         field_data: read_field_data(&addresses)?,
         world_current_model: read_world_current_model(&addresses)?,
+        party_members: read_party_members(&addresses)?,
     })
 }

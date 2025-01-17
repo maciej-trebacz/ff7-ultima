@@ -30,6 +30,8 @@ export function HelpModal({ isOpen, setIsOpen }: HelpModalProps) {
           <div>Save State (on field)</div>
           <div className="text-slate-400">F7</div>
           <div>Full Heal and remove bad status effects</div>
+          <div className="text-slate-400">F8</div>
+          <div>Toggle Limit Bar (full or empty)</div>
           <div className="text-slate-400">F9</div>
           <div>Game Over</div>
         </div>

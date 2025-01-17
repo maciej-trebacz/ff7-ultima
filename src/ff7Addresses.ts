@@ -80,6 +80,9 @@ export interface FF7Addresses {
   sound_command_fn: number;
   key_items: number;
   menu_load_key_items_fn: number;
+  character_records: number;
+  battle_char_array: number;
+  party_objects: number;
 }
 
 export function useFF7Addresses() {

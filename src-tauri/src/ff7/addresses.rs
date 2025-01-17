@@ -33,6 +33,7 @@ pub struct FF7Addresses {
     pub field_num_models: u32,
     pub field_models_ptr: u32,
     pub field_data_ptr: u32,
+    pub battle_char_array: u32,
     pub battle_char_base: u32,
     pub battle_atb_base: u32,
     pub ally_limit: u32,
@@ -63,6 +64,8 @@ pub struct FF7Addresses {
     pub party_add_materia_fn: u32,
     pub sound_command_fn: u32,
     pub key_items: u32,
+    pub character_records: u32,
+    pub party_objects: u32,
 
     // Frontend fields
     pub field_obj_ptr: u32,
@@ -125,6 +128,7 @@ impl FF7Addresses {
             field_num_models: 0xcff73e,
             field_models_ptr: 0xcff738,
             field_data_ptr: 0xcff594,
+            battle_char_array: 0x9a8db8,
             battle_char_base: 0x9ab0dc,
             battle_atb_base: 0x9a8b12,
             ally_limit: 0x9a8dc2,
@@ -155,6 +159,8 @@ impl FF7Addresses {
             party_add_materia_fn: 0x6cc0ea,
             sound_command_fn: 0x740d80,
             key_items: 0xdc091c,
+            character_records: 0xdbfd8c,
+            party_objects: 0xdba498,
 
             // Frontend fields
             field_obj_ptr: 0xcbf9d8,

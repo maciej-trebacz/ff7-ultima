@@ -57,6 +57,18 @@ export interface BattleCharObj {
   scene_id: number,
 }
 
+export interface PartyMember {
+  id: number,
+  name: string,
+  status: number,
+  hp: number,
+  max_hp: number,
+  mp: number,
+  max_mp: number,
+  limit: number,
+  exp: number
+}
+
 export interface WorldModel {
   index: number;
   x: number;

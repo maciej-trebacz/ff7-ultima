@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember } from "./types";
 import { DataType, readMemory } from "./memory";
 import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
@@ -54,8 +54,9 @@ const defaultState = {
     worldZoom: 0,
     worldTilt: 0,
     worldSpeedMultiplier: 2,
-    partyMembers: [] as number[],
+    partyMemberIds: [] as number[],
     keyItems: [] as number[],
+    partyMembers: [] as PartyMember[],
   };
 
 export const useFF7State = function() {
@@ -189,8 +190,9 @@ export const useFF7State = function() {
           worldZoom: basic.world_zoom as number,
           worldTilt: basic.world_tilt as number,
           worldSpeedMultiplier: basic.world_speed_multiplier as number,
-          partyMembers: basic.party_members as number[],
+          partyMemberIds: basic.party_member_ids as number[],
           keyItems: parseKeyItemsBitmask(basic.key_items),
+          partyMembers: ff7Data.party_members as PartyMember[],
         }));
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

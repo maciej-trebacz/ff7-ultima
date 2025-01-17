@@ -134,7 +134,7 @@ export function World(props: { ff7: FF7 }) {
       </div>
       <div className="flex gap-1">
         <Row label="Location & Terrain">
-          {ff7.gameState.worldCurrentModel.location_id !== undefined && LocationName[ff7.gameState.worldCurrentModel.location_id]}
+          {ff7.gameState.worldCurrentModel.location_id !== undefined && ff7.gameState.worldCurrentModel.location_id !== 255 && LocationName[ff7.gameState.worldCurrentModel.location_id]}
           {" - "}
           {WorldWalkmeshType[ff7.gameState.worldCurrentModel.walkmesh_type] || ff7.gameState.worldCurrentModel.walkmesh_type}
           {ff7.gameState.worldCurrentModel.chocobo_tracks && <TooltipProvider>

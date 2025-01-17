@@ -31,7 +31,7 @@ pub fn read_battle_allies(addresses: &FF7Addresses) -> Result<Vec<BattleCharObj>
             mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x28)?,
             max_mp: read_memory_short(addresses.battle_char_base + i * char_obj_length + 0x2a)?,
             atb: read_memory_short(addresses.battle_atb_base + i * 68 + 0x2)?,
-            limit: read_memory_byte(addresses.ally_limit + i * 52)?,
+            limit: read_memory_short(addresses.battle_char_array + i * 0x34 + 0x8)?,
             scene_id: 0,
         };
         chars.push(char);

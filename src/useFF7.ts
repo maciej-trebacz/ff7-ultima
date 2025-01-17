@@ -422,14 +422,27 @@ export function useFF7(addresses: FF7Addresses) {
     setInGameTime: async (inGameTime: number) => {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
+    // TODO: Make it work outside battle too, check current module
     setHP: async (hp: number, index: number) => {
-      await writeMemory(addresses.battle_char_base + index * 104 + 0x2c, hp, DataType.Int);
+      if (gameState.currentModule !== GameModule.Battle) {
+        await writeMemory(addresses.character_records + index * 0x84 + 0x2c, hp, DataType.Short);
+      } else {
+        await writeMemory(addresses.battle_char_base + index * 104 + 0x2c, hp, DataType.Int);
+      }
     },
     setMP: async (mp: number, index: number) => {
-      await writeMemory(addresses.battle_char_base + index * 104 + 0x28, mp, DataType.Short);
+      if (gameState.currentModule !== GameModule.Battle) {
+        await writeMemory(addresses.character_records + index * 0x84 + 0x28, mp, DataType.Short);
+      } else {
+        await writeMemory(addresses.battle_char_base + index * 104 + 0x28, mp, DataType.Short);
+      }
     },
     setStatus: async (status: number, index: number) => {
-      await writeMemory(addresses.battle_char_base + index * 104, status, DataType.Int);
+      if (gameState.currentModule !== GameModule.Battle) {
+        await writeMemory(addresses.character_records + index * 0x84, status, DataType.Byte);
+      } else {
+        await writeMemory(addresses.battle_char_base + index * 104, status, DataType.Int);
+      }
     },
     enableInvincibility: async () => {
       // Function to write state flags for all allies
@@ -678,6 +691,31 @@ export function useFF7(addresses: FF7Addresses) {
           address: 0x745606,
           params: [64, 263, 0, 0, 0],
         }]);
+      }
+    },
+    async toggleLimitBar() {
+      let limit = 0xFF;
+      if (ff7.gameState.currentModule !== GameModule.Battle) {
+        let limit = gameState.partyMembers[0].limit;
+        if (limit !== 0xFF) limit = 0xFF; else limit = 0;
+        for (let i = 0; i < 3; i++) {
+          const idx = gameState.partyMemberIds[i];
+          if (idx === 0xFF) continue;
+          await writeMemory(addresses.character_records + idx * 0x84 + 0xf, limit, DataType.Byte);
+        }
+      } else {
+        let limit = gameState.battleAllies[0].limit;
+        if (limit !== 0xFF) {
+          for (let i = 0; i < 3; i++) {
+            await writeMemory(addresses.battle_char_array + i * 0x34 + 0x8, 0xFF, DataType.Short);
+          }
+        } else {
+          await ff7.callGameFns([
+            {address: 0x434df3, params: [0]},
+            {address: 0x434df3, params: [1]},
+            {address: 0x434df3, params: [2]},
+          ]);
+        }
       }
     }
   };

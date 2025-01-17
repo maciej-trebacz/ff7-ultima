@@ -19,7 +19,10 @@ pub fn read_world_current_model(addresses: &FF7Addresses) -> Result<WorldModel, 
     }
 
     let triangle_ptr = read_memory_int(address + 0x60)? as u32;
-    let location_id = ((read_memory_byte(triangle_ptr + 0xb)? as u8) & 0x7f) >> 1;
+    let mut location_id = 255;
+    if triangle_ptr != 0 {
+        location_id = ((read_memory_byte(triangle_ptr + 0xb)? as u8) & 0x7f) >> 1;
+    }
 
     Ok(WorldModel {
         index: 0,

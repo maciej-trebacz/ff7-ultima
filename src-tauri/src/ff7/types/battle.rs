@@ -12,7 +12,7 @@ pub struct BattleCharObj {
     pub mp: u16,
     pub max_mp: u16,
     pub atb: u16,
-    pub limit: u8,
+    pub limit: u16,
     pub scene_id: u8,
 }
 

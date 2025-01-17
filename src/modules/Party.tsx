@@ -7,8 +7,6 @@ import { AddItemModal } from "@/components/modals/AddItemModal";
 import { AddMateriaModal } from "@/components/modals/AddMateriaModal";
 import { KeyItemsModal } from "@/components/modals/KeyItemsModal";
 
-const PHS = ['Cloud', 'Barret', 'Tifa', 'Aeris', 'Red XIII', 'Yuffie', 'Cait Sith', 'Vincent', 'Cid'];
-
 interface PartyProps {
   ff7: FF7;
 }
@@ -32,10 +30,12 @@ export function Party({ ff7 }: PartyProps) {
     }
   };
 
+  const names = ff7.gameState.partyMembers.map(p => p.name);
+
   const partyMemberSelect = (slot: number) => {
     return (
       <Select
-        value={('' + ff7.gameState.partyMembers[slot]) || "1"}
+        value={('' + ff7.gameState.partyMemberIds[slot]) || "1"}
         onValueChange={v => ff7.setPartyMemberSlot(slot, parseInt(v))}
       >
         <SelectTrigger>
@@ -43,7 +43,7 @@ export function Party({ ff7 }: PartyProps) {
         </SelectTrigger>
         <SelectContent className="h-[250px]">
           <SelectItem value="255">Empty</SelectItem>
-          {PHS.map((p, i) => (
+          {names.map((p, i) => (
             <SelectItem key={i} value={"" + i}>
               {p}
             </SelectItem>
@@ -69,31 +69,61 @@ export function Party({ ff7 }: PartyProps) {
           <Row label="Slot 3">{partyMemberSelect(2)}</Row>
         </div>
       </div>
-      <div className="flex gap-2 mt-1">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => setIsAddItemModalOpen(true)}
-          size="sm"
-        >
-          Add Items
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => setIsAddMateriaModalOpen(true)}
-          size="sm"
-        >
-          Add Materia
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => setIsKeyItemsModalOpen(true)}
-          size="sm"
-        >
-          Manage Key Items
-        </Button>
+      <div className="flex gap-1">
+        <div className="flex-1 flex flex-col gap-1 mt-1">
+          <div className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsAddItemModalOpen(true)}
+              size="sm"
+            >
+              Add Items
+            </Button>
+          </div>
+          <div className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsAddMateriaModalOpen(true)}
+              size="sm"
+            >
+              Add Materia
+            </Button>
+          </div>
+          <div className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsKeyItemsModalOpen(true)}
+              size="sm"
+            >
+              Manage Key Items
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col gap-1 mt-1">
+          <div className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => ff7.fullHeal()}
+              size="sm"
+            >
+              Full Party Heal
+            </Button>
+          </div>
+          <div className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => ff7.toggleLimitBar()}
+              size="sm"
+            >
+              Toggle Limit Bars
+            </Button>
+          </div>
+        </div>
       </div>
 
       <AddItemModal

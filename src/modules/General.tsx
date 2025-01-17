@@ -104,6 +104,7 @@ export function General(props: { ff7: FF7 }) {
     };
   });
 
+  const names = ff7.gameState.partyMembers.map(p => p.name);
   const Menu = ['Item', 'Magic', 'Materia', 'Equip', 'Status', 'Order', 'Limit', 'Config', 'PHS', 'Save']
 
   return (
@@ -193,6 +194,21 @@ export function General(props: { ff7: FF7 }) {
                 <ChevronDown className="h-3 w-3 ml-0.5 mt-0.5 opacity-50" />
               </PopoverTrigger>
               <PopoverContent className="text-xs flex flex-col gap-1">
+                {names.map((ally, index) => (
+                  <label className="flex bg-zinc-800 p-1 px-2 rounded-sm flex-col gap-2" key={index}>
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-1">{ally}</div>
+                      <label className="flex gap-1 items-center">
+                        show
+                        <Checkbox checked={ff7.partyMemberVisible(index)} onClick={(e) => ff7.togglePartyMemberVisibility(index)} />
+                      </label>
+                      <label className="flex gap-1 items-center">
+                        lock
+                        <Checkbox checked={ff7.partyMemberLocked(index)} onClick={(e) => ff7.togglePartyMemberLocking(index)} />
+                      </label>
+                    </div>
+                  </label>
+                ))}
                 <div className="flex justify-center">
                   <a className="cursor-pointer hover:underline" onClick={() => { ff7.togglePartyMemberVisibility(-1); ff7.togglePartyMemberLocking(-1) }}>Toggle all</a>
                 </div>
@@ -207,7 +223,7 @@ export function General(props: { ff7: FF7 }) {
           >
             {state.gameMoment}
           </Row>
-          <GameMomentModal 
+          <GameMomentModal
             isOpen={isGameMomentModalOpen}
             onClose={closeGameMomentModal}
             onSubmit={onSubmitGameMoment}
