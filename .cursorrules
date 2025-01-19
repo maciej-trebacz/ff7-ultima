@@ -1,0 +1,9 @@
+This project is a Tauri 2.0 app that uses Rust on the backend (src-tauri directory) and TypeScript for the frontend (src directory). The TypeScript part utilizes shadcn-ui components and TailwindCSS for styling. The UI uses a dark theme with "slate" base color. When writing UI code make sure it's sleek and compact, use small buttons and minimal padding.
+
+## Updating to a new version (build for release)
+
+To update to a new version several edits need to be made:
+
+1. Update the app version number in `src/Cargo.toml`, `package.json`, and `tauri.conf.json`.
+2. Run the build.ps1 script (this should be done by the user manually)
+3. Update the `updater.json` file with the new version number in the `version` field and also in the `url` field, update the `signature` using contents of the file: `src-tauri/target/release/bundle/nsis/FF7 Ultima_[version]_x64-setup.exe.sig`

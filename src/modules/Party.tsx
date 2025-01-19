@@ -39,13 +39,15 @@ export function Party({ ff7 }: PartyProps) {
         onValueChange={v => ff7.setPartyMemberSlot(slot, parseInt(v))}
       >
         <SelectTrigger>
-          <SelectValue />
+          <span className="truncate w-[55px] text-right">
+            <SelectValue />
+          </span>
         </SelectTrigger>
         <SelectContent className="h-[250px]">
-          <SelectItem value="255">Empty</SelectItem>
+          <SelectItem value="255">[Empty]</SelectItem>
           {names.map((p, i) => (
             <SelectItem key={i} value={"" + i}>
-              {p}
+              {p || "[Unnamed]"}
             </SelectItem>
           ))}
         </SelectContent>

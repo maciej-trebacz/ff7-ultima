@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.1.4 (2025-01-19)
+
+### General
+
+* fixed the display of party member names in the party dropdowns when they're too long
+* when changing party members while in the menu it will now refresh automatically to show the new member portrait and their stats
+
 ## 1.1.3 (2025-01-17)
 
 ### General

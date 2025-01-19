@@ -638,6 +638,13 @@ export function useFF7(addresses: FF7Addresses) {
     },
     async setPartyMemberSlot(slot: number, id: number) {
       await writeMemory(addresses.party_member_ids + slot, id, DataType.Byte);
+      await callGameFns([
+        {address: 0x6cd13a, params: []},
+        {address: 0x6c545b, params: [slot]},
+        {address: 0x5cb2cc, params: [slot]},
+        {address: 0x5cb127, params: []},
+      ]);
+
     },
     async getItemNames() {
       return invoke("read_item_names");

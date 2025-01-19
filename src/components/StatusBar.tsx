@@ -15,7 +15,7 @@ export function StatusBar(props: { ff7: FF7 }) {
 
   return (
     <>
-      <div className="h-6 bg-zinc-800 items-center flex px-2 text-xs gap-2 flex-shrink">
+      <div className="h-6 bg-zinc-800 items-center flex px-2 text-xs gap-2 flex-shrink-0">
         <div className="flex items-center">
           <div className={cn(connected ? "bg-green-500" : "bg-red-500", "h-[7px] w-[7px] rounded-full mr-1.5 ")}></div>
           {connected ? "Connected" : "Disconnected"}
