@@ -701,9 +701,9 @@ export function useFF7(addresses: FF7Addresses) {
       }
     },
     async toggleLimitBar() {
-      let limit = 0xFF;
       if (ff7.gameState.currentModule !== GameModule.Battle) {
-        let limit = gameState.partyMembers[0].limit;
+        const slot1Id = ff7.gameState.partyMemberIds[0];
+        let limit = ff7.gameState.partyMembers[slot1Id].limit;
         if (limit !== 0xFF) limit = 0xFF; else limit = 0;
         for (let i = 0; i < 3; i++) {
           const idx = gameState.partyMemberIds[i];
@@ -717,11 +717,10 @@ export function useFF7(addresses: FF7Addresses) {
             await writeMemory(addresses.battle_char_array + i * 0x34 + 0x8, 0xFF, DataType.Short);
           }
         } else {
-          await ff7.callGameFns([
-            {address: 0x434df3, params: [0]},
-            {address: 0x434df3, params: [1]},
-            {address: 0x434df3, params: [2]},
-          ]);
+          await ff7.callGameFns([0, 1, 2].map(i => ({
+            address: 0x434df3,
+            params: [i]
+          })));
         }
       }
     }

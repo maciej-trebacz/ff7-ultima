@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.5 (2025-01-19)
+
+### General
+
+* fixed toggling the limit bars outside battles
+
 ## 1.1.4 (2025-01-19)
 
 ### General
