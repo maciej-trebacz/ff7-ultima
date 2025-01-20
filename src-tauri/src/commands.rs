@@ -1,9 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::ff7;
-use crate::ff7::addresses::FF7Addresses;
-use crate::ff7::types::EnemyData;
-use crate::utils::memory;
+use ff7_lib::ff7;
+use ff7_lib::ff7::addresses::FF7Addresses;
+use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem};
+use ff7_lib::utils::memory;
 use tauri::ipc::Invoke;
 
 #[tauri::command]

@@ -790,22 +790,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "ff7-ultima"
+name = "ff7-lib"
 version = "1.1.4"
 dependencies = [
  "lazy_static",
+ "log",
  "parking_lot",
  "process-memory",
  "serde",
  "serde_json",
  "sysinfo",
+ "thiserror 1.0.69",
+ "winapi",
+]
+
+[[package]]
+name = "ff7-ultima"
+version = "1.1.4"
+dependencies = [
+ "ff7-lib",
+ "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-global-shortcut",
  "tauri-plugin-shell",
  "tauri-plugin-updater",
  "tauri-plugin-window-state",
- "winapi",
  "windows-hotkeys",
 ]
 

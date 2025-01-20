@@ -1,10 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod commands;
-mod ff7;
 mod updater;
-mod utils;
 
-use utils::process;
+use ff7_lib::utils::process;
 
 fn main() {
     let process_names = vec!["ff7.exe".to_string(), "ff7_en.exe".to_string()];
