@@ -1,10 +1,16 @@
 # Change Log
 
-## 1.1.5 (2025-01-19)
+## 1.1.5 (2025-01-20)
 
 ### General
 
 * fixed toggling the limit bars outside battles
+
+### Field
+
+* display field id properly for wm* fields
+* show field names for wm* destinations in the Warp to Field dialog
+* add a "world map" destination when warping to fields that have entry points from the world map
 
 ## 1.1.4 (2025-01-19)
 

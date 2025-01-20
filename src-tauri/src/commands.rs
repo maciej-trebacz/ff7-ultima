@@ -106,6 +106,11 @@ pub fn read_key_item_names() -> Result<Vec<String>, String> {
     ff7::data::read_key_item_names(&FF7Addresses::new())
 }
 
+#[tauri::command]
+pub fn read_world_field_tbl_data() -> Result<Vec<WorldFieldTblItem>, String> {
+    ff7::data::world::read_world_field_tbl_data(&FF7Addresses::new())
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -128,5 +133,6 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         read_item_names,
         read_materia_names,
         read_key_item_names,
+        read_world_field_tbl_data,
     ]
 }

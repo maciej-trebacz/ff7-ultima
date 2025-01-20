@@ -82,6 +82,14 @@ export interface WorldModel {
   chocobo_tracks: boolean;
 }
 
+export interface WorldFieldTblItem {
+  x: number;
+  y: number;
+  field_id: number;
+  triangle_id: number;
+  direction: number;
+}
+
 export enum WorldModelIds {
   Cloud = 0,
   Tifa = 1,

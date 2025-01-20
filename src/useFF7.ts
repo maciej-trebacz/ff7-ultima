@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
-import { EnemyData, GameModule } from "./types";
+import { EnemyData, GameModule, WorldFieldTblItem } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
@@ -723,6 +723,14 @@ export function useFF7(addresses: FF7Addresses) {
           })));
         }
       }
+    },
+    async getWorldFieldTblData() {
+      await callGameFn(addresses.world_load_data_fn, [addresses.str_field_tbl, 0x600, addresses.world_field_tbl_data, 0])
+      await waitFor(async () => {
+        const data = await readMemory(addresses.world_field_tbl_data, DataType.Int);
+        return data !== 0;
+      });
+      return await invoke("read_world_field_tbl_data") as WorldFieldTblItem[];
     }
   };
 

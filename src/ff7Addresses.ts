@@ -83,6 +83,9 @@ export interface FF7Addresses {
   character_records: number;
   battle_char_array: number;
   party_objects: number;
+  world_field_tbl_data: number;
+  str_field_tbl: number;
+  world_load_data_fn: number;
 }
 
 export function useFF7Addresses() {

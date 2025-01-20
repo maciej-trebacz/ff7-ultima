@@ -1,14 +1,9 @@
-import { Modal } from "@/components/Modal";
 import Row from "@/components/Row";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AutocompleteInput from "@/components/Autocomplete";
 import { FF7 } from "@/useFF7";
-import { useState, useEffect } from "react";
-import scenes from "@/data/scenes.json";
-import { SceneSource, SceneDestination, Scene } from "@/types/scenes";
+import { useState } from "react";
+import { WarpFieldModal } from "@/components/modals/WarpFieldModal";
 import {
   Tooltip,
   TooltipContent,
@@ -17,18 +12,9 @@ import {
 } from "@/components/ui/tooltip";
 import { EditPopover } from "@/components/EditPopover";
 
-// Transform scenes data into a format suitable for autocomplete
-const fieldList = Object.values(scenes).map(scene => ({
-  id: scene.id,
-  name: `${scene.id} - ${scene.fieldName}${scene.mapNames.length > 0 ? ` (${scene.mapNames[0]})` : ''}`
-}));
-
 export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
-  const [fieldId, setFieldId] = useState<string>("");
-  const [selectedDestination, setSelectedDestination] = useState<number | undefined>();
-  const [availableDestinations, setAvailableDestinations] = useState<SceneSource[]>([]);
   const [isWarpModalOpen, setIsWarpModalOpen] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -36,49 +22,20 @@ export function Field(props: { ff7: FF7 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (fieldId) {
-      const selectedField: Scene = (scenes as any)[fieldId];
-      if (selectedField) {
-        const destinations = selectedField.sources.filter(source => source.destination);
-        setAvailableDestinations(destinations);
-        setSelectedDestination(destinations[0]?.id);
-      }
-    } else {
-      setAvailableDestinations([]);
-      setSelectedDestination(undefined);
-    }
-  }, [fieldId]);
-
   const openWarpModal = () => {
-    setFieldId("");
-    setSelectedDestination(undefined);
-    setAvailableDestinations([]);
     setIsWarpModalOpen(true);
-    setTimeout(() => {
-      (document.getElementById('field-id-input') as any)?.focus();
-    }, 50);
   };
 
   const closeWarpModal = () => {
     setIsWarpModalOpen(false);
   };
 
-  const onSubmitFieldId = (id: number | null) => {
-    if (id === null) {
+  const onWarpSubmit = (fieldId: number | null, destination?: any) => {
+    if (fieldId === null) {
       return;
     }
-    const destination = availableDestinations.find(source => source.id === selectedDestination);
-    ff7.warpToFieldId(id, destination?.destination);
+    ff7.warpToFieldId(fieldId, destination);
     closeWarpModal();
-  };
-
-  const onWarpModalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
-      closeWarpModal();
-    } else if (e.key === "Enter") {
-      onSubmitFieldId(parseInt(fieldId));
-    }
   };
 
   const openEditPopover = (title: string, value: string, modelIndex: number, coord: "x" | "y" | "z" | "direction") => {
@@ -119,7 +76,7 @@ export function Field(props: { ff7: FF7 }) {
                     <span className="cursor-pointer" onClick={openWarpModal}>
                       {state.fieldId}
                       {state.fieldId > 0 && (
-                        <span className="text-zinc-400 ml-1">({state.fieldName})</span>
+                        <span className="text-zinc-400 ml-1">({state.fieldId > 63 ? state.fieldName : `wm${state.fieldId - 1}`})</span>
                       )}
                     </span>
                     <Button size="xs" className="ml-2" onClick={openWarpModal}>
@@ -146,46 +103,12 @@ export function Field(props: { ff7: FF7 }) {
         </div>
       </div>
 
-      <Modal
-        open={isWarpModalOpen}
-        setIsOpen={setIsWarpModalOpen}
-        title="Warp to Field"
-        buttonText="Warp"
-        callback={() => onSubmitFieldId(parseInt(fieldId))}
-      >
-        <div className="mt-4 space-y-4">
-          <AutocompleteInput
-            battles={fieldList}
-            isVisible={isWarpModalOpen}
-            onSelect={(id) => setFieldId(id?.toString() ?? "")}
-            onAccept={onWarpModalKeyDown}
-            placeholder="Enter field name or ID"
-          />
-
-          {availableDestinations.length > 0 && (
-            <Select
-              value={"" + selectedDestination}
-              onValueChange={(value) => setSelectedDestination(
-                parseInt(value)
-              )}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="No destinations available" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableDestinations.map((source, index) => (
-                  <SelectItem 
-                    key={index} 
-                    value={"" + source.id}
-                  >
-                    From: {source.fieldName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      </Modal>
+      <WarpFieldModal
+        isOpen={isWarpModalOpen}
+        onClose={closeWarpModal}
+        onSubmit={onWarpSubmit}
+        ff7={ff7}
+      />
 
       <h4 className="text-center mt-2 mb-1 font-medium">Experimental save states</h4>
       <div className="flex gap-1 justify-center mb-4">
@@ -199,7 +122,6 @@ export function Field(props: { ff7: FF7 }) {
 
       {state.fieldModels.length > 0 && state.fieldModels[0] && (
         <>
-
           <h4 className="text-center mt-2 mb-1 font-medium">Field Models</h4>
           <table className="w-full">
             <thead className="bg-zinc-800 text-xs text-left">
@@ -318,7 +240,6 @@ export function Field(props: { ff7: FF7 }) {
             </tbody>
           </table>
         </>
-
       )}
     </div>
   );
