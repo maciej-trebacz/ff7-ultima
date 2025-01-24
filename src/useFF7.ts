@@ -4,12 +4,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
-import { EnemyData, GameModule, WorldFieldTblItem } from "./types";
+import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
 import { useEffect } from "react";
 import { OpcodeWriter } from "./opcodewriter";
+import { loadHackSettings } from "./settings";
 
 type ModelObj = {
   data: number[];
@@ -36,24 +37,44 @@ export function useFF7(addresses: FF7Addresses) {
 
   useEffect(() => {
     async function initializeGfxFlip() {
-      if (connected) {
-        // Call GfxFlip and return
-        let code = hex("55 8B EC 8B 45 08 50 E8 7E 45 24 00 83 C4 04 5D C3");
-        await writeMemory(fnCallerMainAddr, code, DataType.Buffer);
+      // Call GfxFlip and return
+      let code = hex("55 8B EC 8B 45 08 50 E8 7E 45 24 00 83 C4 04 5D C3");
+      await writeMemory(fnCallerMainAddr, code, DataType.Buffer);
 
-        // Replace the call to GfxFlip in WinMain
-        code = hex("E8 4F E2 D9 FF");
-        await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
+      // Replace the call to GfxFlip in WinMain
+      code = hex("E8 4F E2 D9 FF");
+      await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
 
-        // Add a function for overwriting code once it runs
-        code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
-        await writeMemory(fnCallerBaseAddr, code, DataType.Buffer);
+      // Add a function for overwriting code once it runs
+      code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
+      await writeMemory(fnCallerBaseAddr, code, DataType.Buffer);
 
-        setMemoryProtection(fnCallerBaseAddr, 0x50);
+      setMemoryProtection(fnCallerBaseAddr, 0x50);
+    }
+
+    async function applyHackSettings() {
+      const settings = await loadHackSettings();
+      if (settings) {
+        if (settings.speed) await ff7.setSpeed(parseFloat(settings.speed));
+        if (settings.skipIntros !== undefined) settings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
+        if (settings.unfocusPatch !== undefined) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+        if (settings.swirlSkip !== undefined) settings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
+        if (settings.randomBattles !== undefined) {
+          if (settings.randomBattles === RandomEncounters.Off) {
+            ff7.disableBattles();
+          } else if (settings.randomBattles === RandomEncounters.Normal) {
+            ff7.enableBattles();
+          } else if (settings.randomBattles === RandomEncounters.Max) {
+            ff7.maxBattles();
+          }
+        }
       }
     }
 
-    initializeGfxFlip();
+    if (connected) {
+      initializeGfxFlip();
+      applyHackSettings();
+    }
   }, [connected]);
 
   type FnCall = { address: number; params?: number[] };

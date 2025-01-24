@@ -13,6 +13,7 @@ import { General } from "./modules/General";
 import { Field } from "./modules/Field";
 import { World } from "./modules/World";
 import { Battle } from "./modules/Battle";
+import { useShortcuts } from './useShortcuts';
 
 function Home() {
   const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.General);
@@ -30,51 +31,8 @@ function Home() {
     return <></>
   }
 
-  const hotkeys: Record<string, (ff7: FF7) => void> = {
-    "F1": async (ff7) => {
-      await ff7.skipFMV();
-    },
-    "F2": async (ff7) => {
-      await ff7.endBattle(false);
-    },
-    "F3": async (ff7) => {
-      await ff7.setSpeed(4);
-    },
-    "F4": async (ff7) => {
-      await ff7.setSpeed(1);
-    },
-    "F5": async (ff7) => {
-      await ff7.loadState();
-    },
-    "F6": async (ff7) => {
-      await ff7.saveState();
-    },
-    "F7": async (ff7) => {
-      await ff7.fullHeal();
-    },
-    "F8": async (ff7) => {
-      await ff7.toggleLimitBar();
-    },
-    "F9": async (ff7) => {
-      await ff7.gameOver();
-    },
-  }
-
-  useEffect(() => {
-    const registerHotkeys = async () => {
-      for (const [hotkey, callback] of Object.entries(hotkeys)) {
-        if (await isRegistered(hotkey)) {
-          await unregister(hotkey);
-        }
-        await register(hotkey, (event) => {
-          // FIXME: This is hacky but what can you do
-          // The problem is that the ff7 object is stale in the callback so we use the global one
-          event.state === "Pressed" && callback(((window as unknown) as any).FF7);
-        });
-      }
-    }
-    registerHotkeys();
-  }, [])
+  // Use the new shortcuts system
+  useShortcuts();
 
   const renderTabContent = () => {
     switch (currentTab) {

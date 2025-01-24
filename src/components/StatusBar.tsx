@@ -54,8 +54,8 @@ export function StatusBar(props: { ff7: FF7 }) {
           </div>
         </div>
       </div>
+      <HelpModal isOpen={isHelpModalOpen} setIsOpen={setIsHelpModalOpen} ff7={ff7} />
       <AboutModal isOpen={isAboutModalOpen} setIsOpen={setIsAboutModalOpen} />
-      <HelpModal isOpen={isHelpModalOpen} setIsOpen={setIsHelpModalOpen} />
     </>
   );
 }

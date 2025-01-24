@@ -4,6 +4,8 @@ import { Switch } from "./components/ui/switch";
 import { useAlert } from "./hooks/useAlert";
 import { GameModule, RandomEncounters, Tabs } from "./types";
 import { FF7 } from "./useFF7";
+import { useEffect } from "react";
+import { HackSettings, loadHackSettings, saveHackSettings } from "./settings";
 
 const ExpMultiplier = ({ ff7 }: { ff7: FF7 }) => {
   return (
@@ -61,13 +63,32 @@ const InstantATB = ({ ff7 }: { ff7: FF7 }) => {
 
 export function Hacks(props: { ff7: FF7, tab: Tabs }) {
   const ff7 = props.ff7;
-
   const { showAlert, AlertComponent } = useAlert();
+
+  // Load settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      const settings = await loadHackSettings();
+      if (settings) {
+        if (settings.speed) await setSpeed(settings.speed);
+        if (settings.skipIntros !== undefined) settings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
+        if (settings.unfocusPatch !== undefined) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+        if (settings.swirlSkip !== undefined) settings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
+        if (settings.randomBattles !== undefined) await setRandomBattles(settings.randomBattles);
+      }
+    };
+    loadSettings();
+  }, []);
 
   const setSpeed = async (speed: string) => {
     const check = await ff7.setSpeed(parseFloat(speed));
     if (!check) {
       showAlert("Not supported", "This version of FFNx is not supported for setting speed. Use the built-in speedhack instead.");
+    } else {
+      await saveHackSettings({ 
+        ...(await loadHackSettings() || {}),
+        speed
+      });
     }
   };
 
@@ -79,7 +100,39 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
     } else if (randomEncounters === RandomEncounters.Max) {
       ff7.maxBattles();
     }
+    await saveHackSettings({ 
+      ...(await loadHackSettings() || {}),
+      randomBattles: randomEncounters
+    });
   }
+
+  const toggleSkipIntros = async () => {
+    const newValue = !ff7.introDisabled;
+    newValue ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
+    await saveHackSettings({ 
+      ...(await loadHackSettings() || {}),
+      skipIntros: newValue
+    });
+  };
+
+  const toggleUnfocusPatch = async () => {
+    if (ff7.gameState.isFFnx) return;
+    const newValue = !ff7.gameState.unfocusPatchEnabled;
+    newValue ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+    await saveHackSettings({ 
+      ...(await loadHackSettings() || {}),
+      unfocusPatch: newValue
+    });
+  };
+
+  const toggleSwirlSkip = async () => {
+    const newValue = !ff7.gameState.battleSwirlDisabled;
+    newValue ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
+    await saveHackSettings({ 
+      ...(await loadHackSettings() || {}),
+      swirlSkip: newValue
+    });
+  };
 
   return ( 
     <>
@@ -99,17 +152,17 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
       </Row>
 
       <Row label="Skip intros">
-        <Switch checked={ff7.introDisabled} onClick={() => !ff7.introDisabled ? ff7.enableSkipIntro() : ff7.disableSkipIntro()} />
+        <Switch checked={ff7.introDisabled} onClick={toggleSkipIntros} />
       </Row>
 
       <div className={ff7.gameState.isFFnx ? "opacity-50" : ""} title="FFNx already has this feature">
         <Row label="Unfocus patch">
-          <Switch checked={ff7.gameState.unfocusPatchEnabled} onClick={() => !ff7.gameState.isFFnx ? (ff7.gameState.unfocusPatchEnabled ? ff7.unpatchWindowUnfocus() : ff7.patchWindowUnfocus()) : null} />
+          <Switch checked={ff7.gameState.unfocusPatchEnabled} onClick={toggleUnfocusPatch} />
         </Row>
       </div>
       
       <Row label="Swirl skip">
-        <Switch checked={ff7.gameState.battleSwirlDisabled} onClick={() => ff7.gameState.battleSwirlDisabled ? ff7.enableBattleSwirl() : ff7.disableBattleSwirl()} />
+        <Switch checked={ff7.gameState.battleSwirlDisabled} onClick={toggleSwirlSkip} />
       </Row>
 
       <Row label="Random battles">

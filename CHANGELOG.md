@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.6 (2025-01-24)
+
+### General
+
+* added keyboard shortcut remapping
+* remember last used hacks between app launches
+* automatically apply hacks between game restarts
+
 ## 1.1.5 (2025-01-20)
 
 ### General
