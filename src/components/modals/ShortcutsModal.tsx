@@ -5,31 +5,20 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { formatKeyForDisplay } from "@/lib/utils";
 
-interface HelpModalProps {
+interface ShortcutsModalProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   ff7: FF7;
 }
 
-export function HelpModal({ isOpen, setIsOpen, ff7 }: HelpModalProps) {
+export function ShortcutsModal({ isOpen, setIsOpen, ff7 }: ShortcutsModalProps) {
   const { 
     shortcuts, 
     listeningFor, 
     startListening, 
     stopListening, 
-    updateShortcut,
-    unregisterAll,
-    registerAll
+    updateShortcut
   } = useShortcuts();
-
-  // Unregister shortcuts when modal opens, re-register when it closes
-  useEffect(() => {
-    if (isOpen) {
-      unregisterAll();
-    } else {
-      registerAll();
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
@@ -114,4 +103,4 @@ export function HelpModal({ isOpen, setIsOpen, ff7 }: HelpModalProps) {
       </div>
     </Modal>
   );
-}
+} 

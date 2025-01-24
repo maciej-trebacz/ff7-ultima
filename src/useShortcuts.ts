@@ -29,7 +29,6 @@ function convertToTauriAccelerator(key: string): string {
 export function useShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>(defaultShortcuts);
   const [listeningFor, setListeningFor] = useState<string | null>(null);
-  const [areShortcutsRegistered, setAreShortcutsRegistered] = useState(true);
 
   // Load shortcuts from store on mount
   useEffect(() => {
@@ -51,9 +50,11 @@ export function useShortcuts() {
     loadSavedShortcuts();
   }, []);
 
+  // Register all shortcuts
   useEffect(() => {
     const registerAllShortcuts = async () => {
-      if (!areShortcutsRegistered) return;
+      // Don't register any shortcuts while listening for a new binding
+      if (listeningFor) return;
       
       for (const shortcut of shortcuts) {
         if (!shortcut.key) continue; // Skip unbound shortcuts
@@ -76,7 +77,7 @@ export function useShortcuts() {
       }
     };
     registerAllShortcuts();
-  }, [shortcuts, areShortcutsRegistered]);
+  }, [shortcuts, listeningFor]);
 
   const updateShortcut = async (action: string, newKey: string) => {
     const shortcut = shortcuts.find(s => s.action === action);
@@ -111,7 +112,9 @@ export function useShortcuts() {
     }
   };
 
-  const startListening = (action: string) => {
+  const startListening = async (action: string) => {
+    // Unregister all shortcuts before starting to listen
+    await unregisterAll();
     setListeningFor(action);
   };
 
@@ -119,22 +122,11 @@ export function useShortcuts() {
     setListeningFor(null);
   };
 
-  const registerAll = () => {
-    console.debug("registerAll")
-    setAreShortcutsRegistered(true);
-  };
-
   return {
     shortcuts,
     listeningFor,
     startListening,
     stopListening,
-    updateShortcut,
-    unregisterAll: async function () {
-      console.debug("unregisterAll");
-      await unregisterAll();
-      setAreShortcutsRegistered(false);
-    },
-    registerAll
+    updateShortcut
   };
 } 
