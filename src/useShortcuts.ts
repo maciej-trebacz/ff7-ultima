@@ -68,8 +68,10 @@ export function useShortcuts() {
         try {
           console.debug(`registering ${accelerator} for ${shortcut.action}`);
           await register(accelerator, (event) => {
-            console.debug(`${shortcut.key} pressed, calling ${shortcut.action}`);
-            event.state === "Pressed" && shortcut.callback((window as any).FF7);
+            if (event.state === "Pressed") {
+              console.debug(`${shortcut.key} pressed, calling ${shortcut.action}`);
+              shortcut.callback((window as any).FF7);
+            }
           });
         } catch (e) {
           console.error(`Failed to register shortcut ${shortcut.key}:`, e);

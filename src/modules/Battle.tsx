@@ -1,6 +1,6 @@
 import Row from "@/components/Row";
 import { statuses } from "@/ff7Statuses";
-import { BattleCharObj, ChocoboRating, ElementalEffect, EnemyData } from "@/types";
+import { BattleCharObj, ChocoboRating, ElementalEffect, EnemyData, GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatStatus, getElementName } from "@/util";
 import { useState } from "react";
@@ -79,6 +79,15 @@ export function Battle(props: { ff7: FF7 }) {
   const actors = currentAllyEditing !== null && currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
   const actorIdx = currentAllyEditing !== null && currentAllyEditing > 3 ? currentAllyEditing - 4 : currentAllyEditing;
 
+  const allies: (BattleCharObj | null)[] = ff7.gameState.battleAllies
+  if (allies.length < 3) {
+    for (let i = 0; i < 3 - allies.length; i++) {
+      allies.push(null);
+    }
+  }
+
+  const enemies = ff7.gameState.battleEnemies.sort((a, b) => a.scene_id - b.scene_id) || [];
+
   return (
     <div>
       <div className="flex-1">
@@ -140,15 +149,26 @@ export function Battle(props: { ff7: FF7 }) {
       <table className="w-full">
         <thead className="bg-zinc-800 text-xs text-left">
           <tr>
-            <th className="p-2 pb-1">Name</th>
-            <th className="p-1 px-2">HP</th>
-            <th className="p-1 px-2">MP</th>
+            <th className="p-2 pb-1 w-[130px]">Name</th>
+            <th className="p-1 px-2 w-[100px]">HP</th>
+            <th className="p-1 px-2 w-[66px]">MP</th>
             <th className="p-1">Status</th>
+            <th className="px-1 w-7">&nbsp;</th>
           </tr>
         </thead>
         <tbody>
-          {ff7.gameState.battleAllies.map((char, index) => {
-            if (!char.name.trim()) return null;
+          {allies.map((char, index) => {
+            if (!char?.name.trim()) return (
+              <tr key={index} className="bg-zinc-800 text-xs group">
+                <td className="p-1 pl-2 text-nowrap w-[130px] text-zinc-500 group-last:pb-2">
+                  [Empty]
+                </td>
+                <td className="p-1 px-2">-</td>
+                <td className="p-1 px-2">-</td>
+                <td className="p-1 px-2">-</td>
+                <td></td>
+              </tr>
+            )
             return (
               <tr key={index} className="bg-zinc-800 text-xs group">
                 <td className="p-1 pl-2 text-nowrap w-[130px] font-bold group-last:pb-2">
@@ -161,7 +181,7 @@ export function Battle(props: { ff7: FF7 }) {
                     ></progress>
                   </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                <td className="p-1 cursor-pointer px-2 text-nowrap w-[100px] hover:bg-zinc-700">
                   <EditPopover
                     open={popoverOpen && currentAllyEditing === index && editTitle === "HP"}
                     onOpenChange={setPopoverOpen}
@@ -181,19 +201,9 @@ export function Battle(props: { ff7: FF7 }) {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index); e.stopPropagation() }}>💀</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Kill ally</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </EditPopover>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                <td className="p-1 cursor-pointer px-2 text-nowrap w-[66px] hover:bg-zinc-700">
                   <EditPopover
                     open={popoverOpen && currentAllyEditing === index && editTitle === "MP"}
                     onOpenChange={setPopoverOpen}
@@ -215,7 +225,19 @@ export function Battle(props: { ff7: FF7 }) {
                     </TooltipProvider>
                   </EditPopover>
                 </td>
-                <td className="p-1 cursor-pointer" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
+                <td className="p-1 cursor-pointer whitespace-pre hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
+                <td className="cursor-pointer">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={250}>
+                      <TooltipTrigger asChild>
+                        <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index); e.stopPropagation() }}>💀</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Kill ally</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </td>
               </tr>
             )
           })}
@@ -226,14 +248,15 @@ export function Battle(props: { ff7: FF7 }) {
       <table className="w-full">
         <thead className="bg-zinc-800 text-xs text-left">
           <tr>
-            <th className="p-2 pb-1">Name</th>
-            <th className="p-1 px-2">HP</th>
-            <th className="p-1 px-2">MP</th>
+            <th className="p-2 pb-1 w-[130px]">Name</th>
+            <th className="p-1 px-2 w-[100px]">HP</th>
+            <th className="p-1 px-2 w-[66px]">MP</th>
             <th className="p-1">Status</th>
+            <th className="px-1 w-7">&nbsp;</th>
           </tr>
         </thead>
-        <tbody>
-          {ff7.gameState.battleEnemies.map((char, index) => {
+        <tbody className={ff7.gameState.currentModule === GameModule.Battle ? "" : "!text-zinc-400"}>
+          {enemies.map((char, index) => {
             if (!char.name.trim()) return null;
             return (
               <tr key={index} className="bg-zinc-800 text-xs group">
@@ -258,7 +281,7 @@ export function Battle(props: { ff7: FF7 }) {
                     ></progress>
                   </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                <td className="p-1 cursor-pointer px-2 text-nowrap w-[100px] hover:bg-zinc-700">
                   <EditPopover
                     open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "HP"}
                     onOpenChange={setPopoverOpen}
@@ -278,19 +301,9 @@ export function Battle(props: { ff7: FF7 }) {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index + 4); e.stopPropagation() }}>💀</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Kill enemy</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </EditPopover>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap hover:bg-zinc-700">
+                <td className="p-1 cursor-pointer px-2 text-nowrap w-[66px] hover:bg-zinc-700">
                   <EditPopover
                     open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "MP"}
                     onOpenChange={setPopoverOpen}
@@ -312,7 +325,19 @@ export function Battle(props: { ff7: FF7 }) {
                     </TooltipProvider>
                   </EditPopover>
                 </td>
-                <td className="p-1 cursor-pointer hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
+                <td className="p-1 cursor-pointer whitespace-pre hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
+                <td className="cursor-pointer">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={250}>
+                      <TooltipTrigger asChild>
+                        <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index + 4); e.stopPropagation() }}>💀</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Kill enemy</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </td>
               </tr>
             )
           })}

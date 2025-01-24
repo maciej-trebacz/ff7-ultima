@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.1.7 (2025-01-24)
+
+### General
+
+* keyboard shortcuts didn't work when shortcuts window was open
+
+### Battle
+
+* small UI tweaks to allies & enemies sections making the tables more streamer-friendly
+
 ## 1.1.6 (2025-01-24)
 
 ### General

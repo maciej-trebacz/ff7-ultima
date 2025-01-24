@@ -1,6 +1,6 @@
 {
   "productName": "FF7 Ultima",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "identifier": "org.m4v3r.ff7-ultima",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,7 +12,7 @@
     "windows": [
       {
         "title": "Ultima - FF7 Real-time Game Editor",
-        "width": 580,
+        "width": 600,
         "height": 525,
         "theme": "Dark",
         "visible": true,

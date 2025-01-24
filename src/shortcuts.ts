@@ -11,7 +11,6 @@ export const defaultShortcuts: Shortcut[] = [
     key: "F1",
     action: "Skip FMV",
     callback: async (ff7) => {
-      console.debug("skipFMV");
       await ff7.skipFMV();
     },
   },

@@ -39,21 +39,22 @@ export function formatTime(seconds: number): string {
 }
 
 export const formatStatus = (status: number, flags: number, skipInvincibility?: boolean) => {
-  const statusList: string[] = [];
+  let statusCount = 0;
+  let statusList = [];
   for (const key in statuses) {
     if (status & statuses[key as keyof typeof statuses]) {
+      statusCount++;
       statusList.push(key);
     }
   }
   if (!skipInvincibility) {
-    if (flags & 0x1) {
-      statusList.push("ImmunePhy");
-    }
-    if (flags & 0x2) {
-      statusList.push("ImmuneMag");
-    }
+    if (flags & 0x1) statusCount++;
+    if (flags & 0x2) statusCount++;
   }
-  return statusList.join(", ");
+  if (statusCount === 0) {
+    return null;
+  }
+  return statusCount === 1 ? statusList[0] : `${statusCount} effects`;
 }
 
 export const getElementName = (element: number) => {
