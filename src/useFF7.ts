@@ -752,6 +752,15 @@ export function useFF7(addresses: FF7Addresses) {
         return data !== 0;
       });
       return await invoke("read_world_field_tbl_data") as WorldFieldTblItem[];
+    },
+    async getVariables(bank: number) {
+      return await invoke("read_variables_bank", { bank }) as number[];
+    },
+    async setVariable(bank: number, address: number, value: number) {
+      return await invoke("write_variable_8bit", { bank, address, value });
+    },
+    async setVariable16(bank: number, address: number, value: number) {
+      return await invoke("write_variable_16bit", { bank, address, value });
     }
   };
 

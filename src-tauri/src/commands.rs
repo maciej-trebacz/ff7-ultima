@@ -111,6 +111,21 @@ pub fn read_world_field_tbl_data() -> Result<Vec<WorldFieldTblItem>, String> {
     ff7::data::world::read_world_field_tbl_data(&FF7Addresses::new())
 }
 
+#[tauri::command]
+pub fn read_variables_bank(bank: u32) -> Result<Vec<u8>, String> {
+    ff7::data::general::read_variables_bank(bank, &FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn write_variable_8bit(bank: u32, address: u32, value: u8) -> Result<(), String> {
+    ff7::data::general::write_variable_8bit(bank, address, value, &FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn write_variable_16bit(bank: u32, address: u32, value: u16) -> Result<(), String> {
+    ff7::data::general::write_variable_16bit(bank, address, value, &FF7Addresses::new())
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -134,5 +149,8 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         read_materia_names,
         read_key_item_names,
         read_world_field_tbl_data,
+        read_variables_bank,
+        write_variable_8bit,
+        write_variable_16bit,
     ]
 }

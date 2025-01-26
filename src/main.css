@@ -7,6 +7,25 @@ html, body, #root {
   scrollbar-gutter: auto !important;
 }
 
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

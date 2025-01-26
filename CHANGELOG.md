@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.8 (2025-01-24)
+
+### General
+
+* added Variable Editor in the General tab to view & edit Field/World variables
+
 ## 1.1.7 (2025-01-24)
 
 ### General
