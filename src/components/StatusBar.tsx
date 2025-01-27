@@ -27,7 +27,7 @@ export function StatusBar(props: { ff7: FF7 }) {
           </div>
           <div className="h-4 w-px bg-zinc-600"></div>
           <div className="flex items-center">
-            Game Moment: {ff7.gameState.gameMoment}
+            Moment: {ff7.gameState.gameMoment}
           </div>
           <div className="h-4 w-px bg-zinc-600"></div>
           <div className="flex items-center">

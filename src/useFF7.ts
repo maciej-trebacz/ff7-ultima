@@ -23,7 +23,14 @@ type SaveState = {
   models: Array<ModelObj>;
 }
 
+type SnowBoardSaveState = {
+  globalObjData: number[];
+  entitiesData: number[];
+}
+
 const SaveStates: SaveState[] = [];
+
+const SnowBoardSaveStates: SnowBoardSaveState[] = [];
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
@@ -287,27 +294,36 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.sound_buffer_focus, 0, DataType.Byte);
     },
     skipFMV: async () => {
-      const isMoviePlaying = await readMemory(addresses.movie_is_playing, DataType.Byte);
-      if (isMoviePlaying === 0) {
-        return;
-      }
-      await writeMemory(addresses.movie_skip, 0x01, DataType.Byte);
+      if (gameState.currentModule === GameModule.Field) {
+        const isMoviePlaying = await readMemory(addresses.movie_is_playing, DataType.Byte);
+        if (isMoviePlaying === 0) {
+          return;
+        }
+        await writeMemory(addresses.movie_skip, 0x01, DataType.Byte);
 
-      // Check if we're skipping the intro FMV
-      if (gameState.fieldId === 116) {
-        const fieldObjPtr = await getFieldObjPtr();
-        // Fade
-        await writeMemory(fieldObjPtr + 0x4c, 0x01, DataType.Byte);
-        await writeMemory(fieldObjPtr + 0x4e, 0xff, DataType.Byte);
-        await writeMemory(fieldObjPtr + 0x50, 0xff, DataType.Byte);
+        // Check if we're skipping the intro FMV
+        if (gameState.fieldId === 116) {
+          const fieldObjPtr = await getFieldObjPtr();
+          // Fade
+          await writeMemory(fieldObjPtr + 0x4c, 0x01, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x4e, 0xff, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x50, 0xff, DataType.Byte);
 
-        // Scroll
-        await writeMemory(fieldObjPtr + 0x0a, 0x0a, DataType.Byte);
-        await writeMemory(fieldObjPtr + 0x0c, 0x23, DataType.Byte);
-        await writeMemory(fieldObjPtr + 0x1d, 0x4, DataType.Byte);
-        await writeMemory(fieldObjPtr + 0x1f, 0x0, DataType.Byte);
+          // Scroll
+          await writeMemory(fieldObjPtr + 0x0a, 0x0a, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x0c, 0x23, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x1d, 0x4, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x1f, 0x0, DataType.Byte);
 
-        // TODO: Play opening bombing mission music
+          // Play opening bombing mission music
+          await callGameFn(0x742055, [2])
+        }
+      } else if ([GameModule.SnowBoard, GameModule.Snowboard2].includes(gameState.currentModule)) {
+        await writeMemory(0xdd7cac, 0, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.Highway) {
+        await writeMemory(0xd85974, 0, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.Submarine) {
+        await writeMemory(0x980dac, 0, DataType.Byte);
       }
     },
     startBattle: async (battleId: number, musicId: number) => {
@@ -559,7 +575,7 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(base + index * length + 8, z << 12, DataType.SignedInt);
       await writeMemory(base + index * length + 44, direction, DataType.Byte);
     },
-    async saveState() {
+    async saveFieldState() {
       const memory = await readMemoryBuffer(0x99d000, 0x563000)
       const models = [];
       const fieldModelsBase = await readMemory(0xCFF738, DataType.Int);
@@ -587,7 +603,7 @@ export function useFF7(addresses: FF7Addresses) {
         fieldData
       });
     },
-    async loadState() {
+    async loadFieldState() {
       if (SaveStates.length === 0) return;
       const state = SaveStates[SaveStates.length - 1];
       if (state) {
@@ -613,6 +629,37 @@ export function useFF7(addresses: FF7Addresses) {
           await writeMemory(0xCC0DA5, 0, DataType.Byte);
           await writeMemory(0xCC0DA7, 0, DataType.Byte);
         }, 25);
+      }
+    },
+    async saveSnowBoardState() {
+      const globalObjData = await readMemoryBuffer(0xdd83b8, 0x2be0);
+      const entitiesData = await readMemoryBuffer(0xddaf98, 0x90 * 0x20);
+      SnowBoardSaveStates.push({
+        globalObjData,
+        entitiesData
+      });
+    },
+    async loadSnowBoardState() {
+      if (SnowBoardSaveStates.length === 0) return;
+      const state = SnowBoardSaveStates[SnowBoardSaveStates.length - 1];
+      if (state) {
+        await writeMemory(0xdd83b8, state.globalObjData, DataType.Buffer);
+        await writeMemory(0xdd83b8 + 0x64, 0, DataType.Int);
+        await writeMemory(0xddaf98, state.entitiesData, DataType.Buffer);
+      }
+    },
+    async saveState() {
+      if (gameState.currentModule === GameModule.Field) {
+        await this.saveFieldState();
+      } else if (gameState.currentModule === GameModule.Snowboard2) {
+        await this.saveSnowBoardState();
+      }
+    },
+    async loadState() {
+      if (gameState.currentModule === GameModule.Field) {
+        await this.loadFieldState();
+      } else if (gameState.currentModule === GameModule.Snowboard2) {
+        await this.loadSnowBoardState();
       }
     },
     async warpToFieldId(id: number, destination?: {x: number, y: number, triangleId: number, direction?: number}) {

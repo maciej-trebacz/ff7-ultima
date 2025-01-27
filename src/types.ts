@@ -20,6 +20,7 @@ export enum GameModule {
   Submarine = 10,
   Jet = 11,
   ChangeDisc = 12,
+  Snowboard2 = 14,
   Quit = 19,
   Start = 20,
   BattleSwirl = 23,

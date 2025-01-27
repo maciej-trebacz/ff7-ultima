@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.9 (2025-01-27)
+
+### General
+
+* Skip FMV properly plays the Opening Bombing Mission theme when skipping the intro FMV
+* Skip FMV now also skips bike, submarine and snowboard minigames
+* Save states now also work inside the snowboard minigame (useful for speedrun practice)
+
 ## 1.1.8 (2025-01-24)
 
 ### General
