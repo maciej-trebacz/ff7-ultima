@@ -1,11 +1,11 @@
 {
-  "version": "1.1.9",
-  "notes": "",
+  "version": "1.1.10",
+  "notes": "Fix a crash with FFNx",
   "pub_date": "2024-01-27T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFsazd5b2FKUkh5cGtaNGI2MWNVaEtBSno1YzVpV2JiWFdJSFM3Y2pldjd4U2hydmUrdUZhUVdEeis1eG9DaEZ6eGlQRmxGWmNlTmpLQmZ6d1FlM2dJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM3OTkyMDE1CWZpbGU6RkY3IFVsdGltYV8xLjEuOV94NjQtc2V0dXAuZXhlCkpwdlNxZG1odFdmcWJJWHE1VG9JcFg0MGxnU3VHSENxblhSdGlZQ2UrY2xRMmN2cm1qWmZQVWVXY1FIdDlFMnh6b09PTVIvL2Yva0ZVN2RKenZNUkJnPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.1.9/FF7.Ultima_1.1.9_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjdzVHFnSExieWt5VkI0WHNrSVE4YkljU1NPZXJnUFFQQktkTndiNm05V05oTmllT3NRSHphM1dlT1gybEMvdlc3Q1o4b0FiTVdxMHRyQTFYeVlwMlFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5MDA3ODQzCWZpbGU6RkY3IFVsdGltYV8xLjEuMTBfeDY0LXNldHVwLmV4ZQpYOEZOQ0FoNU1ycXZrbEtQUXA4RG1KMDgvSHpIeWhHbzR4VExEdlFqTHk2RUV2bkhoakNOUjZuU3Ztc04zOTdtTDlVUFliWEhKSk5IaFlIbFBLVE5Ddz09Cg==",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.1.10/FF7.Ultima_1.1.10_x64-setup.exe"
     }
   }
 }

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.10 (2025-02-08)
+
+### General
+
+* Fix a crash when FFNx is installed
+
 ## 1.1.9 (2025-01-27)
 
 ### General
