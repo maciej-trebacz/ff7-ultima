@@ -1,7 +1,7 @@
 export interface SceneDestination {
   x: number;
   y: number;
-  triangleId: number;
+  triangle: number;
   direction?: number;
 }
 

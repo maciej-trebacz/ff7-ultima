@@ -1,5 +1,6 @@
 import { Store, load } from '@tauri-apps/plugin-store';
 import { RandomEncounters } from './types';
+import { SaveState, SnowBoardSaveState } from './useSaveStates';
 
 let settingsStore: Store | null = null;
 
@@ -11,11 +12,33 @@ export interface HackSettings {
   randomBattles?: RandomEncounters;
 }
 
+export interface SaveStates {
+  fieldStates: SaveState[];
+  snowboardStates: SnowBoardSaveState[];
+}
+
 export async function getSettingsStore(): Promise<Store> {
   if (!settingsStore) {
     settingsStore = await load('settings.json', { autoSave: true });
   }
   return settingsStore;
+}
+
+export async function saveSaveStates(states: SaveStates) {
+  const store = await getSettingsStore();
+  await store.set('saveStates', states);
+  await store.save();
+}
+
+export async function loadSaveStates(): Promise<SaveStates | null> {
+  try {
+    const store = await getSettingsStore();
+    const states = await store.get<SaveStates>('saveStates');
+    return states || { fieldStates: [], snowboardStates: [] };
+  } catch (e) {
+    console.error('Failed to load save states:', e);
+    return { fieldStates: [], snowboardStates: [] };
+  }
 }
 
 export async function saveShortcuts(shortcuts: Record<string, string>) {

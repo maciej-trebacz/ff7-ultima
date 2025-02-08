@@ -8,5 +8,5 @@ To update to a new version several edits need to be made:
 2. Update the lib version in `../ff7-lib/Cargo.toml` to the same version number
 3. Run the build.ps1 script (this should be done by the user manually)
 4. Update the `updater.json` file with the new version number in the `version` field and also in the `url` field, update the `signature` using contents of the file: `src-tauri/target/release/bundle/nsis/FF7 Ultima_[version]_x64-setup.exe.sig`
-5. Ask the user for a commit message and then stage and commit all changes with message "Version [version], [user message]"
+5. Ask the user for a commit message and then stage and commit all changes with message "Version [version], [user message]" (do not include the files in ff7-lib as they're outside of this repo)
 6. Tag this commit as "[version]" and push it to origin, both the commit and the new tag

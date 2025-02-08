@@ -86,6 +86,7 @@ export interface FF7Addresses {
   world_field_tbl_data: number;
   str_field_tbl: number;
   world_load_data_fn: number;
+  savemap: number;
 }
 
 export function useFF7Addresses() {

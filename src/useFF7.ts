@@ -4,28 +4,48 @@ import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7State } from "./state";
-import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem } from "./types";
+import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
 import { useEffect } from "react";
 import { OpcodeWriter } from "./opcodewriter";
 import { loadHackSettings } from "./settings";
+import { useSaveStates } from "./useSaveStates";
 
 type ModelObj = {
   data: number[];
   ptrData: number[];
 }
 
-type SaveState = {
-  savemap: number[];
-  fieldData: number[];
-  models: Array<ModelObj>;
-}
-
 type SnowBoardSaveState = {
   globalObjData: number[];
   entitiesData: number[];
+}
+
+const SaveRegions = [
+  [0xCBF5EC, 0xCC08E8],
+  [0xCC08EC, 0xCC1E6C],
+  [0xCFF180, 0xCFF3B0],
+  [0xCFF464, 0xCFF48C],
+  [0xCFF494, 0xCFF500],
+  [0xCFF504, 0xCFF594],
+  [0xCFF59C, 0xCFF738],
+  // [0xCFFC00, 0xCFFC6C],
+  // [0xD00088, 0xD000A4],
+  // [0xD000B8, 0xD000C0],
+  [0xD000C4, 0xD011F4],
+  [0xD8F4D8, 0xD8F678],
+  [0xDB9580, 0xDBCAE0],
+  // Savemap here at 0xdbfd38
+]
+
+type SaveState = {
+  regions: number[][];
+  savemap: number[];
+  fieldId: number;
+  destination?: Destination;
+  // models: Array<ModelObj>;
 }
 
 const SaveStates: SaveState[] = [];
@@ -36,6 +56,7 @@ const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
+  const saveStates = useSaveStates();
 
   // Add the proxy function where we can inject our own code that runs every frame
   const fnCallerBaseAddr = addresses.code_cave_fn_caller;
@@ -60,11 +81,12 @@ export function useFF7(addresses: FF7Addresses) {
     }
 
     async function applyHackSettings() {
+      const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
       const settings = await loadHackSettings();
       if (settings) {
         if (settings.speed) await ff7.setSpeed(parseFloat(settings.speed));
         if (settings.skipIntros !== undefined) settings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
-        if (settings.unfocusPatch !== undefined) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+        if (settings.unfocusPatch !== undefined && ffnxCheck !== 0xE9) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
         if (settings.swirlSkip !== undefined) settings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
         if (settings.randomBattles !== undefined) {
           if (settings.randomBattles === RandomEncounters.Off) {
@@ -141,9 +163,17 @@ export function useFF7(addresses: FF7Addresses) {
     return bitmask;
   }
 
+  // FIXME: Remove before release
+  (window as any).readMemory = readMemory;
+
+
   const ff7 = {
     connected,
     gameState,
+    hacks,
+    setHacks,
+    addresses,
+    saveStates,
     callGameFn,
     callGameFns,
     setSpeed: async (speed: number) => {
@@ -575,100 +605,96 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(base + index * length + 8, z << 12, DataType.SignedInt);
       await writeMemory(base + index * length + 44, direction, DataType.Byte);
     },
-    async saveFieldState() {
-      const memory = await readMemoryBuffer(0x99d000, 0x563000)
-      const models = [];
-      const fieldModelsBase = await readMemory(0xCFF738, DataType.Int);
-      const fieldModelNum = await readMemory(0xcff73e, DataType.Byte);
-
-      for (let i = 0; i < fieldModelNum; i++) {
-        const model = await readMemoryBuffer(fieldModelsBase + i * 400, 400);
-        const ptr = await readMemory(fieldModelsBase + i * 400 + 0x178, DataType.Int);
-        const ptrData = await readMemoryBuffer(ptr, 144);
-        models.push({
-          data: model,
-          ptrData
-        });
+    async saveFieldState(title?: string) {
+      const memory = await readMemoryBuffer(addresses.savemap, 0x10F4)
+      
+      const regions = [];
+      for (const region of SaveRegions) {
+        const start = await readMemoryBuffer(region[0], region[1] - region[0]);
+        regions.push(start);
       }
 
-      const fieldDataPtr = await readMemory(0xCFF594, DataType.Int);
-      const section9Offset = await readMemory(fieldDataPtr + 38, DataType.Int);
-      const section9Length = await readMemory(fieldDataPtr + section9Offset, DataType.Int);
-      const totalLength = section9Offset + section9Length + 17;
-      const fieldData = await readMemoryBuffer(fieldDataPtr, totalLength);
+      const fieldModel = gameState.fieldModels[gameState.fieldCurrentModelId];
+      const destination = {
+        x: fieldModel.x,
+        y: fieldModel.y,
+        z: fieldModel.z,
+        direction: fieldModel.direction,
+        triangle: fieldModel.triangle
+      }
 
-      SaveStates.push({
+      saveStates.pushFieldState({
         savemap: memory,
-        models: models,
-        fieldData
+        regions,
+        fieldId: gameState.fieldId,
+        fieldName: gameState.fieldName,
+        destination,
+        title
       });
     },
-    async loadFieldState() {
-      if (SaveStates.length === 0) return;
-      const state = SaveStates[SaveStates.length - 1];
-      if (state) {
-        await writeMemory(0x99d000, state.savemap, DataType.Buffer);
-        const fieldModelsBase = await readMemory(0xCFF738, DataType.Int);
-        for (let i = 0; i < state.models.length; i++) {
-          const model = state.models[i];
-          await writeMemory(fieldModelsBase + i * 400, model.data, DataType.Buffer);
-          const ptr = await readMemory(fieldModelsBase + i * 400 + 0x178, DataType.Int);
-          await writeMemory(ptr, model.ptrData, DataType.Buffer);
-        }
+    async loadFieldState(index?: number) {
+      const state = index !== undefined ? saveStates.getFieldState(index) : saveStates.getLatestFieldState();
+      if (!state) return;
 
-        const fieldDataPtr = await readMemory(0xCFF594, DataType.Int);
-        await writeMemory(fieldDataPtr, state.fieldData, DataType.Buffer);
+      await writeMemory(addresses.savemap, state.savemap, DataType.Buffer);
 
-        const scrollX = await readMemory(0xCC15F0, DataType.Short);
-        const scrollY = await readMemory(0xCC15F4, DataType.Short);
-        await writeMemory(0xCC0D92, scrollX + 1, DataType.Short);
-        await writeMemory(0xCC0D94, scrollY, DataType.Short);
-        await writeMemory(0xCC0DA5, 4, DataType.Byte);
-        await writeMemory(0xCC0DA7, 0, DataType.Byte);
-        setTimeout(async () => {
-          await writeMemory(0xCC0DA5, 0, DataType.Byte);
-          await writeMemory(0xCC0DA7, 0, DataType.Byte);
-        }, 25);
+      if (state.fieldId !== gameState.fieldId) {
+        console.debug("Field ID mismatch - warping to new field");
+        await this.warpToFieldId(state.fieldId, state.destination);
+
+        console.debug("Waiting for field id to match");
+        await waitFor(async () => {
+          const fieldId = await readMemory(addresses.field_id, DataType.Short);
+          return fieldId === state.fieldId;
+        });
+        console.debug("Field id matched");
+      }
+
+      for (let i = 0; i < state.regions.length; i++) {
+        // if (i === 1) continue;
+        const length = SaveRegions[i][1] - SaveRegions[i][0];
+        await writeMemory(SaveRegions[i][0], state.regions[i].slice(0, length), DataType.Buffer);
       }
     },
-    async saveSnowBoardState() {
+
+    async saveSnowBoardState(title?: string) {
       const globalObjData = await readMemoryBuffer(0xdd83b8, 0x2be0);
       const entitiesData = await readMemoryBuffer(0xddaf98, 0x90 * 0x20);
-      SnowBoardSaveStates.push({
+      saveStates.pushSnowboardState({
         globalObjData,
-        entitiesData
+        entitiesData,
+        title
       });
     },
-    async loadSnowBoardState() {
-      if (SnowBoardSaveStates.length === 0) return;
-      const state = SnowBoardSaveStates[SnowBoardSaveStates.length - 1];
-      if (state) {
-        await writeMemory(0xdd83b8, state.globalObjData, DataType.Buffer);
-        await writeMemory(0xdd83b8 + 0x64, 0, DataType.Int);
-        await writeMemory(0xddaf98, state.entitiesData, DataType.Buffer);
-      }
+    async loadSnowBoardState(index?: number) {
+      const state = index !== undefined ? saveStates.getSnowboardState(index) : saveStates.getLatestSnowboardState();
+      if (!state) return;
+      
+      await writeMemory(0xdd83b8, state.globalObjData, DataType.Buffer);
+      await writeMemory(0xdd83b8 + 0x64, 0, DataType.Int);
+      await writeMemory(0xddaf98, state.entitiesData, DataType.Buffer);
     },
-    async saveState() {
+    async saveState(title?: string) {
       if (gameState.currentModule === GameModule.Field) {
-        await this.saveFieldState();
+        await this.saveFieldState(title);
       } else if (gameState.currentModule === GameModule.Snowboard2) {
-        await this.saveSnowBoardState();
+        await this.saveSnowBoardState(title);
       }
     },
-    async loadState() {
+    async loadState(index?: number) {
       if (gameState.currentModule === GameModule.Field) {
-        await this.loadFieldState();
+        await this.loadFieldState(index);
       } else if (gameState.currentModule === GameModule.Snowboard2) {
-        await this.loadSnowBoardState();
+        await this.loadSnowBoardState(index);
       }
     },
-    async warpToFieldId(id: number, destination?: {x: number, y: number, triangleId: number, direction?: number}) {
+    async warpToFieldId(id: number, destination?: Destination) {
       await writeMemory(addresses.field_global_obj + 2, id, DataType.Short);
 
       if (destination) {
         await writeMemory(addresses.field_global_obj + 4, destination.x, DataType.SignedShort);
         await writeMemory(addresses.field_global_obj + 6, destination.y, DataType.SignedShort);
-        await writeMemory(addresses.field_global_obj + 0x22, destination.triangleId, DataType.Short);
+        await writeMemory(addresses.field_global_obj + 0x22, destination.triangle, DataType.Short);
         if (destination.direction) {
           await writeMemory(addresses.field_global_obj + 0x24, destination.direction, DataType.Short);
         }

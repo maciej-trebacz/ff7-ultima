@@ -72,7 +72,7 @@ export function WarpFieldModal({ isOpen, onClose, onSubmit, ff7 }: WarpFieldModa
             destination: {
               x: fieldTblEntry.x,
               y: fieldTblEntry.y,
-              triangleId: fieldTblEntry.triangle_id,
+              triangle: fieldTblEntry.triangle_id,
               direction: fieldTblEntry.direction
             },
             type: "gateway"

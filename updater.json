@@ -1,11 +1,11 @@
 {
-  "version": "1.1.10",
-  "notes": "Fix a crash with FFNx",
-  "pub_date": "2024-01-27T12:00:00Z",
+  "version": "1.2.0",
+  "notes": "Add persistent save state manager with cross-field support, improve game connection stability",
+  "pub_date": "2025-02-08T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjdzVHFnSExieWt5VkI0WHNrSVE4YkljU1NPZXJnUFFQQktkTndiNm05V05oTmllT3NRSHphM1dlT1gybEMvdlc3Q1o4b0FiTVdxMHRyQTFYeVlwMlFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5MDA3ODQzCWZpbGU6RkY3IFVsdGltYV8xLjEuMTBfeDY0LXNldHVwLmV4ZQpYOEZOQ0FoNU1ycXZrbEtQUXA4RG1KMDgvSHpIeWhHbzR4VExEdlFqTHk2RUV2bkhoakNOUjZuU3Ztc04zOTdtTDlVUFliWEhKSk5IaFlIbFBLVE5Ddz09Cg==",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.1.10/FF7.Ultima_1.1.10_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjVmd1FnSmV4bVlwYU5GdkI5a0VnSUQ4cjZCQlVzZFFKb3dpaGpFSTYvNXRIdXRpQjYxc01UdFpmamJpY3I5V09uSVlNTjJoWmZIZnd2T0VDalplWFEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5MDQ2NjQ2CWZpbGU6RkY3IFVsdGltYV8xLjIuMF94NjQtc2V0dXAuZXhlCkFRVHQzbTE5dTF2ckF4K3lMMEdGbllobkxyaUhtS09SOVJtNXRIaUx6bzJTQlpxOU9IdjBxMVFxem5GbURSdk5OQXVuVTIrSDlqQ0ZjS2VxUkdwN0RRPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.0/FF7.Ultima_1.2.0_x64-setup.exe"
     }
   }
 }

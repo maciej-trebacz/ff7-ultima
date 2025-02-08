@@ -30,6 +30,8 @@ export function Battle(props: { ff7: FF7 }) {
   const [enemyData, setEnemyData] = useState<EnemyData | null>(null);
   const [enemyName, setEnemyName] = useState<string>("");
 
+  console.log("Current ally editing", currentAllyEditing);
+
   const parseEnemyName = (enemy: BattleCharObj) => {
     const enemies = ff7.gameState.battleEnemies.filter(e => e.name === enemy.name);
     if (enemies.length === 1) {
@@ -76,6 +78,7 @@ export function Battle(props: { ff7: FF7 }) {
     ff7.setHP(0, index);
   }
 
+  const enemies = ff7.gameState.battleEnemies.sort((a, b) => a.scene_id - b.scene_id) || [];
   const actors = currentAllyEditing !== null && currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
   const actorIdx = currentAllyEditing !== null && currentAllyEditing > 3 ? currentAllyEditing - 4 : currentAllyEditing;
 
@@ -86,7 +89,6 @@ export function Battle(props: { ff7: FF7 }) {
     }
   }
 
-  const enemies = ff7.gameState.battleEnemies.sort((a, b) => a.scene_id - b.scene_id) || [];
 
   return (
     <div>
@@ -283,7 +285,7 @@ export function Battle(props: { ff7: FF7 }) {
                 </td>
                 <td className="p-1 cursor-pointer px-2 text-nowrap w-[100px] hover:bg-zinc-700">
                   <EditPopover
-                    open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "HP"}
+                    open={popoverOpen && currentAllyEditing === char.index && editTitle === "HP"}
                     onOpenChange={setPopoverOpen}
                     value={editValue}
                     onValueChange={setEditValue}
@@ -292,7 +294,7 @@ export function Battle(props: { ff7: FF7 }) {
                     <TooltipProvider>
                       <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index + 4)}>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), char.index)}>
                             {char.hp} / {char.max_hp}
                           </span>
                         </TooltipTrigger>
@@ -305,7 +307,7 @@ export function Battle(props: { ff7: FF7 }) {
                 </td>
                 <td className="p-1 cursor-pointer px-2 text-nowrap w-[66px] hover:bg-zinc-700">
                   <EditPopover
-                    open={popoverOpen && currentAllyEditing === index + 4 && editTitle === "MP"}
+                    open={popoverOpen && currentAllyEditing === char.index && editTitle === "MP"}
                     onOpenChange={setPopoverOpen}
                     value={editValue}
                     onValueChange={setEditValue}
@@ -314,7 +316,7 @@ export function Battle(props: { ff7: FF7 }) {
                     <TooltipProvider>
                       <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index + 4)}>
+                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), char.index)}>
                             {char.mp} / {char.max_mp}
                           </span>
                         </TooltipTrigger>
@@ -330,7 +332,7 @@ export function Battle(props: { ff7: FF7 }) {
                   <TooltipProvider>
                     <Tooltip delayDuration={250}>
                       <TooltipTrigger asChild>
-                        <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(index + 4); e.stopPropagation() }}>💀</span>
+                        <span className="ml-1 cursor-pointer" onClick={(e) => { killCharacter(char.index); e.stopPropagation() }}>💀</span>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs">Kill enemy</p>

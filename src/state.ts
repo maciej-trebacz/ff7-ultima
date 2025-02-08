@@ -31,6 +31,7 @@ const defaultState = {
     gameObjPtr: 0,
     battleSwirlDisabled: false,
     instantATBEnabled: false,
+    fieldCurrentModelId: 0,
     fieldModels: [] as FieldModel[],
     battlePartyChars: [] as BattleCharObj[],
     battleAllies: [] as BattleCharObj[],
@@ -125,6 +126,7 @@ export const useFF7State = function() {
             y: ff7Data.field_models[idx].y,
             z: ff7Data.field_models[idx].z,
             direction: ff7Data.field_models[idx].direction,
+            triangle: ff7Data.field_models[idx].triangle,
           }
         });
 
@@ -146,6 +148,7 @@ export const useFF7State = function() {
           currentModule: basic.current_module as number,
           gameMoment: basic.game_moment as number,
           fieldId: basic.field_id as number,
+          fieldCurrentModelId: basic.field_current_model_id as number,
           fieldName,
           fieldFps: basic.field_fps as number,
           battleFps: basic.battle_fps as number,

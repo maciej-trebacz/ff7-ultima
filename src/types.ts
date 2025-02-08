@@ -43,9 +43,12 @@ export interface FieldModel {
   y: number,
   z: number,
   direction: number,
+  triangle: number,
 }
 
+
 export interface BattleCharObj {
+  index: number,
   status: number,
   flags: number,
   hp: number,
@@ -258,4 +261,11 @@ export enum ChocoboRating {
   "not bad" = 6,
   "bad" = 7,
   "terrible" = 8,
+}
+
+export type Destination = {
+  x: number;
+  y: number;
+  triangle: number;
+  direction?: number;
 }

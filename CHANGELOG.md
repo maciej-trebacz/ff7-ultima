@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.2.0 (2025-02-08)
+
+### General
+
+* Save state manager - can now store multiple save states (persisted between app launches)
+* Saves now work across fields, when loading a state from another field you will get warped there
+* Reworked how the app connects to the game, hopefully it will be more stable now
+
+### Battle
+
+* Fixed an issue with editing enemy details / killing enemies
+
 ## 1.1.10 (2025-02-08)
 
 ### General
