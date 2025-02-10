@@ -23,6 +23,7 @@ export type SnowBoardSaveState = SaveStateBase & {
 export function useSaveStates() {
   const [fieldStates, setFieldStates] = useState<SaveState[]>([]);
   const [snowboardStates, setSnowboardStates] = useState<SnowBoardSaveState[]>([]);
+  const [lastLoadedFieldStateIndex, setLastLoadedFieldStateIndex] = useState<number | null>(null);
 
   // Load states from disk on mount
   useEffect(() => {
@@ -44,6 +45,7 @@ export function useSaveStates() {
 
   const pushFieldState = (state: Omit<SaveState, "timestamp">) => {
     setFieldStates(prev => [...prev, { ...state, timestamp: Date.now() }]);
+    setLastLoadedFieldStateIndex(null);
   };
 
   const pushSnowboardState = (state: Omit<SnowBoardSaveState, "timestamp">) => {
@@ -52,6 +54,11 @@ export function useSaveStates() {
 
   const getLatestFieldState = () => {
     if (fieldStates.length === 0) return null;
+    // If we have a manually loaded state, return that
+    if (lastLoadedFieldStateIndex !== null && lastLoadedFieldStateIndex < fieldStates.length) {
+      return fieldStates[lastLoadedFieldStateIndex];
+    }
+    // Otherwise return the last saved state
     return fieldStates[fieldStates.length - 1];
   };
 
@@ -62,6 +69,8 @@ export function useSaveStates() {
 
   const getFieldState = (index: number) => {
     if (index < 0 || index >= fieldStates.length) return null;
+    // Update the last loaded state index when manually loading a state
+    setLastLoadedFieldStateIndex(index);
     return fieldStates[index];
   };
 
@@ -74,6 +83,13 @@ export function useSaveStates() {
     setFieldStates(prev => {
       const newStates = [...prev];
       newStates.splice(index, 1);
+      // If we remove the last loaded state, reset the index
+      if (lastLoadedFieldStateIndex === index) {
+        setLastLoadedFieldStateIndex(null);
+      } else if (lastLoadedFieldStateIndex !== null && lastLoadedFieldStateIndex > index) {
+        // Adjust the index if we remove a state before it
+        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex - 1);
+      }
       return newStates;
     });
   };
@@ -88,6 +104,7 @@ export function useSaveStates() {
 
   const clearFieldStates = () => {
     setFieldStates([]);
+    setLastLoadedFieldStateIndex(null);
   };
 
   const clearSnowboardStates = () => {

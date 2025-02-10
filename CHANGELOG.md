@@ -1,8 +1,16 @@
 # Change Log
 
+## 1.2.1 (2025-02-10)
+
+### Field
+
+* Quick load will now load the last manually loaded state (so you can pick one from the list and then quickly load it over and over again e.g. for trick practice)
+* Fixed crashes during save load
+* Save states now also save field RNG state and script line state
+
 ## 1.2.0 (2025-02-08)
 
-### General
+### Field
 
 * Save state manager - can now store multiple save states (persisted between app launches)
 * Saves now work across fields, when loading a state from another field you will get warped there

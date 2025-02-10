@@ -30,11 +30,13 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
 * Start an arbitrary battle both from the field and the world map, optionally setting the music
 * Skip FMVs
 * Game over from anywhere
+* Global hotkeys
 * Field module
   - show current field ID, step ID, step fraction, danger value
   - enable/disable character movement
   - view a list of all loaded field models and edit the coordinates
   - warp to any field, optionally setting the destination coordinates
+  - save states: create multiple save states and access them from any field
 * World module
   - show current model's position and triangle information, and current region name
   - show an indicator when walking over chocobo tracks
@@ -69,8 +71,6 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
 * Battle log (display a log of attacks, status changes, etc.)
 * Remember last used hacks
 * Auto-apply hacks on game start
-* Save/load game state for fields
-* Global hotkeys
 
 ## Acknowledgements
 

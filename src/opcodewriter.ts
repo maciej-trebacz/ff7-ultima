@@ -86,6 +86,16 @@ export class OpcodeWriter {
       bytes[3] = (relativeAddress >> 24) & 0xFF
       this.write([...bytes])
     }
+
+    writeMovEax(destination: number) {
+      this.write([0xA3]) // MOV [destination], EAX
+      const bytes = new Uint8Array(4)
+      bytes[0] = destination & 0xFF
+      bytes[1] = (destination >> 8) & 0xFF 
+      bytes[2] = (destination >> 16) & 0xFF
+      bytes[3] = (destination >> 24) & 0xFF
+      this.write([...bytes])
+    }
   
     writeStart() {
       this.write([0x55, 0x8B, 0xEC]) // PUSH EBP; MOV EBP,ESP

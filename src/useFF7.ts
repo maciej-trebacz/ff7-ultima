@@ -25,20 +25,31 @@ type SnowBoardSaveState = {
 
 const SaveRegions = [
   [0xCBF5EC, 0xCC08E8],
-  [0xCC08EC, 0xCC1E6C],
+  [0xCC08EC, 0xCC1670],
   [0xCFF180, 0xCFF3B0],
   [0xCFF464, 0xCFF48C],
   [0xCFF494, 0xCFF500],
   [0xCFF504, 0xCFF594],
   [0xCFF59C, 0xCFF738],
-  // [0xCFFC00, 0xCFFC6C],
-  // [0xD00088, 0xD000A4],
-  // [0xD000B8, 0xD000C0],
   [0xD000C4, 0xD011F4],
   [0xD8F4D8, 0xD8F678],
   [0xDB9580, 0xDBCAE0],
-  // Savemap here at 0xdbfd38
+
+  // RNG Offset and Delta
+  [0x905E50, 0x905E54],
+  [0xCBF588, 0xCBF589],
+
+  // Line objs
+  [0xCC1F70, 0xCC2270],
 ]
+
+// Copy entity/model objs but skip the pointers in the first 8 bytes
+for (let i = 0; i < 16; i++) {
+  const start = 0xcc1678 + i * 0x88;
+  const end = start + 0x80;
+
+  SaveRegions.push([start, end]);
+}
 
 type SaveState = {
   regions: number[][];
@@ -62,6 +73,7 @@ export function useFF7(addresses: FF7Addresses) {
   const fnCallerBaseAddr = addresses.code_cave_fn_caller;
   const fnCallerMainAddr = fnCallerBaseAddr + 18;
   const fnCallerAfterFlipAddr = fnCallerBaseAddr + 33;
+  const fnCallerResultAddr = fnCallerBaseAddr - 4;
 
   useEffect(() => {
     async function initializeGfxFlip() {
@@ -117,6 +129,9 @@ export function useFF7(addresses: FF7Addresses) {
       writer.writeCall(fn.address, fn.params);
     });
 
+    // Write the result
+    writer.writeMovEax(fnCallerResultAddr);
+
     // Call the overwrite function to make sure we call only once
     const length = writer.offset - startOffset;
     writer.writeCall(fnCallerBaseAddr, [length], true);
@@ -127,6 +142,7 @@ export function useFF7(addresses: FF7Addresses) {
 
   const callGameFn = async (address: number, params?: number[]) => {
     await callGameFns([{ address, params }]);
+    return await readMemory(fnCallerResultAddr, DataType.Int);
   };
 
   const getFieldObjPtr = async () => {
@@ -638,7 +654,7 @@ export function useFF7(addresses: FF7Addresses) {
 
       await writeMemory(addresses.savemap, state.savemap, DataType.Buffer);
 
-      if (state.fieldId !== gameState.fieldId) {
+      if (state.fieldId !== gameState.fieldId || gameState.currentModule === GameModule.World) {
         console.debug("Field ID mismatch - warping to new field");
         await this.warpToFieldId(state.fieldId, state.destination);
 
@@ -682,7 +698,7 @@ export function useFF7(addresses: FF7Addresses) {
       }
     },
     async loadState(index?: number) {
-      if (gameState.currentModule === GameModule.Field) {
+      if (gameState.currentModule === GameModule.Field || gameState.currentModule === GameModule.World) {
         await this.loadFieldState(index);
       } else if (gameState.currentModule === GameModule.Snowboard2) {
         await this.loadSnowBoardState(index);
