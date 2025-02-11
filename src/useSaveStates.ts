@@ -132,6 +132,33 @@ export function useSaveStates() {
     });
   };
 
+  const reorderFieldStates = (fromIndex: number, toIndex: number) => {
+    setFieldStates(prev => {
+      const newStates = [...prev];
+      const [removed] = newStates.splice(fromIndex, 1);
+      newStates.splice(toIndex, 0, removed);
+      
+      // Update lastLoadedFieldStateIndex if needed
+      if (lastLoadedFieldStateIndex === fromIndex) {
+        setLastLoadedFieldStateIndex(toIndex);
+      } else if (
+        lastLoadedFieldStateIndex !== null &&
+        fromIndex < lastLoadedFieldStateIndex &&
+        toIndex >= lastLoadedFieldStateIndex
+      ) {
+        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex - 1);
+      } else if (
+        lastLoadedFieldStateIndex !== null &&
+        fromIndex > lastLoadedFieldStateIndex &&
+        toIndex <= lastLoadedFieldStateIndex
+      ) {
+        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex + 1);
+      }
+      
+      return newStates;
+    });
+  };
+
   return {
     fieldStates,
     snowboardStates,
@@ -147,6 +174,7 @@ export function useSaveStates() {
     clearSnowboardStates,
     clearAllStates,
     updateFieldStateTitle,
-    updateSnowboardStateTitle
+    updateSnowboardStateTitle,
+    reorderFieldStates
   };
 } 

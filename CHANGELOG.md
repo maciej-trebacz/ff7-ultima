@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.3 (2025-02-11)
+
+### Field
+
+* Save states can now be reodered by dragging and dropping the rows
+
 ## 1.2.2 (2025-02-11)
 
 ### General

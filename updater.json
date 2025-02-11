@@ -1,11 +1,11 @@
 {
-  "version": "1.2.2",
-  "notes": "Added universal minigame skip, fixed FMV softlock in Junon, made window resizable, improved field warping performance",
+  "version": "1.2.3",
+  "notes": "Save states can now be reordered by dragging and dropping the rows",
   "pub_date": "2025-02-11T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjhUR1gxYkwwbkQ1Y2xFRUhzelN1NzlIaEhUZUtydG9ZVW9pMGUxQ2c0UmJBelB4a0c4TXZrcE1VMlVUNmZUNXZUcE1zSkZBS2Q1T2VYZ3dEZ2lxOUF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5Mjk5NzIxCWZpbGU6RkY3IFVsdGltYV8xLjIuMl94NjQtc2V0dXAuZXhlCmJKTjJLUEpXTHRmUnZzUlJYMjhrL2p6YmVxTjhzdkhNd1pvZnc0RTRZdUhvaHhodzF0MGttWmFJbGRSVGwzdTNwK2dKNkpVdy9NMndsYTdzNmhjZkNBPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.2/FF7.Ultima_1.2.2_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjhJSjVzWE9iQlZkSnlBT2ZPcWVIcVZYb1k1cFlTZlBkcjJWM3dJV0RUK1lZOEl2RWlnMW5hbzUwWUh1bE9jTVJzN0VwNFZMRVl5TlIvbjRXSXJPYUFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5MzA4MDgzCWZpbGU6RkY3IFVsdGltYV8xLjIuM194NjQtc2V0dXAuZXhlCmZzWlZrVlRjdTQ3TlZhaUhmSHM2aWZUdlVTWGl1c3NIblFCQWFvaUlsWkZGdW9waWFnRC90TUQ0b2VCOFJUZzFpa3pjRVVyeHRYTDM0bmRDR29pdkNBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.3/FF7.Ultima_1.2.3_x64-setup.exe"
     }
   }
 }
