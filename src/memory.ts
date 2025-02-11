@@ -14,7 +14,7 @@ export enum DataType {
 
 export function readMemory(address: number, type: DataType): Promise<number> {
   return new Promise((resolve) => {
-    const fns = ["read_memory_byte", "read_memory_short", "read_memory_int", "read_memory_float"];
+    const fns = ["read_memory_byte", "read_memory_short", "read_memory_int", "read_memory_float", "read_memory_buffer", "read_memory_signed_short", "read_memory_signed_int"];
     const fn = fns[type];
     invoke(fn, { address }).then((state) => {
       resolve(state as number);

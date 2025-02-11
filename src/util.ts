@@ -16,7 +16,7 @@ export const waitFor = async (condition: () => Promise<boolean>) => {
         console.log("Error: ", e);
         clearInterval(intervalId);
       }
-    }, 250);
+    }, 100);
   });
 };
 

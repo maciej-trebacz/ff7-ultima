@@ -31,6 +31,7 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
 * Skip FMVs
 * Game over from anywhere
 * Global hotkeys
+* Remembers last used hacks, auto-applies hacks on game start
 * Field module
   - show current field ID, step ID, step fraction, danger value
   - enable/disable character movement
@@ -69,8 +70,6 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
   - indicate whether you can breed a chocobo
 * RNG info (seed, joker, animation index, etc.)
 * Battle log (display a log of attacks, status changes, etc.)
-* Remember last used hacks
-* Auto-apply hacks on game start
 
 ## Acknowledgements
 

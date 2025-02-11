@@ -70,7 +70,11 @@ export function useShortcuts() {
           await register(accelerator, (event) => {
             if (event.state === "Pressed") {
               console.debug(`${shortcut.key} pressed, calling ${shortcut.action}`);
-              shortcut.callback((window as any).FF7);
+              try {
+                shortcut.callback((window as any).FF7);
+              } catch (e) {
+                console.error(`Error calling ${shortcut.action}:`, e);
+              }
             }
           });
         } catch (e) {

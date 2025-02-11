@@ -32,6 +32,16 @@ pub fn read_memory_buffer(address: u32, size: usize) -> Result<Vec<u8>, String> 
 }
 
 #[tauri::command]
+pub fn read_memory_signed_short(address: u32) -> Result<i16, String> {
+    memory::read_memory_signed_short(address)
+}
+
+#[tauri::command]
+pub fn read_memory_signed_int(address: u32) -> Result<i32, String> {
+    memory::read_memory_signed_int(address)
+}
+
+#[tauri::command]
 pub fn write_memory_byte(address: u32, new_value: u8) -> Result<(), String> {
     memory::write_memory_byte(address, new_value)
 }
@@ -133,6 +143,8 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         read_memory_int,
         read_memory_float,
         read_memory_buffer,
+        read_memory_signed_short,
+        read_memory_signed_int,
         write_memory_byte,
         write_memory_short,
         write_memory_signed_short,

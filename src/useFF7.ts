@@ -364,12 +364,24 @@ export function useFF7(addresses: FF7Addresses) {
           // Play opening bombing mission music
           await callGameFn(0x742055, [2])
         }
+
+        // Junon office - prevent softlock when Heidegger orders shooting the canon
+        if (gameState.fieldId === 399) {
+          await writeMemory(addresses.field_script_temp_vars + 9, 1, DataType.Byte);
+        }
       } else if ([GameModule.SnowBoard, GameModule.Snowboard2].includes(gameState.currentModule)) {
         await writeMemory(0xdd7cac, 0, DataType.Byte);
       } else if (gameState.currentModule === GameModule.Highway) {
         await writeMemory(0xd85974, 0, DataType.Byte);
       } else if (gameState.currentModule === GameModule.Submarine) {
         await writeMemory(0x980dac, 0, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.Condor) {
+        await writeMemory(0xcbc80c, 5, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.Chocobo) {
+        await writeMemory(addresses.savemap + 0x0DBD, 0, DataType.Byte); // 1st place
+        await writeMemory(0xe3bad0, 1, DataType.Byte);
+      } else if (gameState.currentModule === GameModule.Jet) {
+        await writeMemory(0xc3f774, 1, DataType.Byte);
       }
     },
     startBattle: async (battleId: number, musicId: number) => {
@@ -652,6 +664,7 @@ export function useFF7(addresses: FF7Addresses) {
       const state = index !== undefined ? saveStates.getFieldState(index) : saveStates.getLatestFieldState();
       if (!state) return;
 
+      // Restore the savemap
       await writeMemory(addresses.savemap, state.savemap, DataType.Buffer);
 
       if (state.fieldId !== gameState.fieldId || gameState.currentModule === GameModule.World) {
@@ -666,11 +679,26 @@ export function useFF7(addresses: FF7Addresses) {
         console.debug("Field id matched");
       }
 
+      // NOP the tick function
+      const tickFunctionAddr = gameState.gameObjPtr + 0xa00;
+      const tickFunctionPtr = await readMemory(tickFunctionAddr, DataType.Int);
+      await writeMemory(tickFunctionAddr, 0x72237a, DataType.Int);
+
       for (let i = 0; i < state.regions.length; i++) {
         // if (i === 1) continue;
         const length = SaveRegions[i][1] - SaveRegions[i][0];
         await writeMemory(SaveRegions[i][0], state.regions[i].slice(0, length), DataType.Buffer);
       }
+
+      // Reset the field model pointers
+      for (let i = 0; i < 16; i++) {
+        const addr = 0xcc1670 + i * 0x88;
+        await writeMemory(addr, 0, DataType.Int);
+        await writeMemory(addr + 4, 0, DataType.Int);
+      }
+
+      // Restore the tick function
+      await writeMemory(tickFunctionAddr, tickFunctionPtr, DataType.Int);
     },
 
     async saveSnowBoardState(title?: string) {
@@ -723,6 +751,11 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(addresses.world_mode, 2, DataType.Byte);
         await writeMemory(addresses.world_mode + 0xC, 1, DataType.Byte);
       }
+
+      // Fade out immediately
+      setTimeout(async () => {
+        await writeMemory(addresses.field_global_obj + 0x4e, 33, DataType.Byte);
+      }, 75);
 
       // Reset all sound channel volumes to cancel looping sounds
       setTimeout(async () => {

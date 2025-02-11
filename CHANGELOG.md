@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.2.2 (2025-02-11)
+
+### General
+
+* Skip every minigame (for the mandatory chocobo races it counts as a win) with F1 / Skip button
+* Fixed a softlock when skipping the FMV during weapon attack in Junon
+* Made the app window resizible
+
+### Field
+
+* Improved the speed of warping to another field (or loading a state from another field)
+
 ## 1.2.1 (2025-02-10)
 
 ### Field

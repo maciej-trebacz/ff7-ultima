@@ -9,7 +9,7 @@ export interface Shortcut {
 export const defaultShortcuts: Shortcut[] = [
   {
     key: "F1",
-    action: "Skip FMV",
+    action: "Skip FMV / Minigame",
     callback: async (ff7) => {
       await ff7.skipFMV();
     },

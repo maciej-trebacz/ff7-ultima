@@ -18,6 +18,8 @@ export function QuickActions(props: { ff7: FF7 }) {
   const [isStartBattleModalOpen, setIsStartBattleModalOpen] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<number | null>(null);
 
+  const skipBtnLabel = [GameModule.Highway, GameModule.Submarine, GameModule.SnowBoard, GameModule.Snowboard2, GameModule.Chocobo].includes(currentModule) ? "Skip Minigame" : "Skip FMV";
+
   const startBattle = () => {
     setBattleId("");
     setSelectedMusic(null);
@@ -65,7 +67,7 @@ export function QuickActions(props: { ff7: FF7 }) {
       </div>
     }
 
-    <Button size={"sm"} variant={"secondary"} onClick={() => ff7.skipFMV()}>Skip FMV</Button>
+    <Button size={"sm"} variant={"secondary"} onClick={() => ff7.skipFMV()}>{skipBtnLabel}</Button>
     <Button size={"sm"} variant={"secondary"} onClick={() => ff7.gameOver()}>Game Over</Button>
 
     <Modal
