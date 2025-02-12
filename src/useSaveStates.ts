@@ -2,13 +2,41 @@ import { useEffect, useState } from "react";
 import { Destination } from "./types";
 import { loadSaveStates, saveSaveStates } from "./settings";
 
+type RegionOffset = [number, number];
+
+export const SaveRegions: RegionOffset[] = [
+  [0xCBF5EC, 0xCC08E8],
+  [0xCC08EC, 0xCC1670],
+  [0xCFF180, 0xCFF3B0],
+  [0xCFF464, 0xCFF48C],
+  [0xCFF494, 0xCFF500],
+  [0xCFF504, 0xCFF594],
+  [0xCFF59C, 0xCFF738],
+  [0xD000C4, 0xD011F4],
+  [0xD8F4D8, 0xD8F678],
+  [0xDB9580, 0xDBCAE0],
+  [0x905E50, 0x905E54],
+  [0xCBF588, 0xCBF589],
+  [0xCC1F70, 0xCC2270],
+];
+
+// Copy entity/model objs but skip the pointers in the first 8 bytes
+for (let i = 0; i < 16; i++) {
+  const start = 0xcc1678 + i * 0x88;
+  const end = start + 0x80;
+
+  SaveRegions.push([start, end]);
+}
+
 export type SaveStateBase = {
+  id: string;
   timestamp: number;
   title?: string;
 }
 
 export type SaveState = SaveStateBase & {
   regions: number[][];
+  regionOffsets?: RegionOffset[]; // Optional for backwards compatibility
   savemap: number[];
   fieldId: number;
   fieldName: string;
@@ -20,10 +48,14 @@ export type SnowBoardSaveState = SaveStateBase & {
   entitiesData: number[];
 };
 
+function generateId(): string {
+  return crypto.randomUUID();
+}
+
 export function useSaveStates() {
   const [fieldStates, setFieldStates] = useState<SaveState[]>([]);
   const [snowboardStates, setSnowboardStates] = useState<SnowBoardSaveState[]>([]);
-  const [lastLoadedFieldStateIndex, setLastLoadedFieldStateIndex] = useState<number | null>(null);
+  const [lastLoadedFieldStateId, setLastLoadedFieldStateId] = useState<string | null>(null);
 
   // Load states from disk on mount
   useEffect(() => {
@@ -43,20 +75,30 @@ export function useSaveStates() {
     });
   }, [fieldStates, snowboardStates]);
 
-  const pushFieldState = (state: Omit<SaveState, "timestamp">) => {
-    setFieldStates(prev => [...prev, { ...state, timestamp: Date.now() }]);
-    setLastLoadedFieldStateIndex(null);
+  const pushFieldState = (state: Omit<SaveState, "timestamp" | "regionOffsets" | "id">) => {
+    setFieldStates(prev => [...prev, { 
+      ...state, 
+      id: generateId(),
+      timestamp: Date.now(),
+      regionOffsets: SaveRegions // Store the current region offsets with the state
+    }]);
+    setLastLoadedFieldStateId(null);
   };
 
-  const pushSnowboardState = (state: Omit<SnowBoardSaveState, "timestamp">) => {
-    setSnowboardStates(prev => [...prev, { ...state, timestamp: Date.now() }]);
+  const pushSnowboardState = (state: Omit<SnowBoardSaveState, "timestamp" | "id">) => {
+    setSnowboardStates(prev => [...prev, { 
+      ...state, 
+      id: generateId(),
+      timestamp: Date.now() 
+    }]);
   };
 
   const getLatestFieldState = () => {
     if (fieldStates.length === 0) return null;
     // If we have a manually loaded state, return that
-    if (lastLoadedFieldStateIndex !== null && lastLoadedFieldStateIndex < fieldStates.length) {
-      return fieldStates[lastLoadedFieldStateIndex];
+    if (lastLoadedFieldStateId) {
+      const state = fieldStates.find(state => state.id === lastLoadedFieldStateId);
+      if (state) return state;
     }
     // Otherwise return the last saved state
     return fieldStates[fieldStates.length - 1];
@@ -70,8 +112,15 @@ export function useSaveStates() {
   const getFieldState = (index: number) => {
     if (index < 0 || index >= fieldStates.length) return null;
     // Update the last loaded state index when manually loading a state
-    setLastLoadedFieldStateIndex(index);
+    setLastLoadedFieldStateId(null);
     return fieldStates[index];
+  };
+
+  const getFieldStateById = (id: string) => {
+    const state = fieldStates.find(state => state.id === id);
+    if (!state) return null;
+    setLastLoadedFieldStateId(id);
+    return state;
   };
 
   const getSnowboardState = (index: number) => {
@@ -79,23 +128,28 @@ export function useSaveStates() {
     return snowboardStates[index];
   };
 
-  const removeFieldState = (index: number) => {
+  const getSnowboardStateById = (id: string): SnowBoardSaveState | null => {
+    const index = snowboardStates.findIndex(state => state.id === id);
+    if (index === -1) return null;
+    return snowboardStates[index];
+  };
+
+  const removeFieldState = (id: string) => {
     setFieldStates(prev => {
-      const newStates = [...prev];
-      newStates.splice(index, 1);
-      // If we remove the last loaded state, reset the index
-      if (lastLoadedFieldStateIndex === index) {
-        setLastLoadedFieldStateIndex(null);
-      } else if (lastLoadedFieldStateIndex !== null && lastLoadedFieldStateIndex > index) {
-        // Adjust the index if we remove a state before it
-        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex - 1);
+      const newStates = prev.filter(state => state.id !== id);
+      // If we remove the last loaded state, reset the ID
+      if (lastLoadedFieldStateId === id) {
+        setLastLoadedFieldStateId(null);
       }
       return newStates;
     });
   };
 
-  const removeSnowboardState = (index: number) => {
+  const removeSnowboardState = (id: string) => {
     setSnowboardStates(prev => {
+      const index = prev.findIndex(state => state.id === id);
+      if (index === -1) return prev;
+      
       const newStates = [...prev];
       newStates.splice(index, 1);
       return newStates;
@@ -104,7 +158,7 @@ export function useSaveStates() {
 
   const clearFieldStates = () => {
     setFieldStates([]);
-    setLastLoadedFieldStateIndex(null);
+    setLastLoadedFieldStateId(null);
   };
 
   const clearSnowboardStates = () => {
@@ -116,46 +170,99 @@ export function useSaveStates() {
     clearSnowboardStates();
   };
 
-  const updateFieldStateTitle = (index: number, title: string) => {
+  const updateFieldStateTitle = (id: string, title: string) => {
     setFieldStates(prev => {
+      const index = prev.findIndex(state => state.id === id);
+      if (index === -1) return prev;
+      
       const newStates = [...prev];
       newStates[index] = { ...newStates[index], title };
       return newStates;
     });
   };
 
-  const updateSnowboardStateTitle = (index: number, title: string) => {
+  const updateSnowboardStateTitle = (id: string, title: string) => {
     setSnowboardStates(prev => {
+      const index = prev.findIndex(state => state.id === id);
+      if (index === -1) return prev;
+      
       const newStates = [...prev];
       newStates[index] = { ...newStates[index], title };
       return newStates;
     });
   };
 
-  const reorderFieldStates = (fromIndex: number, toIndex: number) => {
+  const reorderFieldStates = (fromId: string, toId: string) => {
     setFieldStates(prev => {
+      const fromIndex = prev.findIndex(state => state.id === fromId);
+      const toIndex = prev.findIndex(state => state.id === toId);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+
       const newStates = [...prev];
       const [removed] = newStates.splice(fromIndex, 1);
       newStates.splice(toIndex, 0, removed);
-      
-      // Update lastLoadedFieldStateIndex if needed
-      if (lastLoadedFieldStateIndex === fromIndex) {
-        setLastLoadedFieldStateIndex(toIndex);
-      } else if (
-        lastLoadedFieldStateIndex !== null &&
-        fromIndex < lastLoadedFieldStateIndex &&
-        toIndex >= lastLoadedFieldStateIndex
-      ) {
-        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex - 1);
-      } else if (
-        lastLoadedFieldStateIndex !== null &&
-        fromIndex > lastLoadedFieldStateIndex &&
-        toIndex <= lastLoadedFieldStateIndex
-      ) {
-        setLastLoadedFieldStateIndex(lastLoadedFieldStateIndex + 1);
-      }
-      
       return newStates;
+    });
+  };
+
+  const exportStates = () => {
+    const encodedFieldStates = fieldStates.map(state => ({
+      ...state,
+      regionOffsets: state.regionOffsets || SaveRegions, // Include current offsets if not present
+      regions: state.regions.map(region =>
+        btoa(String.fromCharCode.apply(null, region))
+      ),
+      savemap: btoa(String.fromCharCode.apply(null, state.savemap))
+    }));
+    
+    const encodedSnowboardStates = snowboardStates.map(state => ({
+      ...state,
+      globalObjData: btoa(String.fromCharCode.apply(null, state.globalObjData)),
+      entitiesData: btoa(String.fromCharCode.apply(null, state.entitiesData))
+    }));
+    
+    return { fieldStates: encodedFieldStates, snowboardStates: encodedSnowboardStates };
+  };
+
+  const importStates = (data: { fieldStates: any[], snowboardStates: any[] }) => {
+    // Instead of clearing states, we'll append the imported ones
+    setFieldStates(prev => {
+      // Get set of existing IDs
+      const existingIds = new Set(prev.map(state => state.id));
+      
+      // Filter out states with duplicate IDs and map the remaining ones
+      const newStates = data.fieldStates
+        .filter(state => !state.id || !existingIds.has(state.id))
+        .map(state => ({
+          ...state,
+          id: state.id || generateId(), // Use existing ID if available, otherwise generate new one
+          // Use provided region offsets if available, otherwise use current SaveRegions
+          regionOffsets: state.regionOffsets || SaveRegions,
+          regions: state.regions.map((base64: string) => {
+            const binary = atob(base64);
+            return Array.from(binary, char => char.charCodeAt(0));
+          }),
+          savemap: Array.from(atob(state.savemap), char => char.charCodeAt(0))
+        }));
+
+      return [...prev, ...newStates];
+    });
+
+    setSnowboardStates(prev => {
+      // Get set of existing IDs
+      const existingIds = new Set(prev.map(state => state.id));
+      
+      // Filter out states with duplicate IDs and map the remaining ones
+      const newStates = data.snowboardStates
+        .filter(state => !state.id || !existingIds.has(state.id))
+        .map(state => ({
+          ...state,
+          id: state.id || generateId(), // Use existing ID if available, otherwise generate new one
+          globalObjData: Array.from(atob(state.globalObjData), char => char.charCodeAt(0)),
+          entitiesData: Array.from(atob(state.entitiesData), char => char.charCodeAt(0))
+        }));
+
+      return [...prev, ...newStates];
     });
   };
 
@@ -167,7 +274,9 @@ export function useSaveStates() {
     getLatestFieldState,
     getLatestSnowboardState,
     getFieldState,
+    getFieldStateById,
     getSnowboardState,
+    getSnowboardStateById,
     removeFieldState,
     removeSnowboardState,
     clearFieldStates,
@@ -175,6 +284,8 @@ export function useSaveStates() {
     clearAllStates,
     updateFieldStateTitle,
     updateSnowboardStateTitle,
-    reorderFieldStates
+    reorderFieldStates,
+    exportStates,
+    importStates
   };
 } 

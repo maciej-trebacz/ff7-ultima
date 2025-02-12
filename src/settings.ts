@@ -34,7 +34,26 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
   try {
     const store = await getSettingsStore();
     const states = await store.get<SaveStates>('saveStates');
-    return states || { fieldStates: [], snowboardStates: [] };
+    
+    if (!states) {
+      return { fieldStates: [], snowboardStates: [] };
+    }
+
+    // Ensure each state has an ID
+    const fieldStates = states.fieldStates.map(state => ({
+      ...state,
+      id: state.id || crypto.randomUUID()
+    }));
+
+    const snowboardStates = states.snowboardStates.map(state => ({
+      ...state,
+      id: state.id || crypto.randomUUID()
+    }));
+
+    // Save the updated states back to disk
+    await store.set('saveStates', { fieldStates, snowboardStates });
+
+    return { fieldStates, snowboardStates };
   } catch (e) {
     console.error('Failed to load save states:', e);
     return { fieldStates: [], snowboardStates: [] };

@@ -1,11 +1,11 @@
 {
-  "version": "1.2.3",
-  "notes": "Save states can now be reordered by dragging and dropping the rows",
-  "pub_date": "2025-02-11T12:00:00Z",
+  "version": "1.2.4",
+  "notes": "You can now export and import save states for backup and sharing purposes",
+  "pub_date": "2025-02-12T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjhJSjVzWE9iQlZkSnlBT2ZPcWVIcVZYb1k1cFlTZlBkcjJWM3dJV0RUK1lZOEl2RWlnMW5hbzUwWUh1bE9jTVJzN0VwNFZMRVl5TlIvbjRXSXJPYUFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5MzA4MDgzCWZpbGU6RkY3IFVsdGltYV8xLjIuM194NjQtc2V0dXAuZXhlCmZzWlZrVlRjdTQ3TlZhaUhmSHM2aWZUdlVTWGl1c3NIblFCQWFvaUlsWkZGdW9waWFnRC90TUQ0b2VCOFJUZzFpa3pjRVVyeHRYTDM0bmRDR29pdkNBPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.3/FF7.Ultima_1.2.3_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjRKQVZ2T1dvMllYL2REaDdQbHBMUDlHdnVEcnFBRjVVNU5QcEpPVEd3c1JxQTlPQnlXenVIZkRyZ0tNSFRmT05oYWVqYU8zTVh2M2VxU2xmQ1lhZ0FZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5Mzc4NTMzCWZpbGU6RkY3IFVsdGltYV8xLjIuNF94NjQtc2V0dXAuZXhlCkdBNkIxeEpUUVVvRzl3ck4wekk0TnBXbVBUTmFnaTljdzFWTXNhblhCUEtyQkwyajhJN1hldzBiYzhtZm1QMHhWMXY5T0pDSC9BdlVkaUZQM0tUa0NnPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.4/FF7.Ultima_1.2.4_x64-setup.exe"
     }
   }
 }

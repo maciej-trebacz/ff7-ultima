@@ -11,57 +11,7 @@ import { battles } from "./ff7Battles";
 import { useEffect } from "react";
 import { OpcodeWriter } from "./opcodewriter";
 import { loadHackSettings } from "./settings";
-import { useSaveStates } from "./useSaveStates";
-
-type ModelObj = {
-  data: number[];
-  ptrData: number[];
-}
-
-type SnowBoardSaveState = {
-  globalObjData: number[];
-  entitiesData: number[];
-}
-
-const SaveRegions = [
-  [0xCBF5EC, 0xCC08E8],
-  [0xCC08EC, 0xCC1670],
-  [0xCFF180, 0xCFF3B0],
-  [0xCFF464, 0xCFF48C],
-  [0xCFF494, 0xCFF500],
-  [0xCFF504, 0xCFF594],
-  [0xCFF59C, 0xCFF738],
-  [0xD000C4, 0xD011F4],
-  [0xD8F4D8, 0xD8F678],
-  [0xDB9580, 0xDBCAE0],
-
-  // RNG Offset and Delta
-  [0x905E50, 0x905E54],
-  [0xCBF588, 0xCBF589],
-
-  // Line objs
-  [0xCC1F70, 0xCC2270],
-]
-
-// Copy entity/model objs but skip the pointers in the first 8 bytes
-for (let i = 0; i < 16; i++) {
-  const start = 0xcc1678 + i * 0x88;
-  const end = start + 0x80;
-
-  SaveRegions.push([start, end]);
-}
-
-type SaveState = {
-  regions: number[][];
-  savemap: number[];
-  fieldId: number;
-  destination?: Destination;
-  // models: Array<ModelObj>;
-}
-
-const SaveStates: SaveState[] = [];
-
-const SnowBoardSaveStates: SnowBoardSaveState[] = [];
+import { SaveRegions, useSaveStates } from "./useSaveStates";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
@@ -660,8 +610,8 @@ export function useFF7(addresses: FF7Addresses) {
         title
       });
     },
-    async loadFieldState(index?: number) {
-      const state = index !== undefined ? saveStates.getFieldState(index) : saveStates.getLatestFieldState();
+    async loadFieldState(stateId?: string) {
+      const state = stateId !== undefined ? saveStates.getFieldStateById(stateId) : saveStates.getLatestFieldState();
       if (!state) return;
 
       // Restore the savemap
@@ -672,8 +622,14 @@ export function useFF7(addresses: FF7Addresses) {
         await this.warpToFieldId(state.fieldId, state.destination);
 
         console.debug("Waiting for field id to match");
+        const maxWait = 10000; // e.g., 10 seconds
+        const startTime = Date.now();
         await waitFor(async () => {
           const fieldId = await readMemory(addresses.field_id, DataType.Short);
+          if (Date.now() - startTime > maxWait) {
+            console.error("Timeout waiting for field ID match");
+            return true;
+          }
           return fieldId === state.fieldId;
         });
         console.debug("Field id matched");
@@ -684,10 +640,12 @@ export function useFF7(addresses: FF7Addresses) {
       const tickFunctionPtr = await readMemory(tickFunctionAddr, DataType.Int);
       await writeMemory(tickFunctionAddr, 0x72237a, DataType.Int);
 
+      // Use regionOffsets from the save state if available, otherwise fall back to SaveRegions
+      const regionOffsets = state.regionOffsets || SaveRegions;
+      
       for (let i = 0; i < state.regions.length; i++) {
-        // if (i === 1) continue;
-        const length = SaveRegions[i][1] - SaveRegions[i][0];
-        await writeMemory(SaveRegions[i][0], state.regions[i].slice(0, length), DataType.Buffer);
+        const length = regionOffsets[i][1] - regionOffsets[i][0];
+        await writeMemory(regionOffsets[i][0], state.regions[i].slice(0, length), DataType.Buffer);
       }
 
       // Reset the field model pointers
@@ -710,8 +668,8 @@ export function useFF7(addresses: FF7Addresses) {
         title
       });
     },
-    async loadSnowBoardState(index?: number) {
-      const state = index !== undefined ? saveStates.getSnowboardState(index) : saveStates.getLatestSnowboardState();
+    async loadSnowBoardState(stateId?: string) {
+      const state = stateId !== undefined ? saveStates.getSnowboardStateById(stateId) : saveStates.getLatestSnowboardState();
       if (!state) return;
       
       await writeMemory(0xdd83b8, state.globalObjData, DataType.Buffer);
@@ -725,11 +683,11 @@ export function useFF7(addresses: FF7Addresses) {
         await this.saveSnowBoardState(title);
       }
     },
-    async loadState(index?: number) {
+    async loadState(stateId?: string) {
       if (gameState.currentModule === GameModule.Field || gameState.currentModule === GameModule.World) {
-        await this.loadFieldState(index);
+        await this.loadFieldState(stateId);
       } else if (gameState.currentModule === GameModule.Snowboard2) {
-        await this.loadSnowBoardState(index);
+        await this.loadSnowBoardState(stateId);
       }
     },
     async warpToFieldId(id: number, destination?: Destination) {
@@ -883,7 +841,16 @@ export function useFF7(addresses: FF7Addresses) {
     },
     async setVariable16(bank: number, address: number, value: number) {
       return await invoke("write_variable_16bit", { bank, address, value });
-    }
+    },
+    async setFieldStepId(value: number) {
+      await writeMemory(addresses.step_id, value, DataType.Int);
+    },
+    async setFieldStepFraction(value: number) {
+      await writeMemory(addresses.step_fraction, value, DataType.Int);
+    },
+    async setFieldDangerValue(value: number) {
+      await writeMemory(addresses.danger_value, value, DataType.Int);
+    },
   };
 
   return ff7;

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.4 (2025-02-12)
+
+### Field
+
+* You can now export and import save states for backup and sharing purposes
+
 ## 1.2.3 (2025-02-11)
 
 ### Field

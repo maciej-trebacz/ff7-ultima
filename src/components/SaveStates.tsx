@@ -6,6 +6,9 @@ import { useState } from "react";
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
 
 interface SaveStatesProps {
   ff7: FF7;
@@ -13,7 +16,6 @@ interface SaveStatesProps {
 
 interface SaveStateRowProps {
   state: SaveState;
-  index: number;
   onLoad: () => void;
   onDelete: () => void;
   onTitleChange: (title: string) => void;
@@ -25,7 +27,6 @@ interface SaveStateRowProps {
 
 function SaveStateRow({ 
   state, 
-  index,
   onLoad,
   onDelete,
   onTitleChange,
@@ -41,7 +42,7 @@ function SaveStateRow({
     transform,
     transition,
     isDragging
-  } = useSortable({ id: state.timestamp.toString() });
+  } = useSortable({ id: state.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -99,7 +100,7 @@ function SaveStateRow({
 
 export function SaveStates({ ff7 }: SaveStatesProps) {
   const [titleEditOpen, setTitleEditOpen] = useState(false);
-  const [titleEditIndex, setTitleEditIndex] = useState<number | null>(null);
+  const [titleEditStateId, setTitleEditStateId] = useState<string | null>(null);
   const [titleEditValue, setTitleEditValue] = useState("");
 
   const sensors = useSensors(
@@ -120,33 +121,77 @@ export function SaveStates({ ff7 }: SaveStatesProps) {
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
-      const oldIndex = ff7.saveStates.fieldStates.findIndex(
-        state => state.timestamp.toString() === active.id
-      );
-      const newIndex = ff7.saveStates.fieldStates.findIndex(
-        state => state.timestamp.toString() === over.id
-      );
+      ff7.saveStates.reorderFieldStates(active.id.toString(), over.id.toString());
+    }
+  };
+
+  const handleExportStates = async () => {
+    try {
+      const selected = await save({
+        filters: [{ name: "Ultima FF7 State Files", extensions: ["ff7states"] }],
+        defaultPath: `${new Date().toISOString().split('T')[0]}`
+      });
       
-      ff7.saveStates.reorderFieldStates(oldIndex, newIndex);
+      if (!selected) return;
+      
+      const exportData = ff7.saveStates.exportStates();
+      const json = JSON.stringify(exportData, null, 2);
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(json);
+      
+      await writeFile(selected, bytes);
+      await revealItemInDir(selected);
+    } catch (error) {
+      alert("Error exporting states: " + error);
+    }
+  };
+
+  const handleImportStates = async () => {
+    try {
+      const selected = await open({
+        filters: [{ name: "Ultima FF7 State Files", extensions: ["ff7states"] }],
+        multiple: false
+      });
+      
+      if (!selected || typeof selected !== "string") return;
+      
+      const fileContent = await readFile(selected);
+      const decoder = new TextDecoder();
+      const json = decoder.decode(fileContent);
+      const data = JSON.parse(json);
+      ff7.saveStates.importStates(data);
+    } catch (error) {
+      alert("Error importing states: " + JSON.stringify(error));
     }
   };
 
   return (
-    <div>
-      <div className="relative">
-        <h2 className="uppercase mt-2 font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
-          Save states
-        </h2>
-        <Button disabled={!ff7.connected} className="absolute right-0 top-[2px] cursor-pointer" size="xs" onClick={() => {
-          const title = prompt("Enter a title for this save state (optional):");
-          ff7.saveState(title || undefined);
-        }}>
-          New State
-        </Button>
+    <div className="mt-2">
+      <div className="relative mb-2">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="uppercase font-medium text-sm tracking-wide text-zinc-900 dark:text-zinc-100">
+            Save states
+          </h2>
+          <div className="flex space-x-2">
+            <Button variant="link" size="xs" onClick={handleImportStates}>
+              Import states
+            </Button>
+            <Button variant="link" size="xs" onClick={handleExportStates}>
+              Export states
+            </Button>
+            <Button disabled={!ff7.connected} className="cursor-pointer" size="xs" onClick={() => {
+              const title = prompt("Enter a title for this save state (optional):");
+              ff7.saveState(title || undefined);
+            }}>
+              New State
+            </Button>
+          </div>
+        </div>
+        <div className="border-b border-zinc-600 -mt-1" />
       </div>
       
       {ff7.saveStates.fieldStates.length > 0 ? (
-        <div className="mb-4 max-h-48 overflow-y-auto">
+        <div className="mb-4 max-h-48 overflow-y-auto overflow-x-hidden">
           <table className="w-full">
             <thead className="bg-zinc-800 text-xs text-left sticky top-0">
               <tr>
@@ -158,26 +203,25 @@ export function SaveStates({ ff7 }: SaveStatesProps) {
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
               <tbody>
                 <SortableContext 
-                  items={ff7.saveStates.fieldStates.map(state => state.timestamp.toString())}
+                  items={ff7.saveStates.fieldStates.map(state => state.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {ff7.saveStates.fieldStates.map((state: SaveState, index: number) => (
+                  {ff7.saveStates.fieldStates.map((state: SaveState) => (
                     <SaveStateRow
-                      key={state.timestamp}
+                      key={state.id}
                       state={state}
-                      index={index}
-                      onLoad={() => ff7.loadState(index)}
-                      onDelete={() => ff7.saveStates.removeFieldState(index)}
+                      onLoad={() => ff7.loadState(state.id)}
+                      onDelete={() => ff7.saveStates.removeFieldState(state.id)}
                       onTitleChange={(title) => {
-                        ff7.saveStates.updateFieldStateTitle(index, title);
+                        ff7.saveStates.updateFieldStateTitle(state.id, title);
                         setTitleEditOpen(false);
                       }}
-                      titleEditOpen={titleEditOpen && titleEditIndex === index}
+                      titleEditOpen={titleEditOpen && titleEditStateId === state.id}
                       titleEditValue={titleEditValue}
                       onTitleEditOpenChange={(open) => {
                         setTitleEditOpen(open);
                         if (open) {
-                          setTitleEditIndex(index);
+                          setTitleEditStateId(state.id);
                           setTitleEditValue(state.title || "");
                         }
                       }}
