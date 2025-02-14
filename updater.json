@@ -1,11 +1,11 @@
 {
-  "version": "1.2.4",
-  "notes": "You can now export and import save states for backup and sharing purposes",
+  "version": "1.2.5",
+  "notes": "Fixed a regression causing crashes",
   "pub_date": "2025-02-12T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjRKQVZ2T1dvMllYL2REaDdQbHBMUDlHdnVEcnFBRjVVNU5QcEpPVEd3c1JxQTlPQnlXenVIZkRyZ0tNSFRmT05oYWVqYU8zTVh2M2VxU2xmQ1lhZ0FZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5Mzc4NTMzCWZpbGU6RkY3IFVsdGltYV8xLjIuNF94NjQtc2V0dXAuZXhlCkdBNkIxeEpUUVVvRzl3ck4wekk0TnBXbVBUTmFnaTljdzFWTXNhblhCUEtyQkwyajhJN1hldzBiYzhtZm1QMHhWMXY5T0pDSC9BdlVkaUZQM0tUa0NnPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.4/FF7.Ultima_1.2.4_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFseWR5SERMM3pKdmdIdkdYR2ViQnBReVRRQmppUkt2cHhxRnlsVStKbnBQTkRza3ZtK2UzUExlbXBrdkJUMGN3RzQzbUV2KzJXOEg5TjBuR2tmNWdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5NTYyMDI4CWZpbGU6RkY3IFVsdGltYV8xLjIuNV94NjQtc2V0dXAuZXhlCjQwaHZCa3diUUZSVy9xTmlnMXBYSEQzMzEySVFhUXgxajIyaHllTDFvSjliZE1RN3gybTlGNzVEd0JQZm5Ka0daaXBTZHRuSWh0ZkwrcWdGVE51Y0RRPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.5/FF7.Ultima_1.2.5_x64-setup.exe"
     }
   }
 }
