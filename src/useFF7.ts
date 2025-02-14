@@ -80,7 +80,7 @@ export function useFF7(addresses: FF7Addresses) {
     });
 
     // Write the result
-    writer.writeMovEax(fnCallerResultAddr);
+    // writer.writeMovEax(fnCallerResultAddr);
 
     // Call the overwrite function to make sure we call only once
     const length = writer.offset - startOffset;
@@ -92,7 +92,7 @@ export function useFF7(addresses: FF7Addresses) {
 
   const callGameFn = async (address: number, params?: number[]) => {
     await callGameFns([{ address, params }]);
-    return await readMemory(fnCallerResultAddr, DataType.Int);
+    // return await readMemory(fnCallerResultAddr, DataType.Int);
   };
 
   const getFieldObjPtr = async () => {
