@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Window } from "@tauri-apps/api/window"
+import { Webview } from "@tauri-apps/api/webview"
 
 export const WorldBounds = {
   x: { min: 0, max: 0x48000 },
@@ -31,6 +34,8 @@ export function World(props: { ff7: FF7 }) {
   const [editCoord, setEditCoord] = useState<"x" | "y" | "z" | "direction" | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
+  const [mapWindow, setMapWindow] = useState<Window | null>(null);
+  const [mapWebview, setMapWebview] = useState<Webview | null>(null);
 
   const convertCoordinates = (x: number, z: number) => {
     const imageDimensions = worldmapRef.current!.getBoundingClientRect();
@@ -106,6 +111,74 @@ export function World(props: { ff7: FF7 }) {
       </div>
     );
   });
+
+  const handleOpenMapViewer = async () => {
+    if (mapWindow) {
+      await mapWindow.setFocus();
+      return;
+    }
+
+    const appWindow = new Window('mapviewer', {
+      parent: Window.getCurrent(),
+      title: 'Ultima - Map Viewer',
+      theme: 'dark',
+      resizable: true,
+      visible: false,
+      center: true,
+      width: 800,
+      height: 600,
+      backgroundColor: '#111212',
+    });
+
+    appWindow.once('tauri://created', (e) => {
+      const webview = new Webview(appWindow, 'mapviewer', {
+        url: 'map.html',
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 600,
+        focus: true,
+        backgroundColor: '#111212',
+      });
+      
+      const resize = async () => {
+        const size = await appWindow.innerSize();
+        await webview.setSize(size);
+      }
+
+      webview.once('tauri://created', () => {
+        resize();
+        appWindow.show();
+      });
+
+      // Listen for window resize events
+      appWindow.listen("tauri://resize", resize);
+      resize();
+
+      setMapWindow(appWindow);
+      setMapWebview(webview);
+
+      appWindow.onCloseRequested(() => {
+        setMapWindow(null);
+        setMapWebview(null);
+      });
+    });
+  }
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on component unmount
+      if (mapWindow) {
+        mapWindow.close();
+      }
+    };
+  }, [mapWindow]);
+
+  useEffect(() => {
+    if (mapWebview) {
+      mapWebview.emit("ff7-data", state);
+    }
+  }, [mapWebview, state]);
 
   return (
     <div>
@@ -198,7 +271,21 @@ export function World(props: { ff7: FF7 }) {
           </div>
         </>
       )}
-      <h4 className="text-center mt-2 mb-1 font-medium">Map</h4>
+      
+      <div className="relative mb-2 mt-2">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="uppercase font-medium text-sm tracking-wide text-zinc-900 dark:text-zinc-100">
+            Map
+          </h2>
+          <div className="flex space-x-2">
+            <Button variant="default" size="xs" onClick={handleOpenMapViewer}>
+              Open Map Viewer
+            </Button>
+          </div>
+        </div>
+        <div className="border-b border-zinc-600 -mt-1" />
+      </div>
+
       <div className="relative select-none" onClick={handleMapClick}>
         <img src={Worldmap} ref={worldmapRef} />
         {icons}

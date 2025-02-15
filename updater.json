@@ -1,11 +1,11 @@
 {
-  "version": "1.2.5",
-  "notes": "Fixed a regression causing crashes",
+  "version": "1.3.0",
+  "notes": "Added map viewer feature",
   "pub_date": "2025-02-12T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFseWR5SERMM3pKdmdIdkdYR2ViQnBReVRRQmppUkt2cHhxRnlsVStKbnBQTkRza3ZtK2UzUExlbXBrdkJUMGN3RzQzbUV2KzJXOEg5TjBuR2tmNWdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5NTYyMDI4CWZpbGU6RkY3IFVsdGltYV8xLjIuNV94NjQtc2V0dXAuZXhlCjQwaHZCa3diUUZSVy9xTmlnMXBYSEQzMzEySVFhUXgxajIyaHllTDFvSjliZE1RN3gybTlGNzVEd0JQZm5Ka0daaXBTZHRuSWh0ZkwrcWdGVE51Y0RRPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.2.5/FF7.Ultima_1.2.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Tis5Sjl6T0NJbWs0TGN4cUZuaStZNWRmNUVxb205RVlVWU5jbkJBV2tkaDQva0oyaTREb1dueitncVdCdWNqQkVIOEZqZmZ5eVdLWURzRlphb3gyVXdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5NjQ1NDI0CWZpbGU6RkY3IFVsdGltYV8xLjMuMF94NjQtc2V0dXAuZXhlCk5zNk42bm1wTW4xbW1ua2tZOE54Z1dvTmN6RitwOFYwWGt0QXR2U1drS1RVOFc4N3ZCU1p3SDRvdWJPMXVkNmRxTHU3TWMyRUtwR05FMzRpNmVmOERBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.3.0/FF7.Ultima_1.3.0_x64-setup.exe"
     }
   }
 }

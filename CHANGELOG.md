@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.3.0 (2025-02-15)
+
+### World
+
+* Adds a world map viewer showing a live, zoomable top-down map with ability to toggle section boundaries, triangle boundaries and showing current positions of certain models.
+
+## 1.2.5 (2025-02-14)
+
+### General
+
+* Fixed a crash when using certain features (Skip FMV, Full Party Heal, a few others) on vanilla FF7.
+
 ## 1.2.4 (2025-02-12)
 
 ### Field

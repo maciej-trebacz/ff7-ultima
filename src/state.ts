@@ -58,6 +58,8 @@ const defaultState = {
     partyMemberIds: [] as number[],
     keyItems: [] as number[],
     partyMembers: [] as PartyMember[],
+    zolomCoords: null as [number, number] | null,
+    worldMapType: 0,
   };
 
 export const useFF7State = function() {
@@ -196,6 +198,8 @@ export const useFF7State = function() {
           partyMemberIds: basic.party_member_ids as number[],
           keyItems: parseKeyItemsBitmask(basic.key_items),
           partyMembers: ff7Data.party_members as PartyMember[],
+          zolomCoords: basic.zolom_coords ? [basic.zolom_coords >> 16, basic.zolom_coords & 0xffff] : null,
+          worldMapType: basic.world_map_type as number,
         }));
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

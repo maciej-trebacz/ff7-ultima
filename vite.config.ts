@@ -20,5 +20,15 @@ export default defineConfig(async () => ({
   },
   resolve: {
     alias: [{ find: '@', replacement: '/src' }],
-  },   
+  },
+  // Ensure static files like map.html are included in the build
+  publicDir: 'public',
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        map: 'map.html'
+      }
+    }
+  }
 }));

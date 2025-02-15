@@ -4,7 +4,9 @@ use ff7_lib::ff7;
 use ff7_lib::ff7::addresses::FF7Addresses;
 use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem};
 use ff7_lib::utils::memory;
+use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
+use tauri::Manager;
 
 #[tauri::command]
 pub fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -136,6 +138,16 @@ pub fn write_variable_16bit(bank: u32, address: u32, value: u16) -> Result<(), S
     ff7::data::general::write_variable_16bit(bank, address, value, &FF7Addresses::new())
 }
 
+#[tauri::command]
+pub fn get_current_game_directory() -> Result<String, String> {
+    process::get_current_dir().ok_or("Failed to get current directory".to_string())
+}
+
+#[tauri::command]
+fn show_map_window(app: tauri::AppHandle) {
+    app.get_webview_window("mapviewer").unwrap().show().unwrap();
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -164,5 +176,7 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         read_variables_bank,
         write_variable_8bit,
         write_variable_16bit,
+        get_current_game_directory,
+        show_map_window,
     ]
 }
