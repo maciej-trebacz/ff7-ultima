@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.3.1 (2025-02-16)
+
+### World
+
+* Reworked map viewer pins, added pins for all controllable models and weapons
+* Updated the static world map image
+
 ## 1.3.0 (2025-02-15)
 
 ### World

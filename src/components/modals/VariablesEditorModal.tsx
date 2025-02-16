@@ -155,6 +155,8 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
     await loadVariables();
   };
 
+  const bankTitles = ["1/2", "3/4", "B/C", "D/E", "7/F"]
+
   return (
     <Modal
       open={isOpen}
@@ -174,7 +176,7 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
               <SelectContent>
                 {[1, 2, 3, 4, 5].map((bank) => (
                   <SelectItem key={bank} value={bank.toString()} className="text-xs">
-                    Bank {bank}
+                    Bank {bank} ({bankTitles[bank - 1]})
                   </SelectItem>
                 ))}
               </SelectContent>

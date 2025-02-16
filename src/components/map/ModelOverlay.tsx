@@ -46,16 +46,20 @@ const ModelOverlay: React.FC<ModelOverlayProps> = ({ zoomRef, visible = true }) 
     models.push(...gameState.worldModels);
     models.push(...additionalModels);
   } else if (gameState.worldMapType === 2) {
-    const submarine = gameState.worldModels.find(model => model.model_id === 13 && model.y < -2000);
+    const submarine = gameState.worldModels.find(model => [13, 28].includes(model.model_id) && model.y < -2000);
     if (submarine) {
       models.push(submarine);
     }
-    MIN_SIZE = 100;
+    const emerald = gameState.worldModels.find(model => model.model_id === 30);
+    if (emerald) {
+      models.push(emerald);
+    }
+    MIN_SIZE = 250;
     MAX_SIZE = 750;
   } else if (gameState.worldMapType === 3) {
-    models.push(...gameState.worldModels.filter(model => model.model_id === 0));
-    MIN_SIZE = 100;
-    MAX_SIZE = 750;
+    models.push(...gameState.worldModels.filter(model => [0, 1, 2].includes(model.model_id)));
+    MIN_SIZE = 150;
+    MAX_SIZE = 600;
   }
 
   if (gameState.worldMapType === 2) {
@@ -65,11 +69,11 @@ const ModelOverlay: React.FC<ModelOverlayProps> = ({ zoomRef, visible = true }) 
     });
   }
 
+  const quadSize = Math.min(MAX_SIZE, Math.max(MIN_SIZE, MAX_SIZE / zoomRef.current));
+
   // Filter out models that don't have textures
   const availableModelIds = MODEL_TEXTURES.map(config => config.id);
   const filteredModels = models.filter(model => availableModelIds.includes(model.model_id));
-
-  const quadSize = Math.min(MAX_SIZE, Math.max(MIN_SIZE, MAX_SIZE / zoomRef.current));
 
   return (
     <>
