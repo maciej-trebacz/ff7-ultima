@@ -22,7 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Tauri files
 ~/.tauri/ff7-ultima.key
+src-tauri/settings.backup.json
 
 # windsurf rules
 .windsurfrules

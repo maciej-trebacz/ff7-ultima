@@ -43,6 +43,7 @@
     "core:webview:allow-set-webview-focus",
     "core:webview:allow-set-webview-size",
     "core:window:allow-set-size",
-    "dialog:allow-message"
+    "dialog:allow-message",
+    "core:window:allow-set-always-on-top"
   ]
 }

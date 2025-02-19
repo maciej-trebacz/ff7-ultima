@@ -7,6 +7,8 @@ use ff7_lib::utils::memory;
 use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
 use tauri::Manager;
+use log::{Level, log};
+use serde_json::Value as JsonValue;
 
 #[tauri::command]
 pub fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -148,6 +150,27 @@ fn show_map_window(app: tauri::AppHandle) {
     app.get_webview_window("mapviewer").unwrap().show().unwrap();
 }
 
+#[tauri::command]
+pub fn log_from_frontend(
+    level: String,
+    message: String,
+    params: Option<JsonValue>
+) {
+    let level = match level.to_uppercase().as_str() {
+        "ERROR" => Level::Error,
+        "WARN" => Level::Warn,
+        "INFO" => Level::Info,
+        "DEBUG" => Level::Debug,
+        "TRACE" => Level::Trace,
+        _ => Level::Info,
+    };
+    
+    match params {
+        Some(p) => log!(target: "frontend", level, "{}|{}", message, p),
+        None => log!(target: "frontend", level, "{}", message),
+    }
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -178,5 +201,6 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         write_variable_16bit,
         get_current_game_directory,
         show_map_window,
+        log_from_frontend,
     ]
 }

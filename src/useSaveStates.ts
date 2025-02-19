@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Destination } from "./types";
 import { loadSaveStates, saveSaveStates, SaveStates } from "./settings";
+import { logger } from "./lib/logging";
 
 type RegionOffset = [number, number];
 
@@ -104,37 +105,58 @@ export function useSaveStates() {
   }, [fieldStates, snowboardStates]);
 
   const pushFieldState = (state: Omit<SaveState, "timestamp" | "regionOffsets" | "id">) => {
+    const id = generateId();
     setFieldStates(prev => [...prev, { 
       ...state, 
-      id: generateId(),
+      id,
       timestamp: Date.now(),
       regionOffsets: SaveRegions // Store the current region offsets with the state
     }]);
     setLastLoadedFieldStateId(null);
+    logger.info('Created new field state', { 
+      id,
+      fieldId: state.fieldId,
+      fieldName: state.fieldName
+    });
   };
 
   const pushSnowboardState = (state: Omit<SnowBoardSaveState, "timestamp" | "id">) => {
+    const id = generateId();
     setSnowboardStates(prev => [...prev, { 
       ...state, 
-      id: generateId(),
+      id,
       timestamp: Date.now() 
     }]);
+    logger.info('Created new snowboard state', { id });
   };
 
   const getLatestFieldState = () => {
-    if (fieldStates.length === 0) return null;
+    if (fieldStates.length === 0) {
+      logger.debug('No field states available');
+      return null;
+    }
     // If we have a manually loaded state, return that
     if (lastLoadedFieldStateId) {
       const state = fieldStates.find(state => state.id === lastLoadedFieldStateId);
-      if (state) return state;
+      if (state) {
+        logger.debug('Returning last manually loaded state', { id: state.id });
+        return state;
+      }
     }
     // Otherwise return the last saved state
-    return fieldStates[fieldStates.length - 1];
+    const state = fieldStates[fieldStates.length - 1];
+    logger.debug('Returning latest field state', { id: state.id });
+    return state;
   };
 
   const getLatestSnowboardState = () => {
-    if (snowboardStates.length === 0) return null;
-    return snowboardStates[snowboardStates.length - 1];
+    if (snowboardStates.length === 0) {
+      logger.debug('No snowboard states available');
+      return null;
+    }
+    const state = snowboardStates[snowboardStates.length - 1];
+    logger.debug('Returning latest snowboard state', { id: state.id });
+    return state;
   };
 
   const getFieldState = (index: number) => {
@@ -169,6 +191,7 @@ export function useSaveStates() {
       if (lastLoadedFieldStateId === id) {
         setLastLoadedFieldStateId(null);
       }
+      logger.info('Removed field state', { id });
       return newStates;
     });
   };
@@ -176,20 +199,26 @@ export function useSaveStates() {
   const removeSnowboardState = (id: string) => {
     setSnowboardStates(prev => {
       const index = prev.findIndex(state => state.id === id);
-      if (index === -1) return prev;
+      if (index === -1) {
+        logger.warn('Attempted to remove non-existent snowboard state', { id });
+        return prev;
+      }
       
       const newStates = [...prev];
       newStates.splice(index, 1);
+      logger.info('Removed snowboard state', { id });
       return newStates;
     });
   };
 
   const clearFieldStates = () => {
+    logger.info('Clearing all field states', { count: fieldStates.length });
     setFieldStates([]);
     setLastLoadedFieldStateId(null);
   };
 
   const clearSnowboardStates = () => {
+    logger.info('Clearing all snowboard states', { count: snowboardStates.length });
     setSnowboardStates([]);
   };
 
@@ -201,10 +230,14 @@ export function useSaveStates() {
   const updateFieldStateTitle = (id: string, title: string) => {
     setFieldStates(prev => {
       const index = prev.findIndex(state => state.id === id);
-      if (index === -1) return prev;
+      if (index === -1) {
+        logger.warn('Attempted to update title of non-existent field state', { id });
+        return prev;
+      }
       
       const newStates = [...prev];
       newStates[index] = { ...newStates[index], title };
+      logger.info('Updated field state title', { id, title });
       return newStates;
     });
   };
@@ -212,10 +245,14 @@ export function useSaveStates() {
   const updateSnowboardStateTitle = (id: string, title: string) => {
     setSnowboardStates(prev => {
       const index = prev.findIndex(state => state.id === id);
-      if (index === -1) return prev;
+      if (index === -1) {
+        logger.warn('Attempted to update title of non-existent snowboard state', { id });
+        return prev;
+      }
       
       const newStates = [...prev];
       newStates[index] = { ...newStates[index], title };
+      logger.info('Updated snowboard state title', { id, title });
       return newStates;
     });
   };
@@ -224,19 +261,28 @@ export function useSaveStates() {
     setFieldStates(prev => {
       const fromIndex = prev.findIndex(state => state.id === fromId);
       const toIndex = prev.findIndex(state => state.id === toId);
-      if (fromIndex === -1 || toIndex === -1) return prev;
+      if (fromIndex === -1 || toIndex === -1) {
+        logger.warn('Attempted to reorder with invalid state IDs', { fromId, toId });
+        return prev;
+      }
 
       const newStates = [...prev];
       const [removed] = newStates.splice(fromIndex, 1);
       newStates.splice(toIndex, 0, removed);
+      logger.info('Reordered field states', { fromId, toId, fromIndex, toIndex });
       return newStates;
     });
   };
 
   const exportStates = () => {
+    logger.info('Exporting states', { 
+      fieldStatesCount: fieldStates.length, 
+      snowboardStatesCount: snowboardStates.length 
+    });
+    
     const encodedFieldStates = fieldStates.map(state => ({
       ...state,
-      regionOffsets: state.regionOffsets || SaveRegions, // Include current offsets if not present
+      regionOffsets: state.regionOffsets || SaveRegions,
       regions: state.regions.map(region =>
         btoa(String.fromCharCode.apply(null, region))
       ),
@@ -253,6 +299,11 @@ export function useSaveStates() {
   };
 
   const importStates = (data: { fieldStates: any[], snowboardStates: any[] }) => {
+    logger.info('Importing states', { 
+      fieldStatesCount: data.fieldStates.length, 
+      snowboardStatesCount: data.snowboardStates.length 
+    });
+
     // Instead of clearing states, we'll append the imported ones
     setFieldStates(prev => {
       // Get set of existing IDs
@@ -263,8 +314,7 @@ export function useSaveStates() {
         .filter(state => !state.id || !existingIds.has(state.id))
         .map(state => ({
           ...state,
-          id: state.id || generateId(), // Use existing ID if available, otherwise generate new one
-          // Use provided region offsets if available, otherwise use current SaveRegions
+          id: state.id || generateId(),
           regionOffsets: state.regionOffsets || SaveRegions,
           regions: state.regions.map((base64: string) => {
             const binary = atob(base64);
@@ -273,22 +323,32 @@ export function useSaveStates() {
           savemap: Array.from(atob(state.savemap), char => char.charCodeAt(0))
         }));
 
+      logger.info('Imported field states', { 
+        existingCount: prev.length,
+        importedCount: newStates.length,
+        skippedCount: data.fieldStates.length - newStates.length
+      });
+
       return [...prev, ...newStates];
     });
 
     setSnowboardStates(prev => {
-      // Get set of existing IDs
       const existingIds = new Set(prev.map(state => state.id));
       
-      // Filter out states with duplicate IDs and map the remaining ones
       const newStates = data.snowboardStates
         .filter(state => !state.id || !existingIds.has(state.id))
         .map(state => ({
           ...state,
-          id: state.id || generateId(), // Use existing ID if available, otherwise generate new one
+          id: state.id || generateId(),
           globalObjData: Array.from(atob(state.globalObjData), char => char.charCodeAt(0)),
           entitiesData: Array.from(atob(state.entitiesData), char => char.charCodeAt(0))
         }));
+
+      logger.info('Imported snowboard states', {
+        existingCount: prev.length,
+        importedCount: newStates.length,
+        skippedCount: data.snowboardStates.length - newStates.length
+      });
 
       return [...prev, ...newStates];
     });

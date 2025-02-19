@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod commands;
 mod updater;
+mod logging;
 
 use ff7_lib::utils::process;
 use tauri_plugin_window_state::StateFlags;
@@ -19,6 +20,9 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
             let handle = app.handle().clone();
+            logging::setup_logging(&handle)?;
+            log::info!(target: "app::init", "Application started");
+            
             tauri::async_runtime::spawn(async move {
                 updater::update(handle).await.unwrap();
             });

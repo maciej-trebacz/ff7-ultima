@@ -2,6 +2,7 @@ import { Store, load } from '@tauri-apps/plugin-store';
 import { RandomEncounters } from './types';
 import { SaveState, SnowBoardSaveState } from './useSaveStates';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
+import { logger } from './lib/logging';
 
 let settingsStore: Store | null = null;
 
@@ -33,8 +34,9 @@ async function backupSaveStates(states: SaveStates) {
     };
     const json = JSON.stringify(backup);
     await writeFile('settings.backup.json', new TextEncoder().encode(json));
+    logger.info('Created save states backup', { timestamp: backup.timestamp });
   } catch (e) {
-    console.error('Failed to create backup:', e);
+    logger.error('Failed to create backup', { error: e?.toString() });
   }
 }
 
@@ -43,9 +45,10 @@ async function loadBackupSaveStates(): Promise<SaveStates | null> {
     const backupContent = await readFile('settings.backup.json');
     const json = new TextDecoder().decode(backupContent);
     const backup = JSON.parse(json);
+    logger.info('Loaded save states from backup', { timestamp: backup.timestamp });
     return backup.states;
   } catch (e) {
-    console.error('Failed to load backup:', e);
+    logger.error('Failed to load backup', { error: e?.toString() });
     return null;
   }
 }
@@ -55,10 +58,14 @@ export async function saveSaveStates(states: SaveStates) {
     const store = await getSettingsStore();
     await store.set('saveStates', states);
     await store.save();
+    logger.info('Saved states to main store', { 
+      fieldStatesCount: states.fieldStates.length,
+      snowboardStatesCount: states.snowboardStates.length 
+    });
     // Create a backup after successful save
     await backupSaveStates(states);
   } catch (e) {
-    console.error('Failed to save states:', e);
+    logger.error('Failed to save states to main store', { error: e?.toString() });
     // Try to save to backup file if main save fails
     await backupSaveStates(states);
   }
@@ -70,12 +77,14 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
     const states = await store.get<SaveStates>('saveStates');
     
     if (!states) {
+      logger.warn('No states found in main store, attempting to load from backup');
       // Try to load from backup if main file is empty
       const backup = await loadBackupSaveStates();
       if (backup) {
-        console.log('Restored states from backup file');
+        logger.info('Restored states from backup file');
         return backup;
       }
+      logger.info('No backup found, returning empty states');
       return { fieldStates: [], snowboardStates: [] };
     }
 
@@ -90,17 +99,22 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
       id: state.id || crypto.randomUUID()
     }));
 
+    logger.info('Loaded states from main store', {
+      fieldStatesCount: fieldStates.length,
+      snowboardStatesCount: snowboardStates.length
+    });
+
     // Save the updated states back to disk
     await store.set('saveStates', { fieldStates, snowboardStates });
     await store.save();
     
     return { fieldStates, snowboardStates };
   } catch (e) {
-    console.error('Failed to load save states:', e);
+    logger.error('Failed to load save states from main store', { error: e?.toString() });
     // Try to load from backup if main file fails
     const backup = await loadBackupSaveStates();
     if (backup) {
-      console.log('Restored states from backup file');
+      logger.info('Restored states from backup file');
       return backup;
     }
     return { fieldStates: [], snowboardStates: [] };
@@ -108,35 +122,47 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
 }
 
 export async function saveShortcuts(shortcuts: Record<string, string>) {
-  const store = await getSettingsStore();
-  await store.set('shortcuts', shortcuts);
-  await store.save();
+  try {
+    const store = await getSettingsStore();
+    await store.set('shortcuts', shortcuts);
+    await store.save();
+    logger.info('Saved shortcuts', { count: Object.keys(shortcuts).length });
+  } catch (e) {
+    logger.error('Failed to save shortcuts', { error: e?.toString() });
+  }
 }
 
 export async function loadShortcuts(): Promise<Record<string, string> | null> {
   try {
     const store = await getSettingsStore();
     const shortcuts = await store.get<Record<string, string>>('shortcuts');
+    logger.info('Loaded shortcuts', { count: shortcuts ? Object.keys(shortcuts).length : 0 });
     return shortcuts || null;
   } catch (e) {
-    console.error('Failed to load shortcuts:', e);
+    logger.error('Failed to load shortcuts', { error: e?.toString() });
     return null;
   }
 }
 
 export async function saveHackSettings(settings: HackSettings) {
-  const store = await getSettingsStore();
-  await store.set('hacks', settings);
-  await store.save();
+  try {
+    const store = await getSettingsStore();
+    await store.set('hacks', settings);
+    await store.save();
+    logger.info('Saved hack settings', { settings });
+  } catch (e) {
+    logger.error('Failed to save hack settings', { error: e?.toString() });
+  }
 }
 
 export async function loadHackSettings(): Promise<HackSettings | null> {
   try {
     const store = await getSettingsStore();
     const settings = await store.get<HackSettings>('hacks');
+    logger.info('Loaded hack settings', { settings: settings || 'none' });
     return settings || null;
   } catch (e) {
-    console.error('Failed to load hack settings:', e);
+    logger.error('Failed to load hack settings', { error: e?.toString() });
     return null;
   }
 } 
