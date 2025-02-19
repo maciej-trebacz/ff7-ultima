@@ -38,7 +38,7 @@ export function formatTime(seconds: number): string {
   return `${formattedHours}${formattedMinutes}${formattedSeconds}`;
 }
 
-export const formatStatus = (status: number, flags: number, skipInvincibility?: boolean) => {
+export const formatStatus = (status: number, flags: number, skipInvincibility?: boolean, printAll?: boolean) => {
   let statusCount = 0;
   let statusList = [];
   for (const key in statuses) {
@@ -53,6 +53,9 @@ export const formatStatus = (status: number, flags: number, skipInvincibility?: 
   }
   if (statusCount === 0) {
     return null;
+  }
+  if (printAll) {
+    return statusList.join(", ");
   }
   return statusCount === 1 ? statusList[0] : `${statusCount} effects`;
 }

@@ -15,6 +15,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { EnemyInfoModal } from "@/components/modals/EnemyInfoModal";
 
 export function Battle(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -56,6 +57,10 @@ export function Battle(props: { ff7: FF7 }) {
         ff7.setHP(parseInt(editValue), currentAllyEditing);
       } else if (editTitle === "MP") {
         ff7.setMP(parseInt(editValue), currentAllyEditing);
+      } else if (editTitle === "Max HP") {
+        ff7.setMaxHP(parseInt(editValue), currentAllyEditing);
+      } else if (editTitle === "Max MP") {
+        ff7.setMaxMP(parseInt(editValue), currentAllyEditing);
       }
     }
     setPopoverOpen(false);
@@ -183,49 +188,95 @@ export function Battle(props: { ff7: FF7 }) {
                     ></progress>
                   </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap w-[100px] hover:bg-zinc-700">
-                  <EditPopover
-                    open={popoverOpen && currentAllyEditing === index && editTitle === "HP"}
-                    onOpenChange={setPopoverOpen}
-                    value={editValue}
-                    onValueChange={setEditValue}
-                    onSubmit={submitValue}
-                  >
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), index)}>
-                            {char.hp} / {char.max_hp}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Click to edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </EditPopover>
+                <td className="p-1 px-2 text-nowrap w-[100px]">
+                  <div className="flex gap-1">
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === index && editTitle === "HP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("HP", char.hp.toString(), index)}>
+                              {char.hp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit current HP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                    <span>/</span>
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === index && editTitle === "Max HP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("Max HP", char.max_hp.toString(), index)}>
+                              {char.max_hp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit max HP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap w-[66px] hover:bg-zinc-700">
-                  <EditPopover
-                    open={popoverOpen && currentAllyEditing === index && editTitle === "MP"}
-                    onOpenChange={setPopoverOpen}
-                    value={editValue}
-                    onValueChange={setEditValue}
-                    onSubmit={submitValue}
-                  >
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), index)}>
-                            {char.mp} / {char.max_mp}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Click to edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </EditPopover>
+                <td className="p-1 px-2 text-nowrap w-[66px]">
+                  <div className="flex gap-1">
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === index && editTitle === "MP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("MP", char.mp.toString(), index)}>
+                              {char.mp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit current MP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                    <span>/</span>
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === index && editTitle === "Max MP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("Max MP", char.max_mp.toString(), index)}>
+                              {char.max_mp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit max MP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </div>
                 </td>
                 <td className="p-1 cursor-pointer whitespace-pre hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index); openEditStatusModal(); }}>{formatStatus(char.status, char.flags, state.invincibilityEnabled) || <span className="text-zinc-400">[None]</span>}</td>
                 <td className="cursor-pointer">
@@ -283,49 +334,95 @@ export function Battle(props: { ff7: FF7 }) {
                     ></progress>
                   </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap w-[100px] hover:bg-zinc-700">
-                  <EditPopover
-                    open={popoverOpen && currentAllyEditing === char.index && editTitle === "HP"}
-                    onOpenChange={setPopoverOpen}
-                    value={editValue}
-                    onValueChange={setEditValue}
-                    onSubmit={submitValue}
-                  >
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("HP", char.hp.toString(), char.index)}>
-                            {char.hp} / {char.max_hp}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Click to edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </EditPopover>
+                <td className="p-1 px-2 text-nowrap w-[100px]">
+                  <div className="flex gap-1">
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === char.index && editTitle === "HP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("HP", char.hp.toString(), char.index)}>
+                              {char.hp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit current HP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                    <span>/</span>
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === char.index && editTitle === "Max HP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("Max HP", char.max_hp.toString(), char.index)}>
+                              {char.max_hp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit max HP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </div>
                 </td>
-                <td className="p-1 cursor-pointer px-2 text-nowrap w-[66px] hover:bg-zinc-700">
-                  <EditPopover
-                    open={popoverOpen && currentAllyEditing === char.index && editTitle === "MP"}
-                    onOpenChange={setPopoverOpen}
-                    value={editValue}
-                    onValueChange={setEditValue}
-                    onSubmit={submitValue}
-                  >
-                    <TooltipProvider>
-                      <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-pointer" onClick={() => openEditPopover("MP", char.mp.toString(), char.index)}>
-                            {char.mp} / {char.max_mp}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Click to edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </EditPopover>
+                <td className="p-1 px-2 text-nowrap w-[66px]">
+                  <div className="flex gap-1">
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === char.index && editTitle === "MP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("MP", char.mp.toString(), char.index)}>
+                              {char.mp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit current MP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                    <span>/</span>
+                    <EditPopover
+                      open={popoverOpen && currentAllyEditing === char.index && editTitle === "Max MP"}
+                      onOpenChange={setPopoverOpen}
+                      value={editValue}
+                      onValueChange={setEditValue}
+                      onSubmit={submitValue}
+                    >
+                      <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer hover:bg-zinc-700 px-1" onClick={() => openEditPopover("Max MP", char.max_mp.toString(), char.index)}>
+                              {char.max_mp}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to edit max MP</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </EditPopover>
+                  </div>
                 </td>
                 <td className="p-1 cursor-pointer whitespace-pre hover:bg-zinc-700" onClick={() => { setCurrentAllyEditing(index + 4); openEditStatusModal(); }}>{formatStatus(char.status, char.flags) || <span className="text-zinc-400">[None]</span>}</td>
                 <td className="cursor-pointer">
@@ -418,117 +515,12 @@ export function Battle(props: { ff7: FF7 }) {
         </div>
       </Modal>
 
-      <Modal
+      <EnemyInfoModal
         open={isEnemyInfoModalOpen}
         setIsOpen={setIsEnemyInfoModalOpen}
-        title={`Enemy info: ${enemyName}`}
-        size="lg"
-        callback={() => setIsEnemyInfoModalOpen(false)}
-      >
-        {enemyData && (
-          <div className="max-h-[450px] overflow-y-auto">
-            <div className="grid grid-cols-4 gap-2 text-sm mb-2">
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Level:</span>
-                <span className="float-right">{enemyData.level}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Speed:</span>
-                <span className="float-right">{enemyData.speed}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Strength:</span>
-                <span className="float-right">{enemyData.strength}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Defense:</span>
-                <span className="float-right">{enemyData.defense}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Magic:</span>
-                <span className="float-right">{enemyData.magic}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">M.Defense:</span>
-                <span className="float-right">{enemyData.magic_defense}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Luck:</span>
-                <span className="float-right">{enemyData.luck}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Evade:</span>
-                <span className="float-right">{enemyData.evade}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Exp:</span>
-                <span className="float-right">{enemyData.exp}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">AP:</span>
-                <span className="float-right">{enemyData.ap}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Gil:</span>
-                <span className="float-right">{enemyData.gil}</span>
-              </div>
-              <div className="bg-zinc-800 p-2 rounded">
-                <span className="text-zinc-400">Back atk:</span>
-                <span className="float-right">{enemyData.back_damage_multiplier}x</span>
-              </div>
-            </div>
-            <div className="bg-zinc-800 p-3 rounded mb-2">
-              <h4 className="text-zinc-400 font-semibold mb-2">Elemental Effects</h4>
-              <div className="grid grid-cols-1 gap-1">
-                {enemyData.elements.map((elem, index) => {
-                  const elementType = getElementName(elem.element);
-                  const effectType = ElementalEffect[elem.effect] || "None";
-                  if (effectType === "Nothing" || elementType === "Nothing") return null;
-                  return (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <span className="text-zinc-300">{elementType}:</span>
-                      <span className={`${effectType === "Absorb" ? "text-green-400" :
-                        effectType === "Nullify" ? "text-blue-400" :
-                          effectType === "HalfDamage" ? "text-yellow-400" :
-                            effectType === "DoubleDamage" ? "text-red-400" :
-                              effectType === "Death" ? "text-purple-400" :
-                                effectType === "FullCure" ? "text-emerald-400" :
-                                  "text-zinc-400"
-                        }`}>{effectType}</span>
-                    </div>
-                  );
-                })}
-                {!enemyData.elements.find(elem => elem.element !== 0xFF) && <span className="text-zinc-400">None</span>}
-              </div>
-            </div>
-            <div className="bg-zinc-800 p-3 rounded mb-2">
-              <h4 className="text-zinc-400 font-semibold mb-2">Status Immunities</h4>
-              <div className="text-sm">
-                {formatStatus(enemyData.status_immunities ^ 0xFFFFFFFF, 0) || <span className="text-zinc-400">None</span>}
-              </div>
-            </div>
-            <div className="bg-zinc-800 p-3 rounded">
-              <h4 className="text-zinc-400 font-semibold mb-2">Items</h4>
-              <div className="grid grid-cols-1 gap-1">
-                {enemyData.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-300">{item.name}</span>
-                    <span className={`${item.item_type === 0 ? "text-yellow-400" : "text-blue-400"}`}>{item.item_type} ({item.rate + 1} / 64 = {Math.round((item.rate + 1) / 64 * 100)}%)
-                    </span>
-                  </div>
-                ))}
-                {enemyData.morph && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-300">{enemyData.morph}</span>
-                    <span className="text-yellow-400">Morph</span>
-                  </div>
-                )}
-                {(!enemyData.items || enemyData.items.length === 0) && <span className="text-zinc-400">None</span>}
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
+        enemyData={enemyData}
+        enemyName={enemyName}
+      />
     </div>
   );
 }
