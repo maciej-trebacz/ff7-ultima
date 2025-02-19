@@ -1,6 +1,7 @@
 import { Store, load } from '@tauri-apps/plugin-store';
 import { RandomEncounters } from './types';
 import { SaveState, SnowBoardSaveState } from './useSaveStates';
+import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 
 let settingsStore: Store | null = null;
 
@@ -24,10 +25,43 @@ export async function getSettingsStore(): Promise<Store> {
   return settingsStore;
 }
 
+async function backupSaveStates(states: SaveStates) {
+  try {
+    const backup = {
+      timestamp: Date.now(),
+      states
+    };
+    const json = JSON.stringify(backup);
+    await writeFile('settings.backup.json', new TextEncoder().encode(json));
+  } catch (e) {
+    console.error('Failed to create backup:', e);
+  }
+}
+
+async function loadBackupSaveStates(): Promise<SaveStates | null> {
+  try {
+    const backupContent = await readFile('settings.backup.json');
+    const json = new TextDecoder().decode(backupContent);
+    const backup = JSON.parse(json);
+    return backup.states;
+  } catch (e) {
+    console.error('Failed to load backup:', e);
+    return null;
+  }
+}
+
 export async function saveSaveStates(states: SaveStates) {
-  const store = await getSettingsStore();
-  await store.set('saveStates', states);
-  await store.save();
+  try {
+    const store = await getSettingsStore();
+    await store.set('saveStates', states);
+    await store.save();
+    // Create a backup after successful save
+    await backupSaveStates(states);
+  } catch (e) {
+    console.error('Failed to save states:', e);
+    // Try to save to backup file if main save fails
+    await backupSaveStates(states);
+  }
 }
 
 export async function loadSaveStates(): Promise<SaveStates | null> {
@@ -36,6 +70,12 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
     const states = await store.get<SaveStates>('saveStates');
     
     if (!states) {
+      // Try to load from backup if main file is empty
+      const backup = await loadBackupSaveStates();
+      if (backup) {
+        console.log('Restored states from backup file');
+        return backup;
+      }
       return { fieldStates: [], snowboardStates: [] };
     }
 
@@ -52,10 +92,17 @@ export async function loadSaveStates(): Promise<SaveStates | null> {
 
     // Save the updated states back to disk
     await store.set('saveStates', { fieldStates, snowboardStates });
-
+    await store.save();
+    
     return { fieldStates, snowboardStates };
   } catch (e) {
     console.error('Failed to load save states:', e);
+    // Try to load from backup if main file fails
+    const backup = await loadBackupSaveStates();
+    if (backup) {
+      console.log('Restored states from backup file');
+      return backup;
+    }
     return { fieldStates: [], snowboardStates: [] };
   }
 }

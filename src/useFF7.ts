@@ -467,7 +467,6 @@ export function useFF7(addresses: FF7Addresses) {
     setInGameTime: async (inGameTime: number) => {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
-    // TODO: Make it work outside battle too, check current module
     setHP: async (hp: number, index: number) => {
       if (gameState.currentModule !== GameModule.Battle) {
         await writeMemory(addresses.character_records + index * 0x84 + 0x2c, hp, DataType.Short);
@@ -480,6 +479,26 @@ export function useFF7(addresses: FF7Addresses) {
         await writeMemory(addresses.character_records + index * 0x84 + 0x28, mp, DataType.Short);
       } else {
         await writeMemory(addresses.battle_char_base + index * 104 + 0x28, mp, DataType.Short);
+      }
+    },
+    setMaxHP: async (hp: number, index: number) => {
+      if (gameState.currentModule !== GameModule.Battle) {
+        await writeMemory(addresses.character_records + index * 0x84 + 0x30, hp, DataType.Short);
+      } else {
+        if (index < 3) {
+          await writeMemory(addresses.party_objects + index * 0x440 + 0x12, hp, DataType.Int);
+        }
+        await writeMemory(addresses.battle_char_base + index * 104 + 0x30, hp, DataType.Int);
+      }
+    },
+    setMaxMP: async (mp: number, index: number) => {
+      if (gameState.currentModule !== GameModule.Battle) {
+        await writeMemory(addresses.character_records + index * 0x84 + 0x2a, mp, DataType.Short);
+      } else {
+        if (index < 3) {
+          await writeMemory(addresses.party_objects + index * 0x440 + 0x16, mp, DataType.Short);
+        }
+        await writeMemory(addresses.battle_char_base + index * 104 + 0x2a, mp, DataType.Short);
       }
     },
     setStatus: async (status: number, index: number) => {

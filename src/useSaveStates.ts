@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Destination } from "./types";
-import { loadSaveStates, saveSaveStates } from "./settings";
+import { loadSaveStates, saveSaveStates, SaveStates } from "./settings";
 
 type RegionOffset = [number, number];
 
@@ -56,6 +56,8 @@ export function useSaveStates() {
   const [fieldStates, setFieldStates] = useState<SaveState[]>([]);
   const [snowboardStates, setSnowboardStates] = useState<SnowBoardSaveState[]>([]);
   const [lastLoadedFieldStateId, setLastLoadedFieldStateId] = useState<string | null>(null);
+  const saveTimeout = useRef<number | null>(null);
+  const lastSavedStates = useRef<SaveStates | null>(null);
 
   // Load states from disk on mount
   useEffect(() => {
@@ -63,16 +65,42 @@ export function useSaveStates() {
       if (states) {
         setFieldStates(states.fieldStates);
         setSnowboardStates(states.snowboardStates);
+        lastSavedStates.current = states;
       }
     });
+
+    // Cleanup any pending saves on unmount
+    return () => {
+      if (saveTimeout.current !== null) {
+        window.clearTimeout(saveTimeout.current);
+        // Ensure the final state is saved
+        if (lastSavedStates.current) {
+          saveSaveStates(lastSavedStates.current);
+        }
+      }
+    };
   }, []);
 
-  // Save states to disk whenever they change
+  // Save states to disk whenever they change, with debouncing
   useEffect(() => {
-    saveSaveStates({
+    const currentStates = {
       fieldStates,
       snowboardStates
-    });
+    };
+    
+    // Store the current states for the cleanup function
+    lastSavedStates.current = currentStates;
+
+    // Clear any existing timeout
+    if (saveTimeout.current !== null) {
+      window.clearTimeout(saveTimeout.current);
+    }
+
+    // Set a new timeout to save the states
+    saveTimeout.current = window.setTimeout(() => {
+      saveSaveStates(currentStates);
+      saveTimeout.current = null;
+    }, 1000); // Debounce for 1 second
   }, [fieldStates, snowboardStates]);
 
   const pushFieldState = (state: Omit<SaveState, "timestamp" | "regionOffsets" | "id">) => {
