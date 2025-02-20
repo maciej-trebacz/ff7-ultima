@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { register, unregister, isRegistered as isTauriShortcutRegistered, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { Shortcut, defaultShortcuts } from "./shortcuts";
 import { loadShortcuts, saveShortcuts } from "./settings";
+import { useFF7State } from "./state";
 
 function convertToTauriAccelerator(key: string): string {
   // If it's already a combination, just return it
@@ -29,6 +30,7 @@ function convertToTauriAccelerator(key: string): string {
 export function useShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>(defaultShortcuts);
   const [listeningFor, setListeningFor] = useState<string | null>(null);
+  const {connected} = useFF7State();
 
   // Load shortcuts from store on mount
   useEffect(() => {
@@ -50,20 +52,19 @@ export function useShortcuts() {
     loadSavedShortcuts();
   }, []);
 
-  // Register all shortcuts
+  // Register/unregister shortcuts based on connection state
   useEffect(() => {
     const registerAllShortcuts = async () => {
-      // Don't register any shortcuts while listening for a new binding
-      if (listeningFor) return;
+      // First unregister all shortcuts
+      await unregisterAll();
+      
+      // Don't register any shortcuts if disconnected or while listening for a new binding
+      if (!connected || listeningFor) return;
       
       for (const shortcut of shortcuts) {
         if (!shortcut.key) continue; // Skip unbound shortcuts
         
         const accelerator = convertToTauriAccelerator(shortcut.key);
-        
-        if (await isTauriShortcutRegistered(accelerator)) {
-          await unregister(accelerator);
-        }
         
         try {
           console.debug(`registering ${accelerator} for ${shortcut.action}`);
@@ -83,7 +84,7 @@ export function useShortcuts() {
       }
     };
     registerAllShortcuts();
-  }, [shortcuts, listeningFor]);
+  }, [shortcuts, listeningFor, connected]);
 
   const updateShortcut = async (action: string, newKey: string) => {
     const shortcut = shortcuts.find(s => s.action === action);
