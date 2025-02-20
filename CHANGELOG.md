@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.4.0 (2025-02-20)
+
+### General
+
+* Added a Settings modal for managing keyboard shortcuts and other app settings
+* Ultima now creates a log file on disk to make troubleshooting issues easier
+
+### Field
+
+* Save states should be more robust, hopefully no more lost saves now
+
+### Battle
+
+* Edit max HP/MP of allies and enemies during battles 
+
 ## 1.3.1 (2025-02-16)
 
 ### World

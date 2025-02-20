@@ -1,5 +1,11 @@
 This project is a Tauri 2.0 app that uses Rust on the backend (src-tauri directory) and TypeScript for the frontend (src directory). The TypeScript part utilizes shadcn-ui components and TailwindCSS for styling. The UI uses a dark theme with "slate" base color. When writing UI code make sure it's sleek and compact, use small buttons and minimal padding.
 
+## Installing shadcn components
+
+To add a new shadcn component to the project run the command:
+
+npx shadcn@latest add [component name here]
+
 ## Updating to a new version (build for release)
 
 To update to a new version several edits need to be made:

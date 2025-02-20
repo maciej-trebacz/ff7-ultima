@@ -5,7 +5,7 @@ import { useAlert } from "./hooks/useAlert";
 import { GameModule, RandomEncounters, Tabs } from "./types";
 import { FF7 } from "./useFF7";
 import { useEffect } from "react";
-import { HackSettings, loadHackSettings, saveHackSettings } from "./settings";
+import { HackSettings, loadGeneralSettings, loadHackSettings, saveHackSettings } from "./settings";
 
 const ExpMultiplier = ({ ff7 }: { ff7: FF7 }) => {
   return (
@@ -68,13 +68,26 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
   // Load settings on mount
   useEffect(() => {
     const loadSettings = async () => {
-      const settings = await loadHackSettings();
-      if (settings) {
-        if (settings.speed) await setSpeed(settings.speed);
-        if (settings.skipIntros !== undefined) settings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
-        if (settings.unfocusPatch !== undefined) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
-        if (settings.swirlSkip !== undefined) settings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
-        if (settings.randomBattles !== undefined) await setRandomBattles(settings.randomBattles);
+      const [generalSettings, hackSettings] = await Promise.all([
+        loadGeneralSettings(),
+        loadHackSettings()
+      ]);
+
+      if (hackSettings) {
+        const { rememberedHacks } = generalSettings;
+        if (rememberedHacks.speed && hackSettings.speed) await setSpeed(hackSettings.speed);
+        if (rememberedHacks.skipIntros && hackSettings.skipIntros !== undefined) {
+          hackSettings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
+        }
+        if (rememberedHacks.unfocusPatch && hackSettings.unfocusPatch !== undefined) {
+          hackSettings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+        }
+        if (rememberedHacks.swirlSkip && hackSettings.swirlSkip !== undefined) {
+          hackSettings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
+        }
+        if (rememberedHacks.randomBattles && hackSettings.randomBattles !== undefined) {
+          await setRandomBattles(hackSettings.randomBattles);
+        }
       }
     };
     loadSettings();
@@ -85,10 +98,13 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
     if (!check) {
       showAlert("Not supported", "This version of FFNx is not supported for setting speed. Use the built-in speedhack instead.");
     } else {
-      await saveHackSettings({ 
-        ...(await loadHackSettings() || {}),
-        speed
-      });
+      const generalSettings = await loadGeneralSettings();
+      if (generalSettings.rememberedHacks.speed) {
+        await saveHackSettings({ 
+          ...(await loadHackSettings() || {}),
+          speed
+        });
+      }
     }
   };
 
@@ -100,38 +116,50 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
     } else if (randomEncounters === RandomEncounters.Max) {
       ff7.maxBattles();
     }
-    await saveHackSettings({ 
-      ...(await loadHackSettings() || {}),
-      randomBattles: randomEncounters
-    });
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.randomBattles) {
+      await saveHackSettings({ 
+        ...(await loadHackSettings() || {}),
+        randomBattles: randomEncounters
+      });
+    }
   }
 
   const toggleSkipIntros = async () => {
     const newValue = !ff7.introDisabled;
     newValue ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
-    await saveHackSettings({ 
-      ...(await loadHackSettings() || {}),
-      skipIntros: newValue
-    });
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.skipIntros) {
+      await saveHackSettings({ 
+        ...(await loadHackSettings() || {}),
+        skipIntros: newValue
+      });
+    }
   };
 
   const toggleUnfocusPatch = async () => {
     if (ff7.gameState.isFFnx) return;
     const newValue = !ff7.gameState.unfocusPatchEnabled;
     newValue ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
-    await saveHackSettings({ 
-      ...(await loadHackSettings() || {}),
-      unfocusPatch: newValue
-    });
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.unfocusPatch) {
+      await saveHackSettings({ 
+        ...(await loadHackSettings() || {}),
+        unfocusPatch: newValue
+      });
+    }
   };
 
   const toggleSwirlSkip = async () => {
     const newValue = !ff7.gameState.battleSwirlDisabled;
     newValue ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
-    await saveHackSettings({ 
-      ...(await loadHackSettings() || {}),
-      swirlSkip: newValue
-    });
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.swirlSkip) {
+      await saveHackSettings({ 
+        ...(await loadHackSettings() || {}),
+        swirlSkip: newValue
+      });
+    }
   };
 
   return ( 

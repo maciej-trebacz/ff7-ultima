@@ -3,7 +3,7 @@ import { statuses } from "@/ff7Statuses";
 import { BattleCharObj, ChocoboRating, ElementalEffect, EnemyData, GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatStatus, getElementName } from "@/util";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { EditPopover } from "@/components/EditPopover";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { EnemyInfoModal } from "@/components/modals/EnemyInfoModal";
+import { loadGeneralSettings, loadHackSettings, saveHackSettings } from "@/settings";
 
 export function Battle(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -30,6 +31,50 @@ export function Battle(props: { ff7: FF7 }) {
   const [selectedEnemy, setSelectedEnemy] = useState<number | null>(null);
   const [enemyData, setEnemyData] = useState<EnemyData | null>(null);
   const [enemyName, setEnemyName] = useState<string>("");
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const [generalSettings, hackSettings] = await Promise.all([
+        loadGeneralSettings(),
+        loadHackSettings()
+      ]);
+
+      if (hackSettings) {
+        const { rememberedHacks } = generalSettings;
+        if (rememberedHacks.invincibility && hackSettings.invincibility !== undefined) {
+          hackSettings.invincibility ? ff7.enableInvincibility() : ff7.disableInvincibility();
+        }
+        if (rememberedHacks.instantATB && hackSettings.instantATB !== undefined) {
+          hackSettings.instantATB ? ff7.enableInstantATB() : ff7.disableInstantATB();
+        }
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const toggleInvincibility = async () => {
+    const newValue = !ff7.gameState.invincibilityEnabled;
+    newValue ? ff7.enableInvincibility() : ff7.disableInvincibility();
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.invincibility) {
+      await saveHackSettings({
+        ...(await loadHackSettings() || {}),
+        invincibility: newValue
+      });
+    }
+  };
+
+  const toggleInstantATB = async () => {
+    const newValue = !ff7.gameState.instantATBEnabled;
+    newValue ? ff7.enableInstantATB() : ff7.disableInstantATB();
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.instantATB) {
+      await saveHackSettings({
+        ...(await loadHackSettings() || {}),
+        instantATB: newValue
+      });
+    }
+  };
 
   console.log("Current ally editing", currentAllyEditing);
 
@@ -108,12 +153,12 @@ export function Battle(props: { ff7: FF7 }) {
       <div className="flex gap-1">
         <div className="flex-1">
           <Row label="Invincibility">
-            <Switch checked={ff7.gameState.invincibilityEnabled} onClick={() => ff7.gameState.invincibilityEnabled ? ff7.disableInvincibility() : ff7.enableInvincibility()} />
+            <Switch checked={ff7.gameState.invincibilityEnabled} onClick={toggleInvincibility} />
           </Row>
         </div>
         <div className="flex-1">
           <Row label="Instant ATB">
-            <Switch checked={ff7.gameState.instantATBEnabled} onClick={() => ff7.gameState.instantATBEnabled ? ff7.disableInstantATB() : ff7.enableInstantATB()} />
+            <Switch checked={ff7.gameState.instantATBEnabled} onClick={toggleInstantATB} />
           </Row>
         </div>
       </div>

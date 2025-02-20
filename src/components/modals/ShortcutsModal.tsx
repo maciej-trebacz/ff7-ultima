@@ -5,13 +5,11 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { formatKeyForDisplay } from "@/lib/utils";
 
-interface ShortcutsModalProps {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+interface ShortcutsContentProps {
   ff7: FF7;
 }
 
-export function ShortcutsModal({ isOpen, setIsOpen, ff7 }: ShortcutsModalProps) {
+export function ShortcutsContent({ ff7 }: ShortcutsContentProps) {
   const { 
     shortcuts, 
     listeningFor, 
@@ -55,52 +53,64 @@ export function ShortcutsModal({ isOpen, setIsOpen, ff7 }: ShortcutsModalProps) 
   }, [listeningFor]);
 
   return (
+    <div className="space-y-4">
+      <div className="text-slate-400 text-xs">
+        Click on an action to bind a shortcut to it. Press ESC while binding to unbind the action.
+      </div>
+      <div className="space-y-0.5">
+        {shortcuts.map((shortcut) => (
+          <button
+            key={shortcut.action}
+            onClick={() => startListening(shortcut.action)}
+            className={cn(
+              "w-full px-2 py-1 rounded text-left hover:bg-slate-800/50 ring-0 outline-none",
+              listeningFor === shortcut.action && "bg-slate-800"
+            )}
+          >
+            <div className="flex justify-between items-center">
+              <div>{shortcut.action}</div>
+              <div
+                className={cn(
+                  "px-2 py-0.5 min-w-20 text-xs rounded text-center",
+                  listeningFor === shortcut.action 
+                    ? "bg-slate-700 animate-pulse" 
+                    : shortcut.key 
+                      ? "bg-slate-800"
+                      : "bg-gray-900/50"
+                )}
+              >
+                {listeningFor === shortcut.action 
+                  ? "Press key..." 
+                  : shortcut.key 
+                    ? formatKeyForDisplay(shortcut.key)
+                    : "Unbound"
+                }
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface ShortcutsModalProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  ff7: FF7;
+}
+
+export function ShortcutsModal({ isOpen, setIsOpen, ff7 }: ShortcutsModalProps) {
+  return (
     <Modal
       open={isOpen}
       setIsOpen={setIsOpen}
       title="Keyboard Shortcuts"
       size="md"
       callback={() => {}}
-      disableClose={!!listeningFor}
+      disableClose={false}
     >
-      <div className="space-y-4">
-        <div className="text-slate-400 text-xs">
-          Click on an action to bind a shortcut to it. Press ESC while binding to unbind the action.
-        </div>
-        <div className="space-y-0.5">
-          {shortcuts.map((shortcut) => (
-            <button
-              key={shortcut.action}
-              onClick={() => startListening(shortcut.action)}
-              className={cn(
-                "w-full px-2 py-1 rounded text-left hover:bg-slate-800/50 ring-0 outline-none",
-                listeningFor === shortcut.action && "bg-slate-800"
-              )}
-            >
-              <div className="flex justify-between items-center">
-                <div>{shortcut.action}</div>
-                <div
-                  className={cn(
-                    "px-2 py-0.5 min-w-20 text-xs rounded text-center",
-                    listeningFor === shortcut.action 
-                      ? "bg-slate-700 animate-pulse" 
-                      : shortcut.key 
-                        ? "bg-slate-800"
-                        : "bg-gray-900/50"
-                  )}
-                >
-                  {listeningFor === shortcut.action 
-                    ? "Press key..." 
-                    : shortcut.key 
-                      ? formatKeyForDisplay(shortcut.key)
-                      : "Unbound"
-                  }
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
+      <ShortcutsContent ff7={ff7} />
     </Modal>
   );
 } 

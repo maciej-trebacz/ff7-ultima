@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { register, unregister, isRegistered as isTauriShortcutRegistered, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { Shortcut, defaultShortcuts } from "./shortcuts";
-import { loadShortcuts, saveShortcuts } from "./settings";
+import { loadShortcuts, saveShortcuts, loadGeneralSettings, subscribeToSettings, GeneralSettings } from "./settings";
 import { useFF7State } from "./state";
 
 function convertToTauriAccelerator(key: string): string {
@@ -30,13 +30,19 @@ function convertToTauriAccelerator(key: string): string {
 export function useShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>(defaultShortcuts);
   const [listeningFor, setListeningFor] = useState<string | null>(null);
+  const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
   const {connected} = useFF7State();
 
-  // Load shortcuts from store on mount
+  // Load shortcuts and general settings on mount
   useEffect(() => {
-    const loadSavedShortcuts = async () => {
+    const loadSettings = async () => {
       try {
-        const savedShortcuts = await loadShortcuts();
+        const [savedShortcuts, generalSettings] = await Promise.all([
+          loadShortcuts(),
+          loadGeneralSettings()
+        ]);
+        
+        setShortcutsEnabled(generalSettings.enableShortcuts);
         
         if (savedShortcuts) {
           // Update shortcuts with saved key bindings
@@ -46,20 +52,43 @@ export function useShortcuts() {
           })));
         }
       } catch (e) {
-        console.error('Failed to load shortcuts:', e);
+        console.error('Failed to load settings:', e);
       }
     };
-    loadSavedShortcuts();
+    loadSettings();
   }, []);
 
-  // Register/unregister shortcuts based on connection state
+  // Subscribe to settings changes
+  useEffect(() => {
+    const unsubscribe = subscribeToSettings((key, newValue) => {
+      if (key === 'general') {
+        const settings = newValue as GeneralSettings;
+        setShortcutsEnabled(settings.enableShortcuts);
+      } else if (key === 'shortcuts') {
+        const savedShortcuts = newValue as Record<string, string>;
+        setShortcuts(shortcuts.map(shortcut => ({
+          ...shortcut,
+          key: savedShortcuts[shortcut.action] || shortcut.key
+        })));
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [shortcuts]); // Include shortcuts in deps because we use it in the callback
+
+  // Register/unregister shortcuts based on connection state and enabled setting
   useEffect(() => {
     const registerAllShortcuts = async () => {
       // First unregister all shortcuts
       await unregisterAll();
       
-      // Don't register any shortcuts if disconnected or while listening for a new binding
-      if (!connected || listeningFor) return;
+      // Don't register any shortcuts if:
+      // - disconnected
+      // - listening for a new binding
+      // - shortcuts are disabled
+      if (!connected || listeningFor || !shortcutsEnabled) return;
       
       for (const shortcut of shortcuts) {
         if (!shortcut.key) continue; // Skip unbound shortcuts
@@ -84,7 +113,7 @@ export function useShortcuts() {
       }
     };
     registerAllShortcuts();
-  }, [shortcuts, listeningFor, connected]);
+  }, [shortcuts, listeningFor, connected, shortcutsEnabled]);
 
   const updateShortcut = async (action: string, newKey: string) => {
     const shortcut = shortcuts.find(s => s.action === action);

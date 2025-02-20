@@ -1,11 +1,11 @@
 {
-  "version": "1.3.1",
-  "notes": "Reworked map viewer pins",
-  "pub_date": "2025-02-12T12:00:00Z",
+  "version": "1.4.0",
+  "notes": "Added Settings modal, battle HP/MP editing and logging",
+  "pub_date": "2025-02-20T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Tis0dzZ4bmpLQSt3QlZTUXpmbnN6R0ZOd3IzUHo1a1RUTk9SdlVsQlUrcmdLT3hOZHNtMUUvUmhaNkwzVTZFSERxOUprNS9Gd1M3YTQ4Z2VrVjNVdFEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5NzE4ODAzCWZpbGU6RkY3IFVsdGltYV8xLjMuMV94NjQtc2V0dXAuZXhlCnIyQXA5Y3IySS9qSnFlaVA2WXZGMDhIVnZaRG5oQlVyQnhiT0hsTGRpUTlpZEFyMWJYTHo5OWtmMENUQlpTWnUyRmhhL0xFY0orUEhaVEMzR2h3ckJ3PT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.3.1/FF7.Ultima_1.3.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TitzTDQ1QnZ6M0ZBeVUwaHJQdW1kVE1OOTNDZHZpMjlHZlNCN0dJMEpqOGxaaW8zVkFpS0N4V3dsL3NDS0NydXV5Z0xSeUFFeDMrdXp4bklTaGJkbkF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQwMDcwNjM2CWZpbGU6RkY3IFVsdGltYV8xLjQuMF94NjQtc2V0dXAuZXhlCk43Z2JKYXhsU0w2RlRUSng3dXB3Zkc4UHIvQTczdEdMVi9OSHFjcVdXdnFXVEgweXdtWXZjNFdNSzFzdzE3ZVBrNUtYVDFZUjVqTGpDemd6ODJOOER3PT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.0/FF7.Ultima_1.4.0_x64-setup.exe"
     }
   }
 }

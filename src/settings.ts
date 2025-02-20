@@ -4,7 +4,49 @@ import { SaveState, SnowBoardSaveState } from './useSaveStates';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { logger } from './lib/logging';
 
+// Settings change event system
+type SettingsKey = 'general' | 'hacks' | 'shortcuts' | 'saveStates';
+type SettingsListener = (key: SettingsKey, newValue: any) => void;
+
+const listeners = new Set<SettingsListener>();
+
+export function subscribeToSettings(listener: SettingsListener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notifySettingsChange(key: SettingsKey, newValue: any) {
+  listeners.forEach(listener => {
+    try {
+      listener(key, newValue);
+    } catch (e) {
+      logger.error('Error in settings listener', { error: e?.toString() });
+    }
+  });
+}
+
 let settingsStore: Store | null = null;
+
+export type AutoUpdateOption = 'auto' | 'notify' | 'disabled';
+
+export interface GeneralSettings {
+  autoUpdate: AutoUpdateOption;
+  enableShortcuts: boolean;
+  hasSeenSettingsHint?: boolean;
+  rememberedHacks: {
+    speed: boolean;
+    skipIntros: boolean;
+    unfocusPatch: boolean;
+    swirlSkip: boolean;
+    randomBattles: boolean;
+    expMultiplier: boolean;
+    apMultiplier: boolean;
+    invincibility: boolean;
+    instantATB: boolean;
+  };
+}
 
 export interface HackSettings {
   speed?: string;
@@ -12,6 +54,10 @@ export interface HackSettings {
   unfocusPatch?: boolean;
   swirlSkip?: boolean;
   randomBattles?: RandomEncounters;
+  invincibility?: boolean;
+  instantATB?: boolean;
+  expMultiplier?: number;
+  apMultiplier?: number;
 }
 
 export interface SaveStates {
@@ -58,6 +104,7 @@ export async function saveSaveStates(states: SaveStates) {
     const store = await getSettingsStore();
     await store.set('saveStates', states);
     await store.save();
+    notifySettingsChange('saveStates', states);
     logger.info('Saved states to main store', { 
       fieldStatesCount: states.fieldStates.length,
       snowboardStatesCount: states.snowboardStates.length 
@@ -126,6 +173,7 @@ export async function saveShortcuts(shortcuts: Record<string, string>) {
     const store = await getSettingsStore();
     await store.set('shortcuts', shortcuts);
     await store.save();
+    notifySettingsChange('shortcuts', shortcuts);
     logger.info('Saved shortcuts', { count: Object.keys(shortcuts).length });
   } catch (e) {
     logger.error('Failed to save shortcuts', { error: e?.toString() });
@@ -149,6 +197,7 @@ export async function saveHackSettings(settings: HackSettings) {
     const store = await getSettingsStore();
     await store.set('hacks', settings);
     await store.save();
+    notifySettingsChange('hacks', settings);
     logger.info('Saved hack settings', { settings });
   } catch (e) {
     logger.error('Failed to save hack settings', { error: e?.toString() });
@@ -164,5 +213,74 @@ export async function loadHackSettings(): Promise<HackSettings | null> {
   } catch (e) {
     logger.error('Failed to load hack settings', { error: e?.toString() });
     return null;
+  }
+}
+
+export async function saveGeneralSettings(settings: GeneralSettings) {
+  try {
+    const store = await getSettingsStore();
+    await store.set('general', settings);
+    await store.save();
+    notifySettingsChange('general', settings);
+    logger.info('Saved general settings', { settings });
+  } catch (e) {
+    logger.error('Failed to save general settings', { error: e?.toString() });
+  }
+}
+
+export async function loadGeneralSettings(): Promise<GeneralSettings> {
+  const defaultSettings: GeneralSettings = {
+    autoUpdate: 'auto',
+    enableShortcuts: true,
+    hasSeenSettingsHint: false,
+    rememberedHacks: {
+      speed: true,
+      skipIntros: true,
+      unfocusPatch: true,
+      swirlSkip: true,
+      randomBattles: true,
+      expMultiplier: true,
+      apMultiplier: true,
+      invincibility: true,
+      instantATB: true
+    }
+  };
+
+  try {
+    const store = await getSettingsStore();
+    const settings = await store.get<GeneralSettings>('general');
+
+    if (!settings) {
+      logger.info('No general settings found, using defaults', { settings: defaultSettings });
+      await saveGeneralSettings(defaultSettings);
+      return defaultSettings;
+    }
+
+    // Ensure all fields have default values for users upgrading from older versions
+    const updatedSettings: GeneralSettings = {
+      autoUpdate: settings.autoUpdate ?? defaultSettings.autoUpdate,
+      enableShortcuts: settings.enableShortcuts ?? defaultSettings.enableShortcuts,
+      hasSeenSettingsHint: settings.hasSeenSettingsHint ?? defaultSettings.hasSeenSettingsHint,
+      rememberedHacks: {
+        ...defaultSettings.rememberedHacks,
+        ...settings.rememberedHacks
+      }
+    };
+
+    // If any defaults were applied, save the updated settings
+    if (JSON.stringify(settings) !== JSON.stringify(updatedSettings)) {
+      logger.info('Updating settings with defaults for missing fields', { 
+        original: settings,
+        updated: updatedSettings
+      });
+      await saveGeneralSettings(updatedSettings);
+    }
+
+    logger.info('Loaded general settings', { settings: updatedSettings });
+    return updatedSettings;
+  } catch (e) {
+    logger.error('Failed to load general settings', { error: e?.toString() });
+    // Return default settings on error
+    return defaultSettings;
   }
 } 
