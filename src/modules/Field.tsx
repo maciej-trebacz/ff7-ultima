@@ -79,13 +79,13 @@ export function Field(props: { ff7: FF7 }) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <div className="h-4">
-                    <span className="cursor-pointer" onClick={openWarpModal}>
+                    <span className="cursor-pointer">
                       {state.fieldId}
                       {state.fieldId > 0 && (
                         <span className="text-zinc-400 ml-1">({state.fieldId > 63 ? state.fieldName : `wm${state.fieldId - 1}`})</span>
                       )}
                     </span>
-                    <Button size="xs" className="ml-2" onClick={openWarpModal}>
+                    <Button size="xs" className="ml-2">
                       Warp
                     </Button>
                   </div>

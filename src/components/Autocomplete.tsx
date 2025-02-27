@@ -49,10 +49,12 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     if (isVisible) {
       setInput(value?.name ?? '');
       setHighlightedIndex(-1);
-      inputRef.current?.focus();
-      if (inputRef.current) {
-        inputRef.current.select();
-      }
+      setTimeout(() => {
+        inputRef.current?.focus();
+        if (inputRef.current) {
+          inputRef.current.select();
+        }
+      }, 100);
     }
   }, [isVisible, value?.name]);
 

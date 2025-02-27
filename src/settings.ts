@@ -3,6 +3,7 @@ import { RandomEncounters } from './types';
 import { SaveState, SnowBoardSaveState } from './useSaveStates';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { logger } from './lib/logging';
+import deepEqual from 'deep-equal';
 
 // Settings change event system
 type SettingsKey = 'general' | 'hacks' | 'shortcuts' | 'saveStates';
@@ -268,7 +269,7 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
     };
 
     // If any defaults were applied, save the updated settings
-    if (JSON.stringify(settings) !== JSON.stringify(updatedSettings)) {
+    if (!deepEqual(settings, updatedSettings, { strict: true })) {
       logger.info('Updating settings with defaults for missing fields', { 
         original: settings,
         updated: updatedSettings

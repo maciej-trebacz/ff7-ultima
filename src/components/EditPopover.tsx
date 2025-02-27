@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useCallback } from "react";
 
 interface EditPopoverProps {
   open: boolean;
@@ -24,6 +24,10 @@ export function EditPopover({
   onSubmit,
   children,
 }: EditPopoverProps) {
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    onOpenChange(newOpen);
+  }, [onOpenChange]);
+
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     e.stopPropagation();
     if (e.key === "Enter") {
@@ -35,7 +39,6 @@ export function EditPopover({
 
   useEffect(() => {
     if (open) {
-      // Use setTimeout to ensure the input is mounted
       setTimeout(() => {
         const input = document.querySelector('input[type="text"]') as HTMLInputElement;
         if (input) {
@@ -46,13 +49,24 @@ export function EditPopover({
   }, [open]);
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover 
+      open={open} 
+      onOpenChange={handleOpenChange}
+    >
       <PopoverTrigger asChild>
         <div className="flex items-center">
           {children}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-48">
+      <PopoverContent 
+        className="w-48"
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest('[role="dialog"]') || target.closest('[data-trigger="true"]')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <div className="flex flex-col gap-2">
           <Input
             autoFocus
