@@ -67,7 +67,15 @@ export function QuickActions(props: { ff7: FF7 }) {
       </div>
     }
 
-    <Button size={"sm"} variant={"secondary"} onClick={() => ff7.skipFMV()}>{skipBtnLabel}</Button>
+    {currentModule !== GameModule.Submarine ?
+      <Button size={"sm"} variant={"secondary"} onClick={() => ff7.skipFMV()}>{skipBtnLabel}</Button>
+      :
+      <div className="flex gap-2">
+        <Button size={"sm"} variant={"secondary"} className="flex-1" onClick={() => ff7.skipFMV()}>Fail</Button>
+        <Button size={"sm"} variant={"secondary"} className="flex-1" onClick={() => ff7.skipFMV(true)}>Win</Button>
+      </div>
+    }
+
     <Button size={"sm"} variant={"secondary"} onClick={() => ff7.gameOver()}>Game Over</Button>
 
     <Modal

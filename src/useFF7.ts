@@ -289,7 +289,7 @@ export function useFF7(addresses: FF7Addresses) {
       // Remove the global focus flag
       await writeMemory(addresses.sound_buffer_focus, 0, DataType.Byte);
     },
-    async skipFMV() {
+    async skipFMV(win?: boolean) {
       if (gameState.currentModule === GameModule.Field) {
         const isMoviePlaying = await readMemory(addresses.movie_is_playing, DataType.Byte);
         if (isMoviePlaying === 0) {
@@ -341,6 +341,10 @@ export function useFF7(addresses: FF7Addresses) {
       } else if (gameState.currentModule === GameModule.Highway) {
         await writeMemory(0xd85974, 0, DataType.Byte);
       } else if (gameState.currentModule === GameModule.Submarine) {
+        if (win) {
+          console.log("Win submarine minigame");
+          await writeMemory(0xe74768, 1, DataType.Byte);
+        }
         await writeMemory(0x980dac, 0, DataType.Byte);
       } else if (gameState.currentModule === GameModule.Condor) {
         await writeMemory(0xcbc80c, 5, DataType.Byte);
