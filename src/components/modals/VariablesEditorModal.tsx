@@ -213,11 +213,14 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
                     ? 'bg-yellow-500/25' 
                     : 'bg-zinc-800/50'
                 } cursor-pointer hover:bg-zinc-700/50`}
+                data-trigger="true"
                 onClick={() => handleEdit(index)}
               >
                 <EditPopover
                   open={editIndex === index}
-                  onOpenChange={(open) => !open && setEditIndex(null)}
+                  onOpenChange={(open) => {
+                    if (!open) setEditIndex(null);
+                  }}
                   value={editValue}
                   onValueChange={setEditValue}
                   onSubmit={handleSubmitEdit}

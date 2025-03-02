@@ -289,7 +289,7 @@ export function useFF7(addresses: FF7Addresses) {
       // Remove the global focus flag
       await writeMemory(addresses.sound_buffer_focus, 0, DataType.Byte);
     },
-    skipFMV: async () => {
+    async skipFMV() {
       if (gameState.currentModule === GameModule.Field) {
         const isMoviePlaying = await readMemory(addresses.movie_is_playing, DataType.Byte);
         if (isMoviePlaying === 0) {
@@ -315,10 +315,27 @@ export function useFF7(addresses: FF7Addresses) {
           await callGameFn(0x742055, [2])
         }
 
-        // Junon office - prevent softlock when Heidegger orders shooting the canon
         if (gameState.fieldId === 399) {
+          // Junon office - prevent softlock when Heidegger orders shooting the canon
           await writeMemory(addresses.field_script_temp_vars + 9, 1, DataType.Byte);
-        }
+        } else if (gameState.fieldId === 496) {
+          // Gold Saucer rope station softlock
+          await writeMemory(addresses.field_script_temp_vars + 8, 180, DataType.Byte);
+        } else if (gameState.fieldId === 543 && gameState.gameMoment === 469) {
+          // Bugenhagen observatory softlock
+          await writeMemory(addresses.game_moment, 493, DataType.Short);
+          await this.warpToFieldId(541);
+        } else if (gameState.fieldId === 489 && gameState.gameMoment >= 592 && gameState.gameMoment <= 595) {
+          // Gold Saucer date scene softlock
+          await writeMemory(addresses.game_moment, 595, DataType.Short);
+          await this.warpToFieldId(488);
+        } else if (gameState.fieldId === 731) {
+          // Midgar Raid softlock - fix the fade out
+          const fieldObjPtr = await getFieldObjPtr();
+          await writeMemory(fieldObjPtr + 0x4c, 0x01, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x4e, 0xff, DataType.Byte);
+          await writeMemory(fieldObjPtr + 0x50, 0xff, DataType.Byte);
+        } 
       } else if ([GameModule.SnowBoard, GameModule.Snowboard2].includes(gameState.currentModule)) {
         await writeMemory(0xdd7cac, 0, DataType.Byte);
       } else if (gameState.currentModule === GameModule.Highway) {
