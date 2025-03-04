@@ -203,6 +203,7 @@ export function Field(props: { ff7: FF7 }) {
                 <th className="p-1 px-2">Y</th>
                 <th className="p-1 px-2">Z</th>
                 <th className="p-1">Direction</th>
+                <th className="p-1">Triangle</th>
               </tr>
             </thead>
             <tbody>
@@ -297,6 +298,9 @@ export function Field(props: { ff7: FF7 }) {
                           </Tooltip>
                         </TooltipProvider>
                       </EditPopover>
+                    </td>
+                    <td className="p-1 text-nowrap">
+                      {model.triangle}
                     </td>
                   </tr>
                 ) : (
