@@ -183,7 +183,7 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
         <Switch checked={ff7.introDisabled} onClick={toggleSkipIntros} />
       </Row>
 
-      <div className={ff7.gameState.isFFnx ? "opacity-50" : ""} title="FFNx already has this feature">
+      <div className={ff7.gameState.isFFnx ? "opacity-50" : ""} title={ff7.gameState.isFFnx ? "FFNx already has this feature" : ""}>
         <Row label="Unfocus patch">
           <Switch checked={ff7.gameState.unfocusPatchEnabled} onClick={toggleUnfocusPatch} />
         </Row>

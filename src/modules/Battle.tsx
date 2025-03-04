@@ -76,8 +76,6 @@ export function Battle(props: { ff7: FF7 }) {
     }
   };
 
-  console.log("Current ally editing", currentAllyEditing);
-
   const parseEnemyName = (enemy: BattleCharObj) => {
     const enemies = ff7.gameState.battleEnemies.filter(e => e.name === enemy.name);
     if (enemies.length === 1) {

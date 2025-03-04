@@ -207,7 +207,7 @@ export function Field(props: { ff7: FF7 }) {
             </thead>
             <tbody>
               {state.fieldModels.map((model, index) => {
-                return model && (Math.abs(model.x) < 10000 && Math.abs(model.y) < 10000 && Math.abs(model.z) < 10000) ? (
+                return model && (Math.abs(model.x) < 50000 && Math.abs(model.y) < 50000 && Math.abs(model.z) < 50000) ? (
                   <tr key={index} className="bg-zinc-800 text-xs">
                     <td className="p-1 text-nowrap w-14 font-bold">{model.name}</td>
                     <td className="text-nowrap">
