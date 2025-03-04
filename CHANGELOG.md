@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.4.1 (2025-03-04)
+
+### General
+
+* When unfocus patch is applied the music does not stop anymore when game is unfocused
+* Fixed several softlocks when skipping FMVs
+* Fixed issues with how popovers work for editing certain values (especially Variable Editor)
+* Ability to win/lose the submarine minigame when skipping it
+
+### Field
+
+* Fixed model list on certain fields that were showing N/A in the table
+* Show triangle IDs for field models
+
 ## 1.4.0 (2025-02-20)
 
 ### General

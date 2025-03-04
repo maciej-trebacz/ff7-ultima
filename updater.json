@@ -1,11 +1,11 @@
 {
-  "version": "1.4.0",
-  "notes": "Added Settings modal, battle HP/MP editing and logging",
+  "version": "1.4.1",
+  "notes": "Various bug fixes and improvements",
   "pub_date": "2025-02-20T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TitzTDQ1QnZ6M0ZBeVUwaHJQdW1kVE1OOTNDZHZpMjlHZlNCN0dJMEpqOGxaaW8zVkFpS0N4V3dsL3NDS0NydXV5Z0xSeUFFeDMrdXp4bklTaGJkbkF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQwMDcwNjM2CWZpbGU6RkY3IFVsdGltYV8xLjQuMF94NjQtc2V0dXAuZXhlCk43Z2JKYXhsU0w2RlRUSng3dXB3Zkc4UHIvQTczdEdMVi9OSHFjcVdXdnFXVEgweXdtWXZjNFdNSzFzdzE3ZVBrNUtYVDFZUjVqTGpDemd6ODJOOER3PT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.0/FF7.Ultima_1.4.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjlKQ2E0dHBwR2Eya2RSOFZtQ0Q3ZDFIdkg1YVBNenhaOVdJdjJCZmpQd2VDMFdaQk5Lb09MeWt4dzBxenN0dkd2UklOaVRZa1NEWmM5dzF3Y1RYbkFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQxMDgxNTY0CWZpbGU6RkY3IFVsdGltYV8xLjQuMV94NjQtc2V0dXAuZXhlCndrd2VNY1kvR0V6Qy90Nk10b2YwbWNJWUNGbTRnRWxra3BLZUtGZWFTZlVMaW04cTNqQnpCKys2VmNjOUkxaG9CNFo2L1kyVUhPd0x6WjJYOTBDRkRRPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.1/FF7.Ultima_1.4.1_x64-setup.exe"
     }
   }
 }
