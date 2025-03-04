@@ -260,9 +260,6 @@ export function useFF7(addresses: FF7Addresses) {
         return;
       }
 
-      // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
-      await writeMemory(addresses.sound_buffer_focus, 0x80, DataType.Byte);
-
       // Check if window already was unfocused (tick function pointer is out of program memory)
       await waitFor(async () => {
         const tickFunctionPtr = await readMemory(gameState.gameObjPtr + 0xa00, DataType.Int);
@@ -274,6 +271,12 @@ export function useFF7(addresses: FF7Addresses) {
 
       // Add a RET instruction at the beginning of this function
       await writeMemory(gfxFlipPtr + 0x260, 0xc3, DataType.Byte);
+
+      // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
+      await writeMemory(addresses.sound_buffer_focus, 0x80, DataType.Byte);
+
+      // Same for music, but this is initialized inside the AF3DN library
+      await writeMemory(gfxFlipPtr + 0x8BDD, 0x80, DataType.Byte);
     },
     unpatchWindowUnfocus: async () => {
       if (!gameState.gameObjPtr) {
@@ -286,8 +289,9 @@ export function useFF7(addresses: FF7Addresses) {
       // Remove the RET instruction at the beginning of this function
       await writeMemory(gfxFlipPtr + 0x260, 0x51, DataType.Byte);
 
-      // Remove the global focus flag
+      // Remove the global focus flags
       await writeMemory(addresses.sound_buffer_focus, 0, DataType.Byte);
+      await writeMemory(gfxFlipPtr + 0x8BDD, 0, DataType.Byte);
     },
     async skipFMV(win?: boolean) {
       if (gameState.currentModule === GameModule.Field) {
