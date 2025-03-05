@@ -174,7 +174,7 @@ export function Hacks(props: { ff7: FF7, tab: Tabs }) {
             <SelectItem value="0.5">Slow (1/2x)</SelectItem>
             <SelectItem value="1">Normal (1x)</SelectItem>
             <SelectItem value="2">Fast (2x)</SelectItem>
-            <SelectItem value="4">Fastest (4x)</SelectItem>
+            <SelectItem value="5">Fastest (5x)</SelectItem>
           </SelectContent>
         </Select>
       </Row>

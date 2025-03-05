@@ -179,6 +179,11 @@ export function Field(props: { ff7: FF7 }) {
             <Switch checked={!state.fieldMovementDisabled} onCheckedChange={(enabled) => ff7.toggleMovement()} />
           </Row>
         </div>
+        <div className="flex-1">
+          <Row label="Skip Dialogues">
+            <Switch checked={state.fieldSkipDialoguesEnabled} onCheckedChange={(enabled) => ff7.toggleSkipDialogues()} />
+          </Row>
+        </div>
       </div>
 
       <WarpFieldModal

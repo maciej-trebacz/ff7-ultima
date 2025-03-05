@@ -20,6 +20,7 @@ const defaultState = {
     menuLocks: 0,
     fieldMovementDisabled: 0,
     fieldMenuAccessEnabled: 0,
+    fieldSkipDialoguesEnabled: false,
     partyLockingBitmask: 0,
     partyVisibilityBitmask: 0,
     gil: 0,
@@ -60,6 +61,7 @@ const defaultState = {
     partyMembers: [] as PartyMember[],
     zolomCoords: null as [number, number] | null,
     worldMapType: 0,
+    fieldTmpVars: [] as number[],
   };
 
 export const useFF7State = function() {
@@ -161,6 +163,7 @@ export const useFF7State = function() {
           menuLocks: basic.menu_locks as number,
           fieldMovementDisabled: basic.field_movement_disabled as number,
           fieldMenuAccessEnabled: basic.field_menu_access_enabled as number,
+          fieldSkipDialoguesEnabled: basic.field_skip_dialogues_check !== 0x33,
           partyLockingBitmask: basic.party_locking_mask as number,
           partyVisibilityBitmask: basic.party_visibility_mask as number,
           gil: basic.gil as number,
@@ -200,6 +203,7 @@ export const useFF7State = function() {
           partyMembers: ff7Data.party_members as PartyMember[],
           zolomCoords: basic.zolom_coords ? [basic.zolom_coords >> 16, basic.zolom_coords & 0xffff] : null,
           worldMapType: basic.world_map_type as number,
+          fieldTmpVars: basic.field_tmp_vars as number[],
         }));
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

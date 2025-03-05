@@ -14,6 +14,7 @@ export interface FF7Addresses {
   menu_locks: number;
   field_movement_disabled: number;
   field_menu_access_enabled: number;
+  field_skip_dialogues: number;
   party_locking_mask: number;
   party_visibility_mask: number;
   gil: number;

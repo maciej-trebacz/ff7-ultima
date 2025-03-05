@@ -112,12 +112,6 @@ export function useFF7(addresses: FF7Addresses) {
     return readMemory(gfxFunctionPtrs + 0x4, DataType.Int);
   };
 
-  if (hacks.skipIntro && gameState.currentModule === GameModule.Intro) {
-    setTimeout(async () => {
-      await writeMemory(addresses.intro_skip, 0x01, DataType.Byte);
-    }, 0);
-  }
-
   const toggleBitmaskValue = (bitmask: number, index: number) => {
     if (index === -1) {
       bitmask = bitmask & 1 ? 0 : 0xffff;
@@ -129,9 +123,22 @@ export function useFF7(addresses: FF7Addresses) {
     return bitmask;
   }
 
-  // FIXME: Remove before release
-  (window as any).readMemory = readMemory;
+  if (hacks.skipIntro && gameState.currentModule === GameModule.Intro) {
+    setTimeout(async () => {
+      await writeMemory(addresses.intro_skip, 0x01, DataType.Byte);
+    }, 0);
+  }
 
+
+  // Fixes for softlocks during skip field dialogues
+  if (gameState.fieldSkipDialoguesEnabled) {
+    // Softlock during President Shinra talk in Reactor 5
+    if (gameState.gameMoment === 128 && [0, 2].includes(gameState.fieldTmpVars[9])) {
+      setTimeout(async () => {
+        await writeMemory(addresses.field_script_temp_vars + 9, 1, DataType.Byte);
+      }, 0);
+    }
+  }
 
   const ff7 = {
     connected,
@@ -197,6 +204,17 @@ export function useFF7(addresses: FF7Addresses) {
     },
     toggleMovement: async () => {
       await writeMemory(addresses.field_movement_disabled, gameState.fieldMovementDisabled ? 0 : 1, DataType.Byte);
+    },
+    toggleSkipDialogues: async () => {
+      if (!gameState.fieldSkipDialoguesEnabled) {
+        // jmp over the code for drawing the windows
+        await writeMemory(addresses.field_skip_dialogues, hex("eb 3e"), DataType.Buffer);
+        // set the return value to 0
+        await writeMemory(addresses.field_skip_dialogues + 0x40, hex("31 c0 90 90"), DataType.Buffer);
+      } else {
+        await writeMemory(addresses.field_skip_dialogues, hex("33 c9"), DataType.Buffer);
+        await writeMemory(addresses.field_skip_dialogues + 0x40, hex("85 c0 74 28"), DataType.Buffer);
+      }
     },
     enableAllMenus: async () => {
       await writeMemory(addresses.menu_visibility, 0xffff, DataType.Short);

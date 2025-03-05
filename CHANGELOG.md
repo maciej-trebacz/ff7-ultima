@@ -2,6 +2,12 @@
 
 ## 1.4.1 (2025-03-04)
 
+### Field
+
+* Add "Skip Dialogues" option that skips all the dialogue windows (except the ones where you have to pick an answer)
+
+## 1.4.1 (2025-03-04)
+
 ### General
 
 * When unfocus patch is applied the music does not stop anymore when game is unfocused
