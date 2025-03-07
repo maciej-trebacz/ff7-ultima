@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/tooltip";
 import { EditPopover } from "@/components/EditPopover";
 import { SaveStates } from "@/components/SaveStates";
+import { Box, Shield } from "lucide-react";
+import { Eye } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -207,8 +210,9 @@ export function Field(props: { ff7: FF7 }) {
                 <th className="p-1 px-2">X</th>
                 <th className="p-1 px-2">Y</th>
                 <th className="p-1 px-2">Z</th>
-                <th className="p-1">Direction</th>
-                <th className="p-1">Triangle</th>
+                <th className="p-1">Dir.</th>
+                <th className="p-1">Tri.</th>
+                <th className="p-1">Flags</th>
               </tr>
             </thead>
             <tbody>
@@ -306,6 +310,47 @@ export function Field(props: { ff7: FF7 }) {
                     </td>
                     <td className="p-1 text-nowrap">
                       {model.triangle}
+                    </td>
+                    <td className="p-1 text-nowrap flex gap-1">
+                      <TooltipProvider>
+                        <Tooltip delayDuration={150}>
+                          <TooltipTrigger asChild>
+                            <Box 
+                              className={`h-4 w-4 ${model.collision ? '' : 'opacity-50'} cursor-pointer hover:text-primary transition-colors`} 
+                              onClick={() => ff7.setFieldModelCollision(index, !model.collision)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Collision: {model.collision ? 'Enabled' : 'Disabled'} (click to toggle)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={150}>
+                          <TooltipTrigger asChild>
+                            <MessageSquare 
+                              className={`h-4 w-4 ${model.interaction ? '' : 'opacity-50'} cursor-pointer hover:text-primary transition-colors`} 
+                              onClick={() => ff7.setFieldModelInteraction(index, !model.interaction)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Interaction: {model.interaction ? 'Enabled' : 'Disabled'} (click to toggle)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={150}>
+                          <TooltipTrigger asChild>
+                            <Eye 
+                              className={`h-4 w-4 ${model.visible ? '' : 'opacity-50'} cursor-pointer hover:text-primary transition-colors`} 
+                              onClick={() => ff7.setFieldModelVisible(index, !model.visible)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Visibility: {model.visible ? 'Visible' : 'Hidden'} (click to toggle)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </td>
                   </tr>
                 ) : (

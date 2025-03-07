@@ -90,6 +90,8 @@ export interface FF7Addresses {
   savemap: number;
   field_script_obj_ptr: number;
   field_script_temp_vars: number;
+  field_file_section1_ptr: number;
+  field_models_objs: number;
 }
 
 export function useFF7Addresses() {

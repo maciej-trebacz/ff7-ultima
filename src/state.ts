@@ -131,6 +131,9 @@ export const useFF7State = function() {
             z: ff7Data.field_models[idx].z,
             direction: ff7Data.field_models[idx].direction,
             triangle: ff7Data.field_models[idx].triangle,
+            collision: !ff7Data.field_models[idx].collision,
+            interaction: !ff7Data.field_models[idx].interaction,
+            visible: ff7Data.field_models[idx].visible,
           }
         });
 
@@ -163,7 +166,7 @@ export const useFF7State = function() {
           menuLocks: basic.menu_locks as number,
           fieldMovementDisabled: basic.field_movement_disabled as number,
           fieldMenuAccessEnabled: basic.field_menu_access_enabled as number,
-          fieldSkipDialoguesEnabled: basic.field_skip_dialogues_check !== 0x33,
+          fieldSkipDialoguesEnabled: basic.field_skip_dialogues_check !== 0x8b,
           partyLockingBitmask: basic.party_locking_mask as number,
           partyVisibilityBitmask: basic.party_visibility_mask as number,
           gil: basic.gil as number,

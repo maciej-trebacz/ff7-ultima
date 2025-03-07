@@ -1,6 +1,14 @@
 # Change Log
 
-## 1.4.1 (2025-03-04)
+## 1.4.3 (2025-03-07)
+
+### Field
+
+* Fixed several softlocks when "Skip Dialogues" was enabled
+* Non-closable windows (button prompts, countdowns, etc.) are now visible when "Skip dialogues" is enabled
+* View and set collision, interaction and visibility flags for field models
+
+## 1.4.2 (2025-03-04)
 
 ### Field
 

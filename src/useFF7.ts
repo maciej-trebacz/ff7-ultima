@@ -24,6 +24,7 @@ export function useFF7(addresses: FF7Addresses) {
   const fnCallerMainAddr = fnCallerBaseAddr + 18;
   const fnCallerAfterFlipAddr = fnCallerBaseAddr + 33;
   const fnCallerResultAddr = fnCallerBaseAddr - 4;
+  const fnSkipDialoguesAddr = addresses.code_cave;
 
   useEffect(() => {
     async function initializeGfxFlip() {
@@ -132,10 +133,52 @@ export function useFF7(addresses: FF7Addresses) {
 
   // Fixes for softlocks during skip field dialogues
   if (gameState.fieldSkipDialoguesEnabled) {
-    // Softlock during President Shinra talk in Reactor 5
+    // President Shinra talk in Reactor 5
     if (gameState.gameMoment === 128 && [0, 2].includes(gameState.fieldTmpVars[9])) {
       setTimeout(async () => {
         await writeMemory(addresses.field_script_temp_vars + 9, 1, DataType.Byte);
+      }, 0);
+    }
+    // Turks scene in the Mythril Mines
+    if (gameState.fieldId === 349 && gameState.gameMoment === 387 && gameState.fieldTmpVars[10] === 0) {
+      setTimeout(async () => {
+        const fieldFileSection1Ptr = await readMemory(addresses.field_file_section1_ptr, DataType.Int);
+        await writeMemory(fieldFileSection1Ptr + 0xAF9, 2, DataType.Byte);
+        await writeMemory(addresses.field_script_temp_vars + 10, 1, DataType.Byte);
+      }, 0);
+    }
+    // Cloud wakes up in Gongaga 
+    if (gameState.fieldId === 518 && gameState.gameMoment === 638 && gameState.fieldTmpVars[13] === 0) {
+      setTimeout(async () => {
+        const fieldFileSection1Ptr = await readMemory(addresses.field_file_section1_ptr, DataType.Int);
+        await writeMemory(fieldFileSection1Ptr + 0xC5A, 2, DataType.Byte);
+        await writeMemory(addresses.field_script_temp_vars + 13, 1, DataType.Byte);
+      }, 0);
+    }
+    // Tifa execution scene - press room
+    if (gameState.fieldId === 401 && gameState.gameMoment === 1003 && gameState.fieldTmpVars[11] === 0) {
+      setTimeout(async () => {
+        const fieldFileSection1Ptr = await readMemory(addresses.field_file_section1_ptr, DataType.Int);
+        await writeMemory(fieldFileSection1Ptr + 0x6FE, 2, DataType.Byte);
+        await writeMemory(addresses.field_script_temp_vars + 11, 1, DataType.Byte);
+      }, 0);
+    }
+    // Shinra rocket launch scene
+    if (gameState.fieldId === 567 && gameState.gameMoment === 1308 && gameState.fieldTmpVars[26] === 0) {
+      setTimeout(async () => {
+        const fieldFileSection1Ptr = await readMemory(addresses.field_file_section1_ptr, DataType.Int);
+        await writeMemory(fieldFileSection1Ptr + 0x11EB, 2, DataType.Byte);
+        await writeMemory(fieldFileSection1Ptr + 0x1E41, 2, DataType.Byte);
+        await writeMemory(fieldFileSection1Ptr + 0x1EED, 2, DataType.Byte);
+        await writeMemory(addresses.field_script_temp_vars + 26, 1, DataType.Byte);
+      }, 0);
+    }
+    // Shinra rocket escape pod scene
+    if (gameState.fieldId === 569 && gameState.gameMoment === 1314 && gameState.fieldTmpVars[11] === 0) {
+      setTimeout(async () => {
+        const fieldFileSection1Ptr = await readMemory(addresses.field_file_section1_ptr, DataType.Int);
+        await writeMemory(fieldFileSection1Ptr + 0x91B, 2, DataType.Byte);
+        await writeMemory(addresses.field_script_temp_vars + 11, 1, DataType.Byte);
       }, 0);
     }
   }
@@ -207,13 +250,14 @@ export function useFF7(addresses: FF7Addresses) {
     },
     toggleSkipDialogues: async () => {
       if (!gameState.fieldSkipDialoguesEnabled) {
-        // jmp over the code for drawing the windows
-        await writeMemory(addresses.field_skip_dialogues, hex("eb 3e"), DataType.Buffer);
-        // set the return value to 0
-        await writeMemory(addresses.field_skip_dialogues + 0x40, hex("31 c0 90 90"), DataType.Buffer);
+        // Write the function that checks whether the window is non-closable and only skips the closable ones
+        await writeMemory(fnSkipDialoguesAddr, hex("8b 45 08 25 ff 00 00 00 69 c0 30 00 00 00 53 8b d8 0f bf 8b e6 f5 cf 00 5b 83 e1 01 85 c9 74 01 c3 b8 01 00 00 00 e9 af 51 21 00"), DataType.Buffer);
+
+        // Call the new function
+        await writeMemory(addresses.field_skip_dialogues, hex("e8 2e b1 de ff 90 90 90 90 90 90"), DataType.Buffer);
       } else {
-        await writeMemory(addresses.field_skip_dialogues, hex("33 c9"), DataType.Buffer);
-        await writeMemory(addresses.field_skip_dialogues + 0x40, hex("85 c0 74 28"), DataType.Buffer);
+        // Restore the original code
+        await writeMemory(addresses.field_skip_dialogues, hex("8b 45 08 25 ff 00 00 00 6b c0 30"), DataType.Buffer);
       }
     },
     enableAllMenus: async () => {
@@ -644,6 +688,15 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(base + index * length + 4, y << 12, DataType.SignedInt);
       await writeMemory(base + index * length + 8, z << 12, DataType.SignedInt);
       await writeMemory(base + index * length + 44, direction, DataType.Byte);
+    },
+    setFieldModelCollision: async (index: number, collision: boolean) => {
+      await writeMemory(addresses.field_models_objs + index * 0x88 + 0x5f, collision ? 0 : 1, DataType.Byte);
+    },
+    setFieldModelInteraction: async (index: number, interaction: boolean) => {
+      await writeMemory(addresses.field_models_objs + index * 0x88 + 0x61, interaction ? 0 : 1, DataType.Byte);
+    },
+    setFieldModelVisible: async (index: number, visible: boolean) => {
+      await writeMemory(addresses.field_models_objs + index * 0x88 + 0x62, visible ? 1 : 0, DataType.Byte);
     },
     async saveFieldState(title?: string) {
       const memory = await readMemoryBuffer(addresses.savemap, 0x10F4)

@@ -44,6 +44,9 @@ export interface FieldModel {
   z: number,
   direction: number,
   triangle: number,
+  collision: number,
+  interaction: number,
+  visible: number,
 }
 
 
