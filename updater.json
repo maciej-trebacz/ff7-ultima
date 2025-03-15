@@ -1,11 +1,11 @@
 {
-  "version": "1.4.3",
-  "notes": "Field model flags and Skip Dialogues improvements",
-  "pub_date": "2025-03-07T00:00:00Z",
+  "version": "1.4.4",
+  "notes": "Field improvements and speed hack enhancements",
+  "pub_date": "2025-03-15T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjRZU2QvSHFZajQzL0NEY05vaXdORTVlVjJDaGlXVDRFYkFNK0oxWWJwOGt3T1AzdnZhbFU1ekkyZmVHQld5T1dTTXhyc2JEYzNjU2I0bFQyVmVwT2d3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQxMzM4ODUzCWZpbGU6RkY3IFVsdGltYV8xLjQuM194NjQtc2V0dXAuZXhlCjVKbWU5R1RGUGR3K0wxcjg3UUZKa0NwUzlpK1JOUXNEQmovejdrcXM0aEtrVC9hc0V4UWVlZ3o4OXdlNkRsV0M0ekphcjhJZFJtOFA3TFlDTGNmdEJRPT0K",
-      "url": "https://github.com/ff7-speedruns/ff7-ultima/releases/download/1.4.3/FF7.Ultima_1.4.3_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFzN25SaTI5Q05ieHVCdmh2d3g4M1Eza3N5cGt2QVUrRlFjQ1A2Nm40M0I1eUxxbDFId2NabTl5aFpPV2t2VDJGU2hyb1dleVoxOWxmWjJmaThWMFFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQyMDY1ODM1CWZpbGU6RkY3IFVsdGltYV8xLjQuNF94NjQtc2V0dXAuZXhlCm5vTU0ydUlTWmdJaU5ZdUNlRFo3UTl3NmxWS1dmbUZXZkNuNFFyeEQ2SENmV2g5K3FDaE1ZK2ZpK0VCUUxadUROMnpzeCtZMDRHWHZUN2gyNERVZEFnPT0K",
+      "url": "https://github.com/ff7-speedruns/ff7-ultima/releases/download/1.4.4/FF7.Ultima_1.4.4_x64-setup.exe"
     }
   }
 }

@@ -26,6 +26,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
 
   const [autoUpdate, setAutoUpdate] = useState<AutoUpdateOption>("notify");
   const [enableShortcuts, setEnableShortcuts] = useState(true);
+  const [speedHackEnhancements, setSpeedHackEnhancements] = useState(true);
   const [rememberedHacks, setRememberedHacks] = useState<GeneralSettings['rememberedHacks']>({
     speed: true,
     skipIntros: true,
@@ -42,6 +43,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     loadGeneralSettings().then(settings => {
       setAutoUpdate(settings.autoUpdate);
       setEnableShortcuts(settings.enableShortcuts);
+      setSpeedHackEnhancements(settings.speedHackEnhancements);
       setRememberedHacks(settings.rememberedHacks);
     });
   }, []);
@@ -50,6 +52,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     await saveGeneralSettings({
       autoUpdate,
       enableShortcuts,
+      speedHackEnhancements,
       rememberedHacks
     });
   };
@@ -87,6 +90,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     await saveGeneralSettings({
       autoUpdate,
       enableShortcuts,
+      speedHackEnhancements,
       rememberedHacks: newState
     });
 
@@ -112,6 +116,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     saveGeneralSettings({
       autoUpdate: value,
       enableShortcuts,
+      speedHackEnhancements,
       rememberedHacks
     });
   };
@@ -121,6 +126,17 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     saveGeneralSettings({
       autoUpdate,
       enableShortcuts: value,
+      speedHackEnhancements,
+      rememberedHacks
+    });
+  };
+
+  const handleSpeedHackEnhancementsChange = (value: boolean) => {
+    setSpeedHackEnhancements(value);
+    saveGeneralSettings({
+      autoUpdate,
+      enableShortcuts,
+      speedHackEnhancements: value,
       rememberedHacks
     });
   };
@@ -152,6 +168,18 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
           <Switch checked={enableShortcuts} onCheckedChange={handleShortcutsChange} />
         </div>
         <p className="text-xs text-slate-400">To change the shortcut mapping switch to the Shortcuts tab above</p>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label>Speed Hack Enhancements</Label>
+          <Switch checked={speedHackEnhancements} onCheckedChange={handleSpeedHackEnhancementsChange} />
+        </div>
+        <p className="text-xs text-slate-400">When speed hack is enabled this will also:</p>
+        <ul className="text-xs text-slate-400 list-disc pl-5 space-y-1">
+          <li>disable the temperature dropping in Great Glacier</li>
+          <li>disable battles triggered by the wind in Whirlwind Maze</li>
+        </ul>
       </div>
 
       <div className="space-y-2">

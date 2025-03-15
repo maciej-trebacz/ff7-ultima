@@ -36,6 +36,7 @@ export interface GeneralSettings {
   autoUpdate: AutoUpdateOption;
   enableShortcuts: boolean;
   hasSeenSettingsHint?: boolean;
+  speedHackEnhancements: boolean;
   rememberedHacks: {
     speed: boolean;
     skipIntros: boolean;
@@ -234,6 +235,7 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
     autoUpdate: 'auto',
     enableShortcuts: true,
     hasSeenSettingsHint: false,
+    speedHackEnhancements: true,
     rememberedHacks: {
       speed: true,
       skipIntros: true,
@@ -262,6 +264,7 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
       autoUpdate: settings.autoUpdate ?? defaultSettings.autoUpdate,
       enableShortcuts: settings.enableShortcuts ?? defaultSettings.enableShortcuts,
       hasSeenSettingsHint: settings.hasSeenSettingsHint ?? defaultSettings.hasSeenSettingsHint,
+      speedHackEnhancements: settings.speedHackEnhancements ?? defaultSettings.speedHackEnhancements,
       rememberedHacks: {
         ...defaultSettings.rememberedHacks,
         ...settings.rememberedHacks

@@ -170,7 +170,7 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400">Bank:</span>
             <Select value={selectedBank} onValueChange={handleBankChange}>
-              <SelectTrigger className="w-24 h-7 text-xs">
+              <SelectTrigger className="w-[100px] h-7 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -179,6 +179,9 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
                     Bank {bank} ({bankTitles[bank - 1]})
                   </SelectItem>
                 ))}
+                <SelectItem key={6} value={"6"} className="text-xs">
+                  Temp Bank (5/6)
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

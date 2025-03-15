@@ -8,9 +8,9 @@ import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { OpcodeWriter } from "./opcodewriter";
-import { loadHackSettings } from "./settings";
+import { GeneralSettings, loadGeneralSettings, loadHackSettings, subscribeToSettings } from "./settings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
@@ -24,7 +24,7 @@ export function useFF7(addresses: FF7Addresses) {
   const fnCallerMainAddr = fnCallerBaseAddr + 18;
   const fnCallerAfterFlipAddr = fnCallerBaseAddr + 33;
   const fnCallerResultAddr = fnCallerBaseAddr - 4;
-  const fnSkipDialoguesAddr = addresses.code_cave;
+  const fnSkipDialoguesAddr = addresses.code_cave + 0x20;
 
   useEffect(() => {
     async function initializeGfxFlip() {
@@ -183,6 +183,52 @@ export function useFF7(addresses: FF7Addresses) {
     }
   }
 
+  const [speedHackEnhancementsOn, setSpeedHackEnhancementsOn] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToSettings((key, newValue) => {
+      if (key === 'general') {
+        const settings = newValue as GeneralSettings;
+        setSpeedHackEnhancementsOn(settings.speedHackEnhancements);
+      }
+    });
+
+    const loadSettings = async () => {
+      const settings = await loadGeneralSettings();
+      setSpeedHackEnhancementsOn(settings.speedHackEnhancements);
+    }
+
+    loadSettings();
+
+    return () => {
+      unsubscribe();
+    };
+  }, []); 
+
+  // When speed hack is enabled disable temperature dropping on the Great Glacier climbing sections
+  const snowFields = [689, 692, 694];
+  if (speedHackEnhancementsOn && parseFloat(gameState.speed) > 1 && snowFields.includes(gameState.fieldId) && gameState.fieldTmpVars[8] < 37) {
+    setTimeout(async () => {
+      await writeMemory(addresses.field_script_temp_vars + 8, 37, DataType.Byte);
+    }, 0);
+  }
+
+  // Disable the lines that trigger battles in the Whirlwind Maze fields
+  const whirlwindMazeFields = [709, 710, 711];
+  if (speedHackEnhancementsOn && parseFloat(gameState.speed) > 1 && whirlwindMazeFields.includes(gameState.fieldId) && gameState.fieldLines[0].enabled === 1) {
+    setTimeout(async () => {
+      await writeMemory(addresses.field_line_objs + 0xc, 0, DataType.Byte);
+      await writeMemory(addresses.field_line_objs + 0x18 + 0xc, 0, DataType.Byte);
+    }, 0);
+  }
+  // Re-enable the lines when speed hack is disabled
+  else if ((!speedHackEnhancementsOn || parseFloat(gameState.speed) <= 1) && whirlwindMazeFields.includes(gameState.fieldId) && gameState.fieldLines[0].enabled === 0) {
+    setTimeout(async () => {
+      await writeMemory(addresses.field_line_objs + 0xc, 1, DataType.Byte);
+      await writeMemory(addresses.field_line_objs + 0x18 + 0xc, 1, DataType.Byte);
+    }, 0);
+  }
+
   const ff7 = {
     connected,
     gameState,
@@ -251,10 +297,17 @@ export function useFF7(addresses: FF7Addresses) {
     toggleSkipDialogues: async () => {
       if (!gameState.fieldSkipDialoguesEnabled) {
         // Write the function that checks whether the window is non-closable and only skips the closable ones
-        await writeMemory(fnSkipDialoguesAddr, hex("8b 45 08 25 ff 00 00 00 69 c0 30 00 00 00 53 8b d8 0f bf 8b e6 f5 cf 00 5b 83 e1 01 85 c9 74 01 c3 b8 01 00 00 00 e9 af 51 21 00"), DataType.Buffer);
+        const code = hex("8B 45 08 25 FF 00 00 00 69 C0 30 00 00 00 53 8B D8 0F BF 93 E4 F5 CF 00 66 85 D2 75 19 0F BF 8B E6 F5 CF 00 83 E1 01 85 C9 75 0B B8 01 00 00 00 5B E9 84 51 21 00 5B C3");
+        await writeMemory(fnSkipDialoguesAddr, code, DataType.Buffer);
+        const writer = new OpcodeWriter(fnSkipDialoguesAddr + code.length);
+        writer.writeJmp(addresses.field_skip_dialogues + 0x30D);
+        await writeMemory(fnSkipDialoguesAddr + code.length, writer.opcodes, DataType.Buffer);
 
         // Call the new function
-        await writeMemory(addresses.field_skip_dialogues, hex("e8 2e b1 de ff 90 90 90 90 90 90"), DataType.Buffer);
+        const writer2 = new OpcodeWriter(addresses.field_skip_dialogues);
+        writer2.writeCall(fnSkipDialoguesAddr);
+        await writeMemory(addresses.field_skip_dialogues, writer2.opcodes, DataType.Buffer);
+        await writeMemory(addresses.field_skip_dialogues + 5, hex("90 90 90 90 90 90"), DataType.Buffer);
       } else {
         // Restore the original code
         await writeMemory(addresses.field_skip_dialogues, hex("8b 45 08 25 ff 00 00 00 6b c0 30"), DataType.Buffer);

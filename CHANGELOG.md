@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.4 (2025-03-15)
+
+### Field
+
+* Fixed some additional softlocks when "Skip Dialogues" was enabled
+* Added "Speed hack enhancenements" setting that disables the temperature dropping in Great Glacier and disables wind triggering battles in Whirlwind Maze when speed hack is on
+* Added additional 5x, 10x and 20x options for AP/Exp boosts
+
 ## 1.4.3 (2025-03-07)
 
 ### Field

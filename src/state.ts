@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine } from "./types";
 import { DataType, readMemory } from "./memory";
 import { useFF7Addresses, FF7Addresses } from "./ff7Addresses";
 
@@ -62,6 +62,7 @@ const defaultState = {
     zolomCoords: null as [number, number] | null,
     worldMapType: 0,
     fieldTmpVars: [] as number[],
+    fieldLines: [] as FieldLine[],
   };
 
 export const useFF7State = function() {
@@ -207,6 +208,7 @@ export const useFF7State = function() {
           zolomCoords: basic.zolom_coords ? [basic.zolom_coords >> 16, basic.zolom_coords & 0xffff] : null,
           worldMapType: basic.world_map_type as number,
           fieldTmpVars: basic.field_tmp_vars as number[],
+          fieldLines: ff7Data.field_lines as FieldLine[],
         }));
         setConnected(basic.current_module !== GameModule.None);
       } catch (e) {

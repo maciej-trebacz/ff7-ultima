@@ -49,6 +49,17 @@ export interface FieldModel {
   visible: number,
 }
 
+export interface FieldLine {
+  x1: number,
+  y1: number,
+  z1: number,
+  x2: number,
+  y2: number,
+  z2: number,
+  enabled: number,
+  entity: number,
+}
+
 
 export interface BattleCharObj {
   index: number,
