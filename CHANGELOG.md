@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.6 (unreleased)
+
+### General
+
+* Fixed game locking up on black screen after entering a battle when using 7th Heaven with the 60/30 FPS Gameplay mod enabled
+
 ## 1.4.5 (2025-04-02)
 
 ### General

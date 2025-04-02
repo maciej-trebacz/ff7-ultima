@@ -579,8 +579,11 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.battle_swirl_disable2, 0x00, DataType.Byte);
     },
     enableBattleSwirl: async () => {
-      await writeMemory(addresses.battle_swirl_disable1, 0x2e, DataType.Byte);
-      await writeMemory(addresses.battle_swirl_disable2, 0x4e, DataType.Byte);
+      const check = await readMemory(addresses.battle_swirl_disable2, DataType.Byte);
+      if (check === 0x00) {
+        await writeMemory(addresses.battle_swirl_disable1, 0x2e, DataType.Byte);
+        await writeMemory(addresses.battle_swirl_disable2, 0x4e, DataType.Byte);
+      }
     },
     enableInstantATB: async () => {
       await writeMemory(addresses.instant_atb_set, hex("c7 45 fc ff ff 00 00 90 90 90"), DataType.Buffer); // mov [ebp-04],0000FFFF and 3 nops
