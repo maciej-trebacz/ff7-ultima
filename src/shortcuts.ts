@@ -36,17 +36,17 @@ export const defaultShortcuts: Shortcut[] = [
     },
   },
   {
-    key: "F4",
+    key: "F3",
     action: "Normal Speed (1x)",
     callback: async (ff7) => {
       await ff7.setSpeed(1);
     },
   },
   {
-    key: "F3",
-    action: "Speed Up (4x)",
+    key: "F4",
+    action: "Speed Up (5x)",
     callback: async (ff7) => {
-      await ff7.setSpeed(4);
+      await ff7.setSpeed(5);
     },
   },
   {

@@ -25,11 +25,17 @@ export interface FF7Addresses {
   game_obj_ptr: number;
   battle_swirl_check: number;
   instant_atb_check: number;
+  cait_manual_slots: number;
+  tifa_manual_slots: number;
+  arena_manual_slots: number;
+  slots_active: number;
   unfocus_patch_check: number;
   ffnx_check: number;
   step_id: number;
   step_fraction: number;
+  step_offset: number;
   danger_value: number;
+  formation_idx: number;
   battle_id: number;
   field_models_ptr: number;
   field_data_ptr: number;

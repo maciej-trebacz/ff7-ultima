@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.4.5 (2025-04-02)
+
+### General
+
+* Show current battle/field ID in the status bar at all times
+
+### Field
+
+* Changed how step values are shown, added step offset & formation index
+
+### Battle
+
+* Added "Manual Slots" option that stops all slot reels (Tifa's and Cait's limits, and battle arena) and lets you choose slots with arrow keys
+
 ## 1.4.4 (2025-03-15)
 
 ### Field

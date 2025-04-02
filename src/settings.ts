@@ -47,6 +47,7 @@ export interface GeneralSettings {
     apMultiplier: boolean;
     invincibility: boolean;
     instantATB: boolean;
+    manualSlots: boolean;
   };
 }
 
@@ -60,6 +61,7 @@ export interface HackSettings {
   instantATB?: boolean;
   expMultiplier?: number;
   apMultiplier?: number;
+  manualSlots?: boolean;
 }
 
 export interface SaveStates {
@@ -245,7 +247,8 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
       expMultiplier: true,
       apMultiplier: true,
       invincibility: true,
-      instantATB: true
+      instantATB: true,
+      manualSlots: true
     }
   };
 

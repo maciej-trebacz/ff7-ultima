@@ -12,12 +12,14 @@ import { useEffect, useState } from "react";
 import { OpcodeWriter } from "./opcodewriter";
 import { GeneralSettings, loadGeneralSettings, loadHackSettings, subscribeToSettings } from "./settings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
+import { useShortcuts } from "./useShortcuts";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7State();
   const saveStates = useSaveStates();
+  const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
 
   // Add the proxy function where we can inject our own code that runs every frame
   const fnCallerBaseAddr = addresses.code_cave_fn_caller;
@@ -228,6 +230,61 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.field_line_objs + 0x18 + 0xc, 1, DataType.Byte);
     }, 0);
   }
+
+  useEffect(() => {
+    const registerManualSlotsShortcuts = async () => {
+      const adjustSlotOffset = async (delta: number) => {
+        // Battle arena has different slot offset addresses
+        const currentSlotIdx = await readMemory(gameState.slotsActive === 3 ? 0xdc3860 : 0xdc3c24, DataType.Byte);
+        const slotOffsetsAddr = gameState.slotsActive === 3 ? 0xdc3c30 : 0xdc3c00;
+
+        // Tifa slots are smaller than the other slots
+        const slotMultiplier = gameState.slotsActive === 2 ? 4 : 8;
+
+        // Different slot counts for different slot sets
+        const slotsCount = gameState.slotsActive === 2 ? 12 : gameState.slotsActive === 1 ? 16 : 8;
+
+        const slotOffset = await readMemory(slotOffsetsAddr + currentSlotIdx * 2, DataType.Short);
+        let newOffset = (Math.floor(slotOffset / slotMultiplier) + delta) * slotMultiplier;
+        if (newOffset < 0) newOffset = (slotsCount - 1) * slotMultiplier;
+        await writeMemory(slotOffsetsAddr + currentSlotIdx * 2, newOffset, DataType.Short);
+      }
+
+      if (gameState.manualSlotsEnabled && gameState.slotsActive > 0) {
+        try {
+          await registerCustomShortcut("Up", async () => {
+            await adjustSlotOffset(1);
+          });
+          await registerCustomShortcut("Down", async () => {
+            await adjustSlotOffset(-1);
+          });
+          await registerCustomShortcut("Left", async () => {
+            await adjustSlotOffset(-1);
+          });
+          await registerCustomShortcut("Right", async () => {
+            await adjustSlotOffset(1);
+          });
+
+          console.debug('Registered manual slots shortcuts');
+        } catch (e) {
+          console.error("Failed to register manual slots shortcuts:", e);
+        }
+      } else {
+        try {
+          await unregisterCustomShortcut("Up");
+          await unregisterCustomShortcut("Down"); 
+          await unregisterCustomShortcut("Left");
+          await unregisterCustomShortcut("Right");
+
+          console.debug('Unregistered manual slots shortcuts');
+        } catch (e) {
+          console.error("Failed to unregister manual slots shortcuts:", e);
+        }
+      }
+    };
+
+    registerManualSlotsShortcuts();
+  }, [gameState.manualSlotsEnabled, gameState.slotsActive]);
 
   const ff7 = {
     connected,
@@ -535,6 +592,18 @@ export function useFF7(addresses: FF7Addresses) {
     disableInstantATB: async () => {
       await writeMemory(addresses.instant_atb_set, hex("66 8b 0d 00 ad 9a 00 99 f7 f9"), DataType.Buffer);
     },
+    enableManualSlots: async () => {
+      await writeMemory(addresses.cait_manual_slots, 0, DataType.Byte);
+      await writeMemory(addresses.tifa_manual_slots, 0x9090, DataType.Short);
+      await writeMemory(addresses.tifa_manual_slots + 0xBE, 0xEB, DataType.Byte);
+      await writeMemory(addresses.arena_manual_slots, 0xEB, DataType.Byte);
+    },
+    disableManualSlots: async () => {
+      await writeMemory(addresses.cait_manual_slots, 3, DataType.Byte);
+      await writeMemory(addresses.tifa_manual_slots, 0x4774, DataType.Short);
+      await writeMemory(addresses.tifa_manual_slots + 0xBE, 0x7D, DataType.Byte);
+      await writeMemory(addresses.arena_manual_slots, 0x7D, DataType.Byte);
+    },    
     enableSkipIntro: async () => {
       setHacks({ ...hacks, skipIntro: true });
     },
@@ -786,7 +855,7 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.savemap, state.savemap, DataType.Buffer);
 
       if (state.fieldId !== gameState.fieldId || gameState.currentModule === GameModule.World) {
-        console.debug("Field ID mismatch - warping to new field");
+        console.debug("Field ID mismatch - warping to new field", state.fieldId, state.destination);
         await this.warpToFieldId(state.fieldId, state.destination);
 
         console.debug("Waiting for field id to match");
@@ -804,16 +873,17 @@ export function useFF7(addresses: FF7Addresses) {
       }
 
       // NOP the tick function
-      const tickFunctionAddr = gameState.gameObjPtr + 0xa00;
-      const tickFunctionPtr = await readMemory(tickFunctionAddr, DataType.Int);
-      await writeMemory(tickFunctionAddr, 0x72237a, DataType.Int);
+      // const tickFunctionAddr = gameState.gameObjPtr + 0xa00;
+      // const tickFunctionPtr = await readMemory(tickFunctionAddr, DataType.Int);
+      // await writeMemory(tickFunctionAddr, 0x72237a, DataType.Int);
 
       // Use regionOffsets from the save state if available, otherwise fall back to SaveRegions
       const regionOffsets = state.regionOffsets || SaveRegions;
       
       for (let i = 0; i < state.regions.length; i++) {
         const length = regionOffsets[i][1] - regionOffsets[i][0];
-        await writeMemory(regionOffsets[i][0], state.regions[i].slice(0, length), DataType.Buffer);
+        const start = regionOffsets[i][0];
+        await writeMemory(start, state.regions[i].slice(0, length), DataType.Buffer);
       }
 
       // Reset the field model pointers
@@ -824,7 +894,7 @@ export function useFF7(addresses: FF7Addresses) {
       }
 
       // Restore the tick function
-      await writeMemory(tickFunctionAddr, tickFunctionPtr, DataType.Int);
+      // await writeMemory(tickFunctionAddr, tickFunctionPtr, DataType.Int);
     },
 
     async saveSnowBoardState(title?: string) {
@@ -1017,7 +1087,13 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.step_fraction, value, DataType.Int);
     },
     async setFieldDangerValue(value: number) {
-      await writeMemory(addresses.danger_value, value, DataType.Int);
+      await writeMemory(addresses.danger_value, value, DataType.Short);
+    },
+    async setFieldStepOffset(value: number) {
+      await writeMemory(addresses.step_offset, value, DataType.Byte);
+    },
+    async setFieldFormationIndex(value: number) {
+      await writeMemory(addresses.formation_idx, value, DataType.Byte);
     },
   };
 

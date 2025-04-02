@@ -66,6 +66,10 @@ export function Field(props: { ff7: FF7 }) {
       ff7.setFieldStepFraction(parseInt(editValue));
     } else if (editTitle === "Danger Value") {
       ff7.setFieldDangerValue(parseInt(editValue));
+    } else if (editTitle === "Step Offset") {
+      ff7.setFieldStepOffset(parseInt(editValue));
+    } else if (editTitle === "Formation Index") {
+      ff7.setFieldFormationIndex(parseInt(editValue));
     }
     setPopoverOpen(false);
   }
@@ -99,12 +103,22 @@ export function Field(props: { ff7: FF7 }) {
               </Tooltip>
             </TooltipProvider>
           </Row>
+
+        </div>
+        <div className="flex-1">
+          <Row label="Movement enabled">
+            <Switch checked={!state.fieldMovementDisabled} onCheckedChange={(enabled) => ff7.toggleMovement()} />
+          </Row>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-x-1">
+        <div className="flex-1">
           <Row 
-            label="Step Fraction"
-            onRowClick={() => openEditPopover("Step Fraction", state.stepFraction.toString())}
+            label="Step Info"
           >
+            {/* Step Offset */}
             <EditPopover
-              open={popoverOpen && editTitle === "Step Fraction"}
+              open={popoverOpen && editTitle === "Step Offset"}
               onOpenChange={setPopoverOpen}
               value={editValue}
               onValueChange={setEditValue}
@@ -113,23 +127,18 @@ export function Field(props: { ff7: FF7 }) {
               <TooltipProvider>
                 <Tooltip delayDuration={250}>
                   <TooltipTrigger asChild>
-                    <span className="cursor-pointer" onClick={() => openEditPopover("Step Fraction", state.stepFraction.toString())}>
-                      {state.stepFraction}
+                    <span className="bg-zinc-900 px-1 rounded-xl w-[52px] flex justify-between cursor-pointer hover:text-primary" onClick={() => openEditPopover("Step Offset", state.stepOffset.toString())}>
+                      <span className="text-xs text-zinc-500 mr-1">Off </span>{state.stepOffset}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-xs">Click to edit</p>
+                    <p className="text-xs">Click to edit Step Offset</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </EditPopover>
-          </Row>
-        </div>
-        <div className="flex-1">
-          <Row 
-            label="Step ID"
-            onRowClick={() => openEditPopover("Step ID", state.stepId.toString())}
-          >
+
+            {/* Step ID */}
             <EditPopover
               open={popoverOpen && editTitle === "Step ID"}
               onOpenChange={setPopoverOpen}
@@ -140,21 +149,40 @@ export function Field(props: { ff7: FF7 }) {
               <TooltipProvider>
                 <Tooltip delayDuration={250}>
                   <TooltipTrigger asChild>
-                    <span className="cursor-pointer" onClick={() => openEditPopover("Step ID", state.stepId.toString())}>
-                      {state.stepId}
+                    <span className="ml-1 bg-zinc-900 px-1 rounded-xl w-[46px] flex justify-between cursor-pointer hover:text-primary" onClick={() => openEditPopover("Step ID", state.stepId.toString())}>
+                      <span className="text-xs text-zinc-500 mr-1">ID</span>{state.stepId}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-xs">Click to edit</p>
+                    <p className="text-xs">Click to edit Step ID</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </EditPopover>
-          </Row>
-          <Row 
-            label="Danger Value"
-            onRowClick={() => openEditPopover("Danger Value", state.dangerValue.toString())}
-          >
+
+            {/* Step Fraction */}
+            <EditPopover
+              open={popoverOpen && editTitle === "Step Fraction"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="ml-1 bg-zinc-900 px-1 rounded-xl w-[56px] flex justify-between cursor-pointer hover:text-primary" onClick={() => openEditPopover("Step Fraction", state.stepFraction.toString())}>
+                      <span className="text-xs text-zinc-500 mr-1">Frac</span>{state.stepFraction}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit Step Fraction</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
+
+            {/* Danger Value */}
             <EditPopover
               open={popoverOpen && editTitle === "Danger Value"}
               onOpenChange={setPopoverOpen}
@@ -165,23 +193,42 @@ export function Field(props: { ff7: FF7 }) {
               <TooltipProvider>
                 <Tooltip delayDuration={250}>
                   <TooltipTrigger asChild>
-                    <span className="cursor-pointer" onClick={() => openEditPopover("Danger Value", state.dangerValue.toString())}>
-                      {state.dangerValue}
+                    <span className="ml-1 bg-zinc-900 px-1 rounded-xl min-w-[60px] flex justify-between cursor-pointer hover:text-primary" onClick={() => openEditPopover("Danger Value", state.dangerValue.toString())}>
+                      <span className="text-xs text-zinc-500 mr-1">Dng</span>{state.dangerValue}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-xs">Click to edit</p>
+                    <p className="text-xs">Click to edit Danger Value</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
+
+            {/* Danger Value */}
+            <EditPopover
+              open={popoverOpen && editTitle === "Formation Index"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="ml-1 bg-zinc-900 px-1 rounded-xl min-w-[52px] flex justify-between cursor-pointer hover:text-primary" onClick={() => openEditPopover("Formation Index", state.formationIndex.toString())}>
+                      <span className="text-xs text-zinc-500 mr-1">Frm</span>{state.formationIndex}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit Formation Index</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </EditPopover>
           </Row>
         </div>
-        <div className="flex-1">
-          <Row label="Movement enabled">
-            <Switch checked={!state.fieldMovementDisabled} onCheckedChange={(enabled) => ff7.toggleMovement()} />
-          </Row>
-        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-x-1">
         <div className="flex-1">
           <Row label="Skip Dialogues">
             <Switch checked={state.fieldSkipDialoguesEnabled} onCheckedChange={(enabled) => ff7.toggleSkipDialogues()} />

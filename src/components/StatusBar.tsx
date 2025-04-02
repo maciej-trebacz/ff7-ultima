@@ -44,6 +44,16 @@ export function StatusBar(props: { ff7: FF7 }) {
           <div className="h-4 w-px bg-zinc-600"></div>
           <div className="flex items-center">
             Module: {GameModule[ff7.gameState.currentModule]}
+            {ff7.gameState.currentModule === GameModule.Battle && ff7.gameState.battleId !== 0xFFFF && <>
+              <span className="text-zinc-400 pl-1">
+                ({ff7.gameState.battleId})
+              </span>
+            </>}
+            {ff7.gameState.currentModule === GameModule.Field && <>
+              <span className="text-zinc-400 pl-1">
+                ({ff7.gameState.fieldId})
+              </span>
+            </>}
           </div>
           <div className="h-4 w-px bg-zinc-600"></div>
           <div className="flex items-center">

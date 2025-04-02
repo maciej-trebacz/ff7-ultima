@@ -1,11 +1,11 @@
 {
-  "version": "1.4.4",
-  "notes": "Field improvements and speed hack enhancements",
-  "pub_date": "2025-03-15T00:00:00Z",
+  "version": "1.4.5",
+  "notes": "Manual slots option, show current battle/field ID in the status bar and improved step values display",
+  "pub_date": "2025-04-02T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFzN25SaTI5Q05ieHVCdmh2d3g4M1Eza3N5cGt2QVUrRlFjQ1A2Nm40M0I1eUxxbDFId2NabTl5aFpPV2t2VDJGU2hyb1dleVoxOWxmWjJmaThWMFFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQyMDY1ODM1CWZpbGU6RkY3IFVsdGltYV8xLjQuNF94NjQtc2V0dXAuZXhlCm5vTU0ydUlTWmdJaU5ZdUNlRFo3UTl3NmxWS1dmbUZXZkNuNFFyeEQ2SENmV2g5K3FDaE1ZK2ZpK0VCUUxadUROMnpzeCtZMDRHWHZUN2gyNERVZEFnPT0K",
-      "url": "https://github.com/ff7-speedruns/ff7-ultima/releases/download/1.4.4/FF7.Ultima_1.4.4_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Tjkrck5PMkdsVzN0THgxaVMrdWMzWHNoQWhjS0JYdmhteEMwVlFhNUltbzV4MGpHRldOMnY3clJneXR5NlJuTnNGMDcvK0hGOWhVRWw4UUJLNnVjMmdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQzNTkwNjQyCWZpbGU6RkY3IFVsdGltYV8xLjQuNV94NjQtc2V0dXAuZXhlCnM5bEZpZW1vMStSSTVwRVplejlxSERvK3g1TUl4N3cwRGpvS3lMaFp1bCtmVU8rQkRvNlJ6enZEc3FCc3pGOTE0REdzaXQyMVlJV2kvSnh0U05EaERBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.5/FF7.Ultima_1.4.5_x64-setup.exe"
     }
   }
 }

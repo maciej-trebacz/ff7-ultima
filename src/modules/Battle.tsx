@@ -76,6 +76,18 @@ export function Battle(props: { ff7: FF7 }) {
     }
   };
 
+  const toggleManualSlots = async () => {
+    const newValue = !ff7.gameState.manualSlotsEnabled;
+    newValue ? ff7.enableManualSlots() : ff7.disableManualSlots();
+    const generalSettings = await loadGeneralSettings();
+    if (generalSettings.rememberedHacks.manualSlots) {
+      await saveHackSettings({
+        ...(await loadHackSettings() || {}),
+        manualSlots: newValue
+      });
+    }
+  };
+
   const parseEnemyName = (enemy: BattleCharObj) => {
     const enemies = ff7.gameState.battleEnemies.filter(e => e.name === enemy.name);
     if (enemies.length === 1) {
@@ -157,6 +169,11 @@ export function Battle(props: { ff7: FF7 }) {
         <div className="flex-1">
           <Row label="Instant ATB">
             <Switch checked={ff7.gameState.instantATBEnabled} onClick={toggleInstantATB} />
+          </Row>
+        </div>
+        <div className="flex-1">
+          <Row label="Manual Slots">
+            <Switch checked={ff7.gameState.manualSlotsEnabled} onClick={toggleManualSlots} />
           </Row>
         </div>
       </div>

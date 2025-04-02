@@ -31,6 +31,7 @@ export function useShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>(defaultShortcuts);
   const [listeningFor, setListeningFor] = useState<string | null>(null);
   const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
+  const [customShortcuts, setCustomShortcuts] = useState<Map<string, () => void>>(new Map());
   const {connected} = useFF7State();
 
   // Load shortcuts and general settings on mount
@@ -115,6 +116,43 @@ export function useShortcuts() {
     registerAllShortcuts();
   }, [shortcuts, listeningFor, connected, shortcutsEnabled]);
 
+  // Effect for handling custom shortcuts
+  useEffect(() => {
+    const registerCustomShortcuts = async () => {
+      if (!connected) return;
+      
+      for (const [accelerator, callback] of customShortcuts.entries()) {
+        try {
+          if (await isTauriShortcutRegistered(accelerator)) {
+            await unregister(accelerator);
+          }
+          await register(accelerator, (event) => {
+            if (connected && event.state === "Pressed") {
+              callback();
+            }
+          });
+        } catch (e) {
+          console.error(`Failed to register custom shortcut ${accelerator}:`, e);
+        }
+      }
+    };
+
+    registerCustomShortcuts();
+
+    return () => {
+      // Cleanup custom shortcuts when component unmounts or dependencies change
+      customShortcuts.forEach(async (_, accelerator) => {
+        try {
+          if (await isTauriShortcutRegistered(accelerator)) {
+            await unregister(accelerator);
+          }
+        } catch (e) {
+          console.error(`Failed to unregister custom shortcut ${accelerator}:`, e);
+        }
+      });
+    };
+  }, [customShortcuts, connected]);
+
   const updateShortcut = async (action: string, newKey: string) => {
     const shortcut = shortcuts.find(s => s.action === action);
     if (!shortcut) return;
@@ -158,11 +196,38 @@ export function useShortcuts() {
     setListeningFor(null);
   };
 
+  const registerCustomShortcut = async (key: string, callback: () => void) => {
+    const accelerator = convertToTauriAccelerator(key);
+    setCustomShortcuts(prev => {
+      const next = new Map(prev);
+      next.set(accelerator, callback);
+      return next;
+    });
+  };
+
+  const unregisterCustomShortcut = async (key: string) => {
+    const accelerator = convertToTauriAccelerator(key);
+    try {
+      if (await isTauriShortcutRegistered(accelerator)) {
+        await unregister(accelerator);
+      }
+      setCustomShortcuts(prev => {
+        const next = new Map(prev);
+        next.delete(accelerator);
+        return next;
+      });
+    } catch (e) {
+      console.error(`Failed to unregister custom shortcut ${accelerator}:`, e);
+    }
+  };
+
   return {
     shortcuts,
     listeningFor,
     startListening,
     stopListening,
-    updateShortcut
+    updateShortcut,
+    registerCustomShortcut,
+    unregisterCustomShortcut
   };
 } 
