@@ -1,10 +1,18 @@
 # Change Log
 
-## 1.4.6 (unreleased)
+## 1.4.6 (2025-04-15)
 
 ### General
 
 * Fixed game locking up on black screen after entering a battle when using 7th Heaven with the 60/30 FPS Gameplay mod enabled
+
+### Battle
+
+* Add Battle Log, displays a list of actions that happened during a battle with their outcomes
+
+### World
+
+* Walk Anywhere toggle that lets you walk, drive and land on all terrain types
 
 ## 1.4.5 (2025-04-02)
 

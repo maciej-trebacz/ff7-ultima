@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { MapId, useMapState } from "@/hooks/useMapState";
 import { useLgpState } from "@/hooks/useLgpState";
 import MapViewer from "./MapViewer";
-import { useFF7State } from "@/state";
 import { MapType } from "./types";
 
 const MapTypes = [

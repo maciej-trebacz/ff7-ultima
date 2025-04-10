@@ -99,6 +99,7 @@ export interface FF7Addresses {
   field_file_section1_ptr: number;
   field_models_objs: number;
   field_line_objs: number;
+  battle_obj_ptr: number;
 }
 
 export function useFF7Addresses() {

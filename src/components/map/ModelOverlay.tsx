@@ -2,7 +2,7 @@ import React, { MutableRefObject, useMemo } from 'react';
 import { DoubleSide, TextureLoader } from 'three';
 import { useLoader } from '@react-three/fiber';
 import { SCALE } from './constants';
-import { useFF7State } from '@/state';
+import { useFF7Context } from '@/FF7Context';
 import { MODEL_TEXTURES, createTextureMap, getModelTexture } from './modelTextures';
 
 interface ModelOverlayProps {
@@ -11,7 +11,7 @@ interface ModelOverlayProps {
 }
 
 const ModelOverlay: React.FC<ModelOverlayProps> = ({ zoomRef, visible = true }) => {
-  const { connected, gameState } = useFF7State();
+  const { connected, gameState } = useFF7Context();
   
   // Load all textures
   const textures = MODEL_TEXTURES.map(config => ({

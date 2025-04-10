@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
-import { useFF7State } from "./state";
+import { useFF7Context } from "./FF7Context";
 import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
@@ -13,11 +13,12 @@ import { OpcodeWriter } from "./opcodewriter";
 import { GeneralSettings, loadGeneralSettings, loadHackSettings, subscribeToSettings } from "./settings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
 import { useShortcuts } from "./useShortcuts";
+import { useBattleLog } from "./hooks/useBattleLog";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
 export function useFF7(addresses: FF7Addresses) {
-  const { connected, gameState, hacks, setHacks } = useFF7State();
+  const { connected, gameState, hacks, setHacks } = useFF7Context();
   const saveStates = useSaveStates();
   const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
 
@@ -285,6 +286,29 @@ export function useFF7(addresses: FF7Addresses) {
 
     registerManualSlotsShortcuts();
   }, [gameState.manualSlotsEnabled, gameState.slotsActive]);
+
+  const { addLogItem, clearLogs } = useBattleLog();
+  useEffect(() => {
+    const priority = gameState.battleQueue[0];
+    const queuePosition = gameState.battleQueue[1];
+
+    if (gameState.currentModule === GameModule.Battle) {
+      // Skip the initial state of the battle queue
+      if (gameState.battleQueue.every(byte => byte === 0)) {
+        clearLogs();
+        return;
+      }
+
+      addLogItem({
+        attacker: gameState.battleQueue[2],
+        targetMask: gameState.battleQueue[6] + gameState.battleQueue[7] * 256,
+        commandId: gameState.battleQueue[3],
+        parameter: gameState.battleQueue[4] + gameState.battleQueue[5] * 256,
+        queuePosition,
+        priority,
+      });
+    }
+  }, [gameState.battleQueue, gameState.currentModule, addLogItem]);
 
   const ff7 = {
     connected,
@@ -606,7 +630,15 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.tifa_manual_slots, 0x4774, DataType.Short);
       await writeMemory(addresses.tifa_manual_slots + 0xBE, 0x7D, DataType.Byte);
       await writeMemory(addresses.arena_manual_slots, 0x7D, DataType.Byte);
-    },    
+    },
+    enableWalkAnywhere: async () => {
+      await writeMemory(0x74ced3, hex("e9 20 03 00 00"), DataType.Buffer);
+      await writeMemory(0x766705, hex("b8 00 00 00 00"), DataType.Buffer);
+    },
+    disableWalkAnywhere: async () => {
+      await writeMemory(0x74ced3, hex("25 e0 00 00 00"), DataType.Buffer);
+      await writeMemory(0x766705, hex("e8 2c ba ff ff"), DataType.Buffer);
+    },
     enableSkipIntro: async () => {
       setHacks({ ...hacks, skipIntro: true });
     },
@@ -996,6 +1028,12 @@ export function useFF7(addresses: FF7Addresses) {
     },
     async getKeyItemNames() {
       return invoke("read_key_item_names");
+    },
+    async getCommandNames() {
+      return invoke("read_command_names");
+    },
+    async getAttackNames() {
+      return invoke("read_attack_names");
     },
     async addItem(id: number, quantity: number) {
       const itemId = id | quantity << 9;

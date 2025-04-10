@@ -17,7 +17,7 @@ import { useShortcuts } from './useShortcuts';
 
 function Home() {
   const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.General);
-  const addresses = useFF7Context();
+  const { addresses } = useFF7Context();
 
   if (!addresses) {
     return <></>

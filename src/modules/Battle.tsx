@@ -1,4 +1,5 @@
 import Row from "@/components/Row";
+import { BattleLogRow } from "@/components/BattleLogRow";
 import { statuses } from "@/ff7Statuses";
 import { BattleCharObj, ChocoboRating, ElementalEffect, EnemyData, GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
@@ -16,11 +17,14 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { EnemyInfoModal } from "@/components/modals/EnemyInfoModal";
+import { BattleLogModal } from "@/components/modals/BattleLogModal";
 import { loadGeneralSettings, loadHackSettings, saveHackSettings } from "@/settings";
+import { useBattleLog } from "@/hooks/useBattleLog";
 
 export function Battle(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
+  const { logs, formatCommand } = useBattleLog();
 
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -31,6 +35,7 @@ export function Battle(props: { ff7: FF7 }) {
   const [selectedEnemy, setSelectedEnemy] = useState<number | null>(null);
   const [enemyData, setEnemyData] = useState<EnemyData | null>(null);
   const [enemyName, setEnemyName] = useState<string>("");
+  const [isBattleLogModalOpen, setIsBattleLogModalOpen] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -587,6 +592,36 @@ export function Battle(props: { ff7: FF7 }) {
         enemyData={enemyData}
         enemyName={enemyName}
       />
+
+      <BattleLogModal
+        isOpen={isBattleLogModalOpen}
+        setIsOpen={setIsBattleLogModalOpen}
+        logs={logs}
+      />
+
+      <h4 className="text-center mt-4 mb-1 font-medium">Battle Log</h4>
+      <div className="text-xs">
+        {logs.slice(-3).reverse().map((log, index: number) => (
+          <BattleLogRow 
+            key={`${log.timestamp}-${log.queuePosition}-${log.priority}-${index}-preview`}
+            log={log}
+          />
+        ))}
+        {logs.length === 0 && (
+          <div className="text-zinc-500 text-center py-1">No battle actions recorded yet</div>
+        )}
+        <div className="text-center mt-2">
+          <Button
+            variant="link"
+            size="sm"
+            className="text-xs h-6"
+            onClick={() => setIsBattleLogModalOpen(true)}
+            disabled={logs.length === 0}
+          >
+            Show full log
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

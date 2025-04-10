@@ -3,7 +3,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { RotateCcw, RotateCw, Home, Grid, Grip, Boxes } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RenderingMode } from '../types';
-import { useFF7State } from '@/state';
+import { useFF7Context } from '@/FF7Context';
 
 interface MapControlsProps {
   onRotate: (direction: 'left' | 'right') => void;
@@ -30,7 +30,7 @@ export function MapControls({
   renderingMode,
   onRenderingModeChange
 }: MapControlsProps) {
-  const { gameState } = useFF7State();
+  const { gameState } = useFF7Context();
   const { x = 0, z = 0 } = gameState.worldCurrentModel || {};
 
   return (

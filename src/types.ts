@@ -187,7 +187,7 @@ export enum ElementalType {
   Water = 6,
   Wind = 7,
   Holy = 8,
-  Health = 9,
+  Restorative = 9,
   Cut = 10,
   Hit = 11,
   Punch = 12,

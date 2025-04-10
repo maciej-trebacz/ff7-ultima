@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { register, unregister, isRegistered as isTauriShortcutRegistered, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { Shortcut, defaultShortcuts } from "./shortcuts";
 import { loadShortcuts, saveShortcuts, loadGeneralSettings, subscribeToSettings, GeneralSettings } from "./settings";
-import { useFF7State } from "./state";
+import { useFF7Context } from "./FF7Context";
 
 function convertToTauriAccelerator(key: string): string {
   // If it's already a combination, just return it
@@ -32,7 +32,7 @@ export function useShortcuts() {
   const [listeningFor, setListeningFor] = useState<string | null>(null);
   const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
   const [customShortcuts, setCustomShortcuts] = useState<Map<string, () => void>>(new Map());
-  const {connected} = useFF7State();
+  const {connected} = useFF7Context();
 
   // Load shortcuts and general settings on mount
   useEffect(() => {

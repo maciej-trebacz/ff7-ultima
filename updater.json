@@ -1,11 +1,11 @@
 {
-  "version": "1.4.5",
-  "notes": "Manual slots option, show current battle/field ID in the status bar and improved step values display",
-  "pub_date": "2025-04-02T00:00:00Z",
+  "version": "1.4.6",
+  "notes": "Battle Log, Walk Anywhere, 60 FPS mod softlock fix",
+  "pub_date": "2025-04-15T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Tjkrck5PMkdsVzN0THgxaVMrdWMzWHNoQWhjS0JYdmhteEMwVlFhNUltbzV4MGpHRldOMnY3clJneXR5NlJuTnNGMDcvK0hGOWhVRWw4UUJLNnVjMmdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQzNTkwNjQyCWZpbGU6RkY3IFVsdGltYV8xLjQuNV94NjQtc2V0dXAuZXhlCnM5bEZpZW1vMStSSTVwRVplejlxSERvK3g1TUl4N3cwRGpvS3lMaFp1bCtmVU8rQkRvNlJ6enZEc3FCc3pGOTE0REdzaXQyMVlJV2kvSnh0U05EaERBPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.5/FF7.Ultima_1.4.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TitVK1V1UUY5Q1Y2QVVPZGtNSHFjeDY1VE9qRE55cFdrc0cyZ3JtWGdYdGJJWG4weW80VVhacGhMUlJEREVyOENzR0tmT0g0K3dNWkkrUjQzVnFOdXdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ0NzA3Nzk4CWZpbGU6RkY3IFVsdGltYV8xLjQuNl94NjQtc2V0dXAuZXhlCktUa08xczZGTk4rRi8wVEdjaGNCa1ppVGhoUTd2ckhuRE43ZjhveVczbmxvb2drZDEyemlPYkpITGJpclF5c3pxaEgvTUpQaHgrQUEvZi8xYTZaYkFBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.6/FF7.Ultima_1.4.6_x64-setup.exe"
     }
   }
 }

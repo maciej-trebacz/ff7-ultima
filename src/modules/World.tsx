@@ -224,7 +224,7 @@ export function World(props: { ff7: FF7 }) {
       </div>
       <div className="flex gap-1">
         <div className="flex-1">
-          <Row label="Enable Zoom & Tilt">
+          <Row label="Zoom & Tilt">
             <Switch checked={ff7.gameState.worldZoomTiltEnabled} onCheckedChange={(checked) => ff7.setWorldZoomTiltEnabled(checked)} />
           </Row>
         </div>
@@ -233,6 +233,14 @@ export function World(props: { ff7: FF7 }) {
             <Switch 
               checked={ff7.gameState.worldSpeedMultiplier === 12} 
               onCheckedChange={(checked) => ff7.setWorldSpeedMultiplier(checked ? 12 : 2)} 
+            />
+          </Row>
+        </div>
+        <div className="flex-1">
+          <Row label="Walk Anywhere">
+            <Switch 
+              checked={ff7.gameState.walkAnywhereEnabled}
+              onCheckedChange={() => !ff7.gameState.walkAnywhereEnabled ? ff7.enableWalkAnywhere() : ff7.disableWalkAnywhere()} 
             />
           </Row>
         </div>

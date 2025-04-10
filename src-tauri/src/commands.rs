@@ -2,7 +2,7 @@
 
 use ff7_lib::ff7;
 use ff7_lib::ff7::addresses::FF7Addresses;
-use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem};
+use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData};
 use ff7_lib::utils::memory;
 use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
@@ -121,6 +121,26 @@ pub fn read_key_item_names() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+pub fn read_command_names() -> Result<Vec<String>, String> {
+    ff7::data::read_command_names(&FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn read_attack_names() -> Result<Vec<String>, String> {
+    ff7::data::read_attack_names(&FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn read_enemy_attack_names() -> Result<Vec<String>, String> {
+    ff7::data::battle::read_enemy_attack_names(&FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn read_item_data() -> Result<Vec<ItemData>, String> {
+    ff7::data::kernel::read_item_data(&FF7Addresses::new())
+}
+
+#[tauri::command]
 pub fn read_world_field_tbl_data() -> Result<Vec<WorldFieldTblItem>, String> {
     ff7::data::world::read_world_field_tbl_data(&FF7Addresses::new())
 }
@@ -195,6 +215,10 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         read_item_names,
         read_materia_names,
         read_key_item_names,
+        read_command_names,
+        read_attack_names,
+        read_enemy_attack_names,
+        read_item_data,
         read_world_field_tbl_data,
         read_variables_bank,
         write_variable_8bit,
