@@ -9,6 +9,7 @@ use tauri::ipc::Invoke;
 use tauri::Manager;
 use log::{Level, log};
 use serde_json::Value as JsonValue;
+use crate::updater::{check_updates, perform_update, UpdateInfo};
 
 #[tauri::command]
 pub fn read_memory_byte(address: u32) -> Result<u8, String> {
@@ -191,6 +192,16 @@ pub fn log_from_frontend(
     }
 }
 
+#[tauri::command]
+pub async fn check_for_updates(app: tauri::AppHandle) -> Result<Option<UpdateInfo>, String> {
+    check_updates(app).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn execute_update(app: tauri::AppHandle) -> Result<(), String> {
+    perform_update(app).await.map_err(|e| e.to_string())
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -226,5 +237,7 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         get_current_game_directory,
         show_map_window,
         log_from_frontend,
+        check_for_updates,
+        execute_update,
     ]
 }

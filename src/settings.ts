@@ -35,7 +35,8 @@ export type AutoUpdateOption = 'auto' | 'notify' | 'disabled';
 export interface GeneralSettings {
   autoUpdate: AutoUpdateOption;
   enableShortcuts: boolean;
-  hasSeenSettingsHint?: boolean;
+  hasSeenSettingsHint: boolean;
+  lastDismissedUpdateVersion: string | null;
   speedHackEnhancements: boolean;
   rememberedHacks: {
     speed: boolean;
@@ -237,6 +238,7 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
     autoUpdate: 'auto',
     enableShortcuts: true,
     hasSeenSettingsHint: false,
+    lastDismissedUpdateVersion: null,
     speedHackEnhancements: true,
     rememberedHacks: {
       speed: true,
@@ -267,6 +269,7 @@ export async function loadGeneralSettings(): Promise<GeneralSettings> {
       autoUpdate: settings.autoUpdate ?? defaultSettings.autoUpdate,
       enableShortcuts: settings.enableShortcuts ?? defaultSettings.enableShortcuts,
       hasSeenSettingsHint: settings.hasSeenSettingsHint ?? defaultSettings.hasSeenSettingsHint,
+      lastDismissedUpdateVersion: settings.lastDismissedUpdateVersion ?? defaultSettings.lastDismissedUpdateVersion,
       speedHackEnhancements: settings.speedHackEnhancements ?? defaultSettings.speedHackEnhancements,
       rememberedHacks: {
         ...defaultSettings.rememberedHacks,

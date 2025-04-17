@@ -283,3 +283,9 @@ export type Destination = {
   triangle: number;
   direction?: number;
 }
+
+export type UpdateInfo = {
+  version: string;
+  date: string | null;
+  body: string | null;
+};

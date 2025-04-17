@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { GameModule } from "@/types";
+import { GameModule, UpdateInfo } from "@/types";
 import { FF7 } from "@/useFF7";
 import { formatTime } from "@/util";
 import React, { useState, useEffect } from "react";
@@ -9,6 +9,8 @@ import { SettingsModal } from "./modals/SettingsModal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { loadGeneralSettings, saveGeneralSettings } from "@/settings";
+import { invoke } from "@tauri-apps/api/core";
+import { DownloadCloud } from "lucide-react";
 
 export function StatusBar(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -16,21 +18,60 @@ export function StatusBar(props: { ff7: FF7 }) {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [showSettingsHint, setShowSettingsHint] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showUpdateHintPopover, setShowUpdateHintPopover] = useState(false);
 
   useEffect(() => {
-    const checkSettingsHint = async () => {
+    const initialize = async () => {
+      // Check settings hint visibility
       const settings = await loadGeneralSettings();
       if (!settings.hasSeenSettingsHint) {
         setShowSettingsHint(true);
       }
+
+      // Check for updates
+      try {
+        const updateInfo = await invoke<UpdateInfo | null>('check_for_updates');
+        if (updateInfo) {
+          setUpdateAvailable(updateInfo);
+          console.log("Update available:", updateInfo);
+          // Show popover only if this version hasn't been dismissed
+          if (updateInfo.version !== settings.lastDismissedUpdateVersion) {
+            setShowUpdateHintPopover(true);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check for updates:", error);
+      }
     };
-    checkSettingsHint();
+    initialize();
+
   }, []);
 
   const handleHintDismiss = async () => {
     setShowSettingsHint(false);
     const settings = await loadGeneralSettings();
     await saveGeneralSettings({ ...settings, hasSeenSettingsHint: true });
+  };
+
+  const handleUpdateHintDismiss = async () => {
+    setShowUpdateHintPopover(false);
+    if (updateAvailable) {
+      const settings = await loadGeneralSettings();
+      await saveGeneralSettings({ ...settings, lastDismissedUpdateVersion: updateAvailable.version });
+    }
+  };
+
+  const handleUpdateConfirm = async () => {
+    if (!updateAvailable) return; 
+    setIsUpdating(true);
+    try {
+      await invoke('execute_update');
+    } catch (error) {
+      console.error("Failed to perform update:", error);
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -82,11 +123,11 @@ export function StatusBar(props: { ff7: FF7 }) {
                 Settings
               </div>
             </PopoverTrigger>
-            <PopoverContent className="w-80" side="bottom" align="end" sideOffset={5}>
+            <PopoverContent className="w-80 text-sm" side="bottom" align="end" sideOffset={5}>
               <div className="space-y-3">
                 <p className="font-medium">Hey, listen!</p>
-                <p className="text-sm text-muted-foreground">
-                  We've added a Settings section here where you can configure your keyboard shortcuts and other app settings.
+                <p className="text-muted-foreground">
+                  We've added a Settings section where you can configure your keyboard shortcuts and other app settings.
                 </p>
                 <div className="flex justify-end">
                   <Button variant="outline" size="sm" onClick={handleHintDismiss}>
@@ -97,11 +138,45 @@ export function StatusBar(props: { ff7: FF7 }) {
             </PopoverContent>
           </Popover>
           <div className="h-4 w-px bg-zinc-600"></div>
-          <div 
-            className="text-zinc-400 hover:text-zinc-200 cursor-pointer" 
-            onClick={() => setIsAboutModalOpen(true)}
-          >
-            v{version}
+          <div className="flex items-center gap-1">
+            <div
+              className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
+              onClick={() => setIsAboutModalOpen(true)}
+              title="About FF7 Ultima"
+            >
+              v{version}
+            </div>
+            {updateAvailable && (
+              <Popover open={showUpdateHintPopover} onOpenChange={setShowUpdateHintPopover}>
+                <PopoverTrigger asChild>
+                  <div
+                    className="text-yellow-400 hover:text-yellow-300 cursor-pointer"
+                    title={`Update available: v${updateAvailable.version}`}
+                  >
+                    <DownloadCloud size={12} className="animate-pulse" />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-96 text-sm" side="bottom" align="end" sideOffset={5}>
+                  <div className="space-y-3">
+                    <p className="font-medium">New version available: v{updateAvailable.version}</p>
+                    {updateAvailable.date && <p className="text-[10px] text-muted-foreground !mt-0 mb-2">Released on: {updateAvailable.date.split(" ")[0]}</p>}
+                    <div className="max-h-48 overflow-y-auto pr-2">
+                      <p className="text-muted-foreground whitespace-pre-wrap text-xs">
+                        {updateAvailable.body || "No description provided."}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <Button variant="outline" size="sm" onClick={handleUpdateHintDismiss} disabled={isUpdating}>
+                        Dismiss
+                      </Button>
+                      <Button size="sm" onClick={handleUpdateConfirm} disabled={isUpdating}>
+                        {isUpdating ? "Updating..." : "Download & Install"}
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       </div>

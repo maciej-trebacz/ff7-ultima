@@ -22,10 +22,6 @@ fn main() {
             let handle = app.handle().clone();
             logging::setup_logging(&handle)?;
             log::info!(target: "app::init", "Application started");
-            
-            tauri::async_runtime::spawn(async move {
-                updater::update(handle).await.unwrap();
-            });
             Ok(())
         })
         .plugin(tauri_plugin_updater::Builder::new().build())

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.7 (2025-04-17)
+
+### General
+
+* Auto-updater popup that asks if you want to update instead of performing it automatically
+
 ## 1.4.6 (2025-04-15)
 
 ### General

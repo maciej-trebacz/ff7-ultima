@@ -1,7 +1,28 @@
 use tauri::AppHandle;
 use tauri_plugin_updater::UpdaterExt;
+use serde::{Serialize, Deserialize};
 
-pub async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
+#[derive(Serialize, Deserialize)]
+pub struct UpdateInfo {
+    pub version: String,
+    pub date: Option<String>,
+    pub body: Option<String>,
+}
+
+pub async fn check_updates(app: AppHandle) -> tauri_plugin_updater::Result<Option<UpdateInfo>> {
+    if let Some(update) = app.updater()?.check().await? {
+        println!("[Updater] update to version {} date {:?}", update.version, update.date);
+        Ok(Some(UpdateInfo {
+            version: update.version.clone(),
+            date: update.date.map(|d| d.to_string()),
+            body: update.body.clone(),
+        }))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn perform_update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
     if let Some(update) = app.updater()?.check().await? {
         let mut downloaded = 0;
         let version = update.version.clone();
