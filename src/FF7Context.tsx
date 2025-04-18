@@ -488,8 +488,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    console.debug(`Reading attack names for battle ${gameState.battleId}`);
-    if (connected && gameState.currentModule === GameModule.Battle) {
+    if (connected && gameState.currentModule === GameModule.Battle && ![0, 0xFFFF].includes(gameState.battleId)) {
       loadEnemyAttackNames();
     }
   }, [connected, gameState.currentModule, gameState.battleId]);

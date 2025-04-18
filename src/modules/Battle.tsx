@@ -19,13 +19,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { EnemyInfoModal } from "@/components/modals/EnemyInfoModal";
 import { BattleLogModal } from "@/components/modals/BattleLogModal";
-import { loadGeneralSettings, loadHackSettings, saveHackSettings } from "@/settings";
+import { useSettings } from "@/useSettings";
 import { useBattleLog } from "@/hooks/useBattleLog";
 
 export function Battle(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
   const { logs, formatCommand } = useBattleLog();
+  const { generalSettings, hackSettings, updateHackSettings } = useSettings();
 
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -38,62 +39,53 @@ export function Battle(props: { ff7: FF7 }) {
   const [enemyName, setEnemyName] = useState<string>("");
   const [isBattleLogModalOpen, setIsBattleLogModalOpen] = useState(false);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      const [generalSettings, hackSettings] = await Promise.all([
-        loadGeneralSettings(),
-        loadHackSettings()
-      ]);
-
-      if (hackSettings) {
-        const { rememberedHacks } = generalSettings;
-        if (rememberedHacks.invincibility && hackSettings.invincibility !== undefined) {
-          hackSettings.invincibility ? ff7.enableInvincibility() : ff7.disableInvincibility();
-        }
-        if (rememberedHacks.instantATB && hackSettings.instantATB !== undefined) {
-          hackSettings.instantATB ? ff7.enableInstantATB() : ff7.disableInstantATB();
-        }
-      }
-    };
-    loadSettings();
-  }, []);
-
-  const toggleInvincibility = async () => {
+  const toggleInvincibility = () => {
     const newValue = !ff7.gameState.invincibilityEnabled;
     newValue ? ff7.enableInvincibility() : ff7.disableInvincibility();
-    const generalSettings = await loadGeneralSettings();
-    if (generalSettings.rememberedHacks.invincibility) {
-      await saveHackSettings({
-        ...(await loadHackSettings() || {}),
-        invincibility: newValue
+    if (generalSettings?.rememberedHacks.invincibility) {
+      updateHackSettings({
+        ...(hackSettings || {}),
+        invincibility: newValue,
       });
     }
   };
 
-  const toggleInstantATB = async () => {
+  const toggleInstantATB = () => {
     const newValue = !ff7.gameState.instantATBEnabled;
     newValue ? ff7.enableInstantATB() : ff7.disableInstantATB();
-    const generalSettings = await loadGeneralSettings();
-    if (generalSettings.rememberedHacks.instantATB) {
-      await saveHackSettings({
-        ...(await loadHackSettings() || {}),
-        instantATB: newValue
+    if (generalSettings?.rememberedHacks.instantATB) {
+      updateHackSettings({
+        ...(hackSettings || {}),
+        instantATB: newValue,
       });
     }
   };
 
-  const toggleManualSlots = async () => {
+  const toggleManualSlots = () => {
     const newValue = !ff7.gameState.manualSlotsEnabled;
     newValue ? ff7.enableManualSlots() : ff7.disableManualSlots();
-    const generalSettings = await loadGeneralSettings();
-    if (generalSettings.rememberedHacks.manualSlots) {
-      await saveHackSettings({
-        ...(await loadHackSettings() || {}),
-        manualSlots: newValue
+    if (generalSettings?.rememberedHacks.manualSlots) {
+      updateHackSettings({
+        ...(hackSettings || {}),
+        manualSlots: newValue,
       });
     }
   };
 
+  const setExpMultiplier = (multiplier: number) => {
+    ff7.setExpMultiplier(multiplier);
+    if (generalSettings?.rememberedHacks.expMultiplier) {
+      updateHackSettings({ ...hackSettings, expMultiplier: multiplier });
+    }
+  };
+
+  const setApMultiplier = (multiplier: number) => {
+    ff7.setApMultiplier(multiplier);
+    if (generalSettings?.rememberedHacks.apMultiplier) {
+      updateHackSettings({ ...hackSettings, apMultiplier: multiplier });
+    }
+  };
+  
   const parseEnemyName = (enemy: BattleCharObj) => {
     const enemies = ff7.gameState.battleEnemies.filter(e => e.name === enemy.name);
     if (enemies.length === 1) {
@@ -200,7 +192,7 @@ export function Battle(props: { ff7: FF7 }) {
       <div className="flex gap-1">
         <div className="flex-1">
           <Row label="EXP Multiplier">
-            <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => ff7.setExpMultiplier(parseInt(value))}>
+            <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => setExpMultiplier(parseInt(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -219,7 +211,7 @@ export function Battle(props: { ff7: FF7 }) {
         </div>
         <div className="flex-1">
           <Row label="AP Multiplier">
-            <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => ff7.setApMultiplier(parseInt(value))}>
+            <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => setApMultiplier(parseInt(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

@@ -8,7 +8,7 @@ import { AboutModal } from "./modals/AboutModal";
 import { SettingsModal } from "./modals/SettingsModal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { loadGeneralSettings, saveGeneralSettings } from "@/settings";
+import { useSettings } from "@/useSettings";
 import { invoke } from "@tauri-apps/api/core";
 import { DownloadCloud } from "lucide-react";
 
@@ -21,45 +21,45 @@ export function StatusBar(props: { ff7: FF7 }) {
   const [updateAvailable, setUpdateAvailable] = useState<UpdateInfo | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showUpdateHintPopover, setShowUpdateHintPopover] = useState(false);
+  const { generalSettings, updateGeneralSettings } = useSettings();
 
   useEffect(() => {
     const initialize = async () => {
-      // Check settings hint visibility
-      const settings = await loadGeneralSettings();
-      if (!settings.hasSeenSettingsHint) {
-        setShowSettingsHint(true);
-      }
-
-      // Check for updates
-      try {
-        const updateInfo = await invoke<UpdateInfo | null>('check_for_updates');
-        if (updateInfo) {
-          setUpdateAvailable(updateInfo);
-          console.log("Update available:", updateInfo);
-          // Show popover only if this version hasn't been dismissed
-          if (updateInfo.version !== settings.lastDismissedUpdateVersion) {
-            setShowUpdateHintPopover(true);
-          }
+      if (generalSettings) {
+        // Check settings hint visibility
+        if (!generalSettings.hasSeenSettingsHint) {
+          setShowSettingsHint(true);
         }
-      } catch (error) {
-        console.error("Failed to check for updates:", error);
+
+        // Check for updates
+        try {
+          const updateInfo = await invoke<UpdateInfo | null>('check_for_updates');
+          if (updateInfo) {
+            setUpdateAvailable(updateInfo);
+            // Show popover only if this version hasn't been dismissed
+            if (updateInfo.version !== generalSettings.lastDismissedUpdateVersion) {
+              setShowUpdateHintPopover(true);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to check for updates:", error);
+        }
       }
     };
     initialize();
+  }, [generalSettings]);
 
-  }, []);
-
-  const handleHintDismiss = async () => {
+  const handleHintDismiss = () => {
     setShowSettingsHint(false);
-    const settings = await loadGeneralSettings();
-    await saveGeneralSettings({ ...settings, hasSeenSettingsHint: true });
+    if (generalSettings) {
+      updateGeneralSettings({ ...generalSettings, hasSeenSettingsHint: true });
+    }
   };
 
-  const handleUpdateHintDismiss = async () => {
+  const handleUpdateHintDismiss = () => {
     setShowUpdateHintPopover(false);
-    if (updateAvailable) {
-      const settings = await loadGeneralSettings();
-      await saveGeneralSettings({ ...settings, lastDismissedUpdateVersion: updateAvailable.version });
+    if (updateAvailable && generalSettings) {
+      updateGeneralSettings({ ...generalSettings, lastDismissedUpdateVersion: updateAvailable.version });
     }
   };
 

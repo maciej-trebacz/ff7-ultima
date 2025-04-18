@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { AutoUpdateOption, GeneralSettings, loadGeneralSettings, loadHackSettings, saveGeneralSettings, saveHackSettings } from "@/settings";
+import { AutoUpdateOption, useSettings } from "@/useSettings";
 
 interface GeneralSettingsContentProps {
   ff7: FF7;
@@ -24,10 +24,12 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     disabled: "The app will never check for updates"
   };
 
-  const [autoUpdate, setAutoUpdate] = useState<AutoUpdateOption>("notify");
-  const [enableShortcuts, setEnableShortcuts] = useState(true);
-  const [speedHackEnhancements, setSpeedHackEnhancements] = useState(true);
-  const [rememberedHacks, setRememberedHacks] = useState<GeneralSettings['rememberedHacks']>({
+  const { generalSettings, hackSettings, updateGeneralSettings, updateHackSettings } = useSettings();
+
+  const [autoUpdate, setAutoUpdate] = useState<AutoUpdateOption>(generalSettings?.autoUpdate || "notify");
+  const [enableShortcuts, setEnableShortcuts] = useState<boolean>(generalSettings?.enableShortcuts ?? true);
+  const [speedHackEnhancements, setSpeedHackEnhancements] = useState<boolean>(generalSettings?.speedHackEnhancements ?? true);
+  const [rememberedHacks, setRememberedHacks] = useState(generalSettings?.rememberedHacks || {
     speed: true,
     skipIntros: true,
     unfocusPatch: true,
@@ -40,25 +42,16 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     manualSlots: true
   });
 
+  // Sync state when generalSettings changes
   useEffect(() => {
-    loadGeneralSettings().then(settings => {
-      setAutoUpdate(settings.autoUpdate);
-      setEnableShortcuts(settings.enableShortcuts);
-      setSpeedHackEnhancements(settings.speedHackEnhancements);
-      setRememberedHacks(settings.rememberedHacks);
-    });
-  }, []);
+    if (generalSettings) {
+      setEnableShortcuts(generalSettings.enableShortcuts);
+      setSpeedHackEnhancements(generalSettings.speedHackEnhancements);
+      setRememberedHacks(generalSettings.rememberedHacks);
+    }
+  }, [generalSettings]);
 
-  const saveSettings = async () => {
-    await saveGeneralSettings({
-      autoUpdate,
-      enableShortcuts,
-      speedHackEnhancements,
-      rememberedHacks
-    });
-  };
-
-  const getCurrentHackState = (hack: keyof GeneralSettings['rememberedHacks']) => {
+  const getCurrentHackState = (hack: keyof typeof rememberedHacks) => {
     switch (hack) {
       case 'speed':
         return ff7.gameState.speed;
@@ -83,29 +76,26 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     }
   };
 
-  const toggleHack = async (hack: keyof GeneralSettings['rememberedHacks']) => {
+  const toggleHack = (hack: keyof typeof rememberedHacks) => {
     const newState = {
       ...rememberedHacks,
       [hack]: !rememberedHacks[hack]
     };
 
-    // Save the general settings first
-    await saveGeneralSettings({
-      autoUpdate,
-      enableShortcuts,
-      speedHackEnhancements,
+    // Update general settings
+    generalSettings && updateGeneralSettings({
+      ...generalSettings,
       rememberedHacks: newState
     });
 
-    // Now handle the hack settings
-    const hackSettings = await loadHackSettings() || {};
+    // Handle hack settings
     if (!newState[hack]) {
       // If we're disabling remembering, remove this hack from settings
-      delete hackSettings[hack];
-      await saveHackSettings(hackSettings);
+      const { [hack]: _, ...rest } = hackSettings || {};
+      updateHackSettings(rest);
     } else {
       // If we're enabling remembering, save the current state
-      await saveHackSettings({
+      updateHackSettings({
         ...hackSettings,
         [hack]: getCurrentHackState(hack)
       });
@@ -116,31 +106,25 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
 
   const handleAutoUpdateChange = (value: AutoUpdateOption) => {
     setAutoUpdate(value);
-    saveGeneralSettings({
-      autoUpdate: value,
-      enableShortcuts,
-      speedHackEnhancements,
-      rememberedHacks
+    generalSettings && updateGeneralSettings({
+      ...generalSettings,
+      autoUpdate: value
     });
   };
 
   const handleShortcutsChange = (value: boolean) => {
     setEnableShortcuts(value);
-    saveGeneralSettings({
-      autoUpdate,
-      enableShortcuts: value,
-      speedHackEnhancements,
-      rememberedHacks
+    generalSettings && updateGeneralSettings({
+      ...generalSettings,
+      enableShortcuts: value
     });
   };
 
   const handleSpeedHackEnhancementsChange = (value: boolean) => {
     setSpeedHackEnhancements(value);
-    saveGeneralSettings({
-      autoUpdate,
-      enableShortcuts,
-      speedHackEnhancements: value,
-      rememberedHacks
+    generalSettings && updateGeneralSettings({
+      ...generalSettings,
+      speedHackEnhancements: value
     });
   };
 

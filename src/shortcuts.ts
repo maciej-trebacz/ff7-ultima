@@ -25,7 +25,7 @@ export const defaultShortcuts: Shortcut[] = [
     key: "",
     action: "Win battle immediately",
     callback: async (ff7) => {
-      await ff7.endBattle(false);
+      await ff7.endBattle(true);
     },
   },
   {

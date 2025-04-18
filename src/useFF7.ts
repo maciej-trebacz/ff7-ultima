@@ -8,9 +8,9 @@ import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { OpcodeWriter } from "./opcodewriter";
-import { GeneralSettings, loadGeneralSettings, loadHackSettings, subscribeToSettings } from "./settings";
+import { useSettings } from "./useSettings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
 import { useShortcuts } from "./useShortcuts";
 import { useBattleLog } from "./hooks/useBattleLog";
@@ -20,9 +20,10 @@ const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, hacks, setHacks } = useFF7Context();
   const saveStates = useSaveStates();
+  const initialized = useRef(false);
   const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
+  const { generalSettings, hackSettings } = useSettings();
 
-  // Add the proxy function where we can inject our own code that runs every frame
   const fnCallerBaseAddr = addresses.code_cave_fn_caller;
   const fnCallerMainAddr = fnCallerBaseAddr + 18;
   const fnCallerAfterFlipAddr = fnCallerBaseAddr + 33;
@@ -31,15 +32,13 @@ export function useFF7(addresses: FF7Addresses) {
 
   useEffect(() => {
     async function initializeGfxFlip() {
-      // Call GfxFlip and return
+      console.log("initializeGfxFlip");
       let code = hex("55 8B EC 8B 45 08 50 E8 7E 45 24 00 83 C4 04 5D C3");
       await writeMemory(fnCallerMainAddr, code, DataType.Buffer);
 
-      // Replace the call to GfxFlip in WinMain
       code = hex("E8 4F E2 D9 FF");
       await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
 
-      // Add a function for overwriting code once it runs
       code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
       await writeMemory(fnCallerBaseAddr, code, DataType.Buffer);
 
@@ -47,31 +46,48 @@ export function useFF7(addresses: FF7Addresses) {
     }
 
     async function applyHackSettings() {
-      const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
-      const settings = await loadHackSettings();
-      if (settings) {
-        if (settings.speed) await ff7.setSpeed(parseFloat(settings.speed));
-        if (settings.skipIntros !== undefined) settings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
-        if (settings.unfocusPatch !== undefined && ffnxCheck !== 0xE9) settings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
-        if (settings.swirlSkip !== undefined) settings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
-        if (settings.randomBattles !== undefined) {
-          if (settings.randomBattles === RandomEncounters.Off) {
+      if (hackSettings && generalSettings) {
+        const { rememberedHacks } = generalSettings;
+        if (rememberedHacks.speed && hackSettings.speed && hackSettings.speed !== gameState.speed) await ff7.setSpeed(parseFloat(hackSettings.speed));
+        if (rememberedHacks.skipIntros && hackSettings.skipIntros !== undefined) hackSettings.skipIntros ? ff7.enableSkipIntro() : ff7.disableSkipIntro();
+        if (rememberedHacks.unfocusPatch && hackSettings.unfocusPatch !== undefined && hackSettings.unfocusPatch !== gameState.unfocusPatchEnabled) hackSettings.unfocusPatch ? ff7.patchWindowUnfocus() : ff7.unpatchWindowUnfocus();
+        if (rememberedHacks.swirlSkip && hackSettings.swirlSkip !== undefined && hackSettings.swirlSkip !== gameState.battleSwirlDisabled) hackSettings.swirlSkip ? ff7.disableBattleSwirl() : ff7.enableBattleSwirl();
+        if (rememberedHacks.randomBattles && hackSettings.randomBattles !== undefined && hackSettings.randomBattles !== gameState.randomEncounters) {
+          if (hackSettings.randomBattles === RandomEncounters.Off) {
             ff7.disableBattles();
-          } else if (settings.randomBattles === RandomEncounters.Normal) {
+          } else if (hackSettings.randomBattles === RandomEncounters.Normal) {
             ff7.enableBattles();
-          } else if (settings.randomBattles === RandomEncounters.Max) {
+          } else if (hackSettings.randomBattles === RandomEncounters.Max) {
             ff7.maxBattles();
           }
+        }
+        if (rememberedHacks.expMultiplier && hackSettings.expMultiplier !== undefined) {
+          ff7.setExpMultiplier(hackSettings.expMultiplier);
+        }
+        if (rememberedHacks.apMultiplier && hackSettings.apMultiplier !== undefined && hackSettings.apMultiplier !== gameState.apMultiplier) {
+          ff7.setApMultiplier(hackSettings.apMultiplier);
+        }
+        if (rememberedHacks.invincibility && hackSettings.invincibility !== undefined && hackSettings.invincibility !== gameState.invincibilityEnabled) {
+          hackSettings.invincibility ? ff7.enableInvincibility() : ff7.disableInvincibility();
+        }
+        if (rememberedHacks.instantATB && hackSettings.instantATB !== undefined && hackSettings.instantATB !== gameState.instantATBEnabled) {
+          hackSettings.instantATB ? ff7.enableInstantATB() : ff7.disableInstantATB();
+        }
+        if (rememberedHacks.manualSlots && hackSettings.manualSlots !== undefined && hackSettings.manualSlots !== gameState.manualSlotsEnabled) {
+          hackSettings.manualSlots ? ff7.enableManualSlots() : ff7.disableManualSlots();
         }
       }
     }
 
-    if (connected) {
+    if (connected && !initialized.current) {
+      initialized.current = true;
       initializeGfxFlip();
       applyHackSettings();
+    } else if (!connected) {
+      initialized.current = false;
     }
-  }, [connected]);
-
+  }, [connected, hackSettings]);
+  
   type FnCall = { address: number; params?: number[] };
 
   const callGameFns = async (fns: FnCall[]) => {
@@ -186,27 +202,7 @@ export function useFF7(addresses: FF7Addresses) {
     }
   }
 
-  const [speedHackEnhancementsOn, setSpeedHackEnhancementsOn] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToSettings((key, newValue) => {
-      if (key === 'general') {
-        const settings = newValue as GeneralSettings;
-        setSpeedHackEnhancementsOn(settings.speedHackEnhancements);
-      }
-    });
-
-    const loadSettings = async () => {
-      const settings = await loadGeneralSettings();
-      setSpeedHackEnhancementsOn(settings.speedHackEnhancements);
-    }
-
-    loadSettings();
-
-    return () => {
-      unsubscribe();
-    };
-  }, []); 
+const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
 
   // When speed hack is enabled disable temperature dropping on the Great Glacier climbing sections
   const snowFields = [689, 692, 694];
@@ -456,10 +452,16 @@ export function useFF7(addresses: FF7Addresses) {
         return;
       }
 
+      const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
+      if (ffnxCheck === 0xE9) {
+        return;
+      }
+
       // Add Global Focus flag to sound buffer initialization so we don't lose sound while unfocused
       await writeMemory(addresses.sound_buffer_focus, 0x80, DataType.Byte);
 
       // Check if window already was unfocused (tick function pointer is out of program memory)
+      console.log("patchWindowUnfocus", gameState.gameObjPtr);
       await waitFor(async () => {
         const tickFunctionPtr = await readMemory(gameState.gameObjPtr + 0xa00, DataType.Int);
         return tickFunctionPtr <= 0xffffff;
@@ -476,6 +478,11 @@ export function useFF7(addresses: FF7Addresses) {
     },
     unpatchWindowUnfocus: async () => {
       if (!gameState.gameObjPtr) {
+        return;
+      }
+
+      const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
+      if (ffnxCheck === 0xE9) {
         return;
       }
 
