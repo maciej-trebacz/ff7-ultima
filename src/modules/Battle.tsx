@@ -79,6 +79,13 @@ export function Battle(props: { ff7: FF7 }) {
     }
   };
 
+  const setGilMultiplier = (multiplier: number) => {
+    ff7.setGilMultiplier(multiplier);
+    if (generalSettings?.rememberedHacks.gilMultiplier) {
+      updateHackSettings({ ...hackSettings, gilMultiplier: multiplier });
+    }
+  };
+
   const setApMultiplier = (multiplier: number) => {
     ff7.setApMultiplier(multiplier);
     if (generalSettings?.rememberedHacks.apMultiplier) {
@@ -228,6 +235,25 @@ export function Battle(props: { ff7: FF7 }) {
             </Select>
           </Row>
         </div>
+        <div className="flex-1">
+          <Row label="Gil Multiplier">
+            <Select value={'' + ff7.gameState.gilMultiplier} onValueChange={(value) => setGilMultiplier(parseInt(value))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+              </SelectContent>
+            </Select>
+          </Row>
+        </div>        
       </div>
 
       <h4 className="text-center mt-2 mb-1 font-medium">Allies</h4>

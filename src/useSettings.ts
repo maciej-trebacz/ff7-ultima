@@ -2,9 +2,7 @@ import { atom, useAtom } from 'jotai';
 import { useEffect, useCallback, useRef } from 'react';
 import { debounce } from 'lodash-es';
 import { load, Store } from '@tauri-apps/plugin-store';
-import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { logger } from './lib/logging';
-import deepEqual from 'deep-equal';
 import { Destination } from './types';
 import { RandomEncounters } from './types';
 
@@ -23,6 +21,7 @@ export interface GeneralSettings {
     swirlSkip: boolean;
     randomBattles: boolean;
     expMultiplier: boolean;
+    gilMultiplier: boolean;
     apMultiplier: boolean;
     invincibility: boolean;
     instantATB: boolean;
@@ -39,6 +38,7 @@ export interface HackSettings {
   invincibility?: boolean;
   instantATB?: boolean;
   expMultiplier?: number;
+  gilMultiplier?: number;
   apMultiplier?: number;
   manualSlots?: boolean;
 }
@@ -100,32 +100,6 @@ async function getOrInitializeStore(): Promise<Store> {
   return storeInstance;
 }
 
-async function backupSaveStates(states: SaveStates) {
-  try {
-    const backup = { timestamp: Date.now(), states };
-    const json = JSON.stringify(backup);
-    await writeFile('settings.backup.json', new TextEncoder().encode(json));
-    logger.info('Created save states backup', { timestamp: backup.timestamp });
-  } catch (e) {
-    logger.error('Failed to create backup', { error: e?.toString() });
-  }
-}
-
-async function loadBackupSaveStates(store: Store): Promise<SaveStates | null> {
-  try {
-    const backupContent = await readFile('settings.backup.json');
-    const json = new TextDecoder().decode(backupContent);
-    const backup = JSON.parse(json);
-    logger.info('Loaded save states from backup', { timestamp: backup.timestamp });
-    await store.set('saveStates', backup.states);
-    await store.save();
-    return backup.states;
-  } catch (e) {
-    logger.error('Failed to load backup', { error: e?.toString() });
-    return null;
-  }
-}
-
 export function useSettings() {
   const [generalSettings, setGeneralSettings] = useAtom(generalSettingsAtom);
   const [hackSettings, setHackSettings] = useAtom(hackSettingsAtom);
@@ -151,54 +125,35 @@ export function useSettings() {
         logger.debug('Loading settings data into hook state...');
 
         let general = await store.get<GeneralSettings>('general');
-        const defaultGeneral = getDefaultGeneralSettings();
         if (!general) {
-          general = defaultGeneral;
+          general = getDefaultGeneralSettings();
           await store.set('general', general);
           await store.save();
+          logger.info('Initialized general settings in store.');
         } else {
-          const updatedGeneral = {
+          const defaultGeneral = getDefaultGeneralSettings();
+          general = {
             ...defaultGeneral,
             ...general,
             rememberedHacks: { ...defaultGeneral.rememberedHacks, ...general.rememberedHacks },
           };
-          if (!deepEqual(general, updatedGeneral, { strict: true })) {
-            await store.set('general', updatedGeneral);
-            await store.save();
-            general = updatedGeneral;
-          }
         }
-        setGeneralSettings(prev => deepEqual(prev, general, { strict: true }) ? prev : general);
+        setGeneralSettings(general);
 
-        const hacks = await store.get<HackSettings>('hacks');
-        setHackSettings(prev => deepEqual(prev, hacks || null, { strict: true }) ? prev : (hacks || null));
+        let hacks = await store.get<HackSettings>('hacks');
+        setHackSettings(hacks ?? null);
 
-        const shortcutsData = await store.get<Record<string, string>>('shortcuts');
-        setShortcuts(prev => deepEqual(prev, shortcutsData || null, { strict: true }) ? prev : (shortcutsData || null));
+        let shortcutsData = await store.get<Record<string, string>>('shortcuts');
+        setShortcuts(shortcutsData ?? null);
 
-        let states: SaveStates | null | undefined = await store.get<SaveStates>('saveStates');
+        let states = await store.get<SaveStates>('saveStates');
         if (!states) {
-            logger.warn('Main save states not found, attempting to load backup...');
-            states = await loadBackupSaveStates(store);
-        }
-        const defaultStates = { fieldStates: [], snowboardStates: [] };
-        const currentStates = states || defaultStates;
-        const initializedStates: SaveStates = {
-            fieldStates: (currentStates.fieldStates || []).map(state => ({
-                ...state,
-                id: state.id || crypto.randomUUID(),
-            })),
-            snowboardStates: (currentStates.snowboardStates || []).map(state => ({
-                ...state,
-                id: state.id || crypto.randomUUID(),
-            })),
-        };
-        if (!states || !deepEqual(states, initializedStates, { strict: true })) {
-            await store.set('saveStates', initializedStates);
+            states = { fieldStates: [], snowboardStates: [] };
+            await store.set('saveStates', states);
             await store.save();
-            logger.info('Initialized or updated save states in store.');
+            logger.info('Initialized save states in store.');
         }
-        setSaveStates(prev => deepEqual(prev, initializedStates, { strict: true }) ? prev : initializedStates);
+        setSaveStates(states);
 
         logger.info('Settings loaded successfully into hook state.');
 
@@ -266,7 +221,6 @@ export function useSettings() {
           fieldStatesCount: statesWithIds.fieldStates.length,
           snowboardStatesCount: statesWithIds.snowboardStates.length,
         });
-        await backupSaveStates(statesWithIds);
       } catch (error) {
         logger.error('Failed to save save states', { error });
       }
@@ -276,9 +230,6 @@ export function useSettings() {
 
   const updateGeneralSettings = useCallback((newSettings: GeneralSettings) => {
     setGeneralSettings(currentSettings => {
-      if (deepEqual(currentSettings, newSettings, { strict: true })) {
-        return currentSettings;
-      }
       saveGeneralSettings(newSettings);
       return newSettings;
     });
@@ -286,9 +237,6 @@ export function useSettings() {
 
   const updateHackSettings = useCallback((newSettings: HackSettings) => {
     setHackSettings(currentSettings => {
-      if (deepEqual(currentSettings, newSettings, { strict: true })) {
-        return currentSettings;
-      }
       saveHackSettings(newSettings);
       return newSettings;
     });
@@ -296,9 +244,6 @@ export function useSettings() {
 
   const updateShortcuts = useCallback((newShortcuts: Record<string, string>) => {
     setShortcuts(currentShortcuts => {
-       if (deepEqual(currentShortcuts, newShortcuts, { strict: true })) {
-        return currentShortcuts;
-       }
        saveShortcuts(newShortcuts);
        return newShortcuts;
     });
@@ -310,9 +255,6 @@ export function useSettings() {
             fieldStates: newSaveStates.fieldStates.map(s => ({ ...s, id: s.id || crypto.randomUUID() })),
             snowboardStates: newSaveStates.snowboardStates.map(s => ({ ...s, id: s.id || crypto.randomUUID() })),
       };
-      if (deepEqual(currentSaveStates, newStatesWithIds, { strict: true })) {
-          return currentSaveStates;
-      }
       saveSaveStates(newStatesWithIds);
       return newStatesWithIds;
     });
@@ -344,6 +286,7 @@ function getDefaultGeneralSettings(): GeneralSettings {
       swirlSkip: true,
       randomBattles: true,
       expMultiplier: true,
+      gilMultiplier: true,
       apMultiplier: true,
       invincibility: true,
       instantATB: true,

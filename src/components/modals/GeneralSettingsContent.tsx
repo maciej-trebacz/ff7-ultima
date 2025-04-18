@@ -36,6 +36,7 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     swirlSkip: true,
     randomBattles: true,
     expMultiplier: true,
+    gilMultiplier: true,
     apMultiplier: true,
     invincibility: true,
     instantATB: true,
@@ -65,6 +66,8 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
         return ff7.gameState.randomEncounters;
       case 'expMultiplier':
         return ff7.gameState.expMultiplier;
+      case 'gilMultiplier':
+        return ff7.gameState.gilMultiplier;
       case 'apMultiplier':
         return ff7.gameState.apMultiplier;
       case 'invincibility':

@@ -64,6 +64,9 @@ export function useFF7(addresses: FF7Addresses) {
         if (rememberedHacks.expMultiplier && hackSettings.expMultiplier !== undefined) {
           ff7.setExpMultiplier(hackSettings.expMultiplier);
         }
+        if (rememberedHacks.gilMultiplier && hackSettings.gilMultiplier !== undefined) {
+          ff7.setGilMultiplier(hackSettings.gilMultiplier);
+        }
         if (rememberedHacks.apMultiplier && hackSettings.apMultiplier !== undefined && hackSettings.apMultiplier !== gameState.apMultiplier) {
           ff7.setApMultiplier(hackSettings.apMultiplier);
         }
@@ -805,6 +808,10 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     setExpMultiplier: async (multiplier: number) => {
       const value = multiplier.toString(16);
       await writeMemory(addresses.battle_exp_calc, hex(`8b 88 38 B1 9A 00 6B C9 ${value} 01 0D C0 E2 99 00 90 90 90`), DataType.Buffer);
+    },
+    setGilMultiplier: async (multiplier: number) => {
+      const value = multiplier.toString(16);
+      await writeMemory(addresses.battle_exp_calc + 0x1B, hex(`8b 82 34 B1 9A 00 6B C0 ${value} 01 05 C8 E2 99 00 90`), DataType.Buffer);
     },
     setApMultiplier: async (multiplier: number) => {
       const value = multiplier.toString(16);
