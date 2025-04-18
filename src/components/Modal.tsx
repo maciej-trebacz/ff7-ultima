@@ -36,7 +36,7 @@ export function Modal({ open, setIsOpen, title, children, buttonText, size = "md
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
       <DialogContent className={`text-xs ${sizes[size]} p-3 pt-2.5`}>
         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
           <X className="h-4 w-4" />

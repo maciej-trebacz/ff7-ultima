@@ -9,6 +9,7 @@ import { Modal } from "@/components/Modal";
 import { EditPopover } from "@/components/EditPopover";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -177,7 +178,21 @@ export function Battle(props: { ff7: FF7 }) {
           </Row>
         </div>
         <div className="flex-1">
-          <Row label="Manual Slots">
+          <Row label={
+            <div className="flex items-center gap-1">
+              <span>Manual Slots</span>
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <Info size={14} className="cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Stops the slot reels and allows adjusting them with arrow keys (gamepad not supported)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          } className="flex items-center">
             <Switch checked={ff7.gameState.manualSlotsEnabled} onClick={toggleManualSlots} />
           </Row>
         </div>
