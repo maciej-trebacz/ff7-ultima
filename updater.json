@@ -1,11 +1,11 @@
 {
-  "version": "1.4.6",
-  "notes": "Battle Log, Walk Anywhere, 60 FPS mod softlock fix",
-  "pub_date": "2025-04-15T00:00:00Z",
+  "version": "1.4.7",
+  "notes": "See the changelog at https://github.com/maciej-trebacz/ff7-ultima/blob/main/CHANGELOG.md",
+  "pub_date": "2025-04-17T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TitVK1V1UUY5Q1Y2QVVPZGtNSHFjeDY1VE9qRE55cFdrc0cyZ3JtWGdYdGJJWG4weW80VVhacGhMUlJEREVyOENzR0tmT0g0K3dNWkkrUjQzVnFOdXdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ0NzA3Nzk4CWZpbGU6RkY3IFVsdGltYV8xLjQuNl94NjQtc2V0dXAuZXhlCktUa08xczZGTk4rRi8wVEdjaGNCa1ppVGhoUTd2ckhuRE43ZjhveVczbmxvb2drZDEyemlPYkpITGJpclF5c3pxaEgvTUpQaHgrQUEvZi8xYTZaYkFBPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.6/FF7.Ultima_1.4.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFXOVY2S01icHo2Ty9QdDVJN1BwZHVWNzhNa2NVOGtscCtwNGZHM1hwZk5UWlRLQmhkcEVHdEQ0UjBhRXdjeS9nWGY5eGc0ZTB1bll3enNsUjI2NkFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ0OTgxNTA3CWZpbGU6RkY3IFVsdGltYV8xLjQuN194NjQtc2V0dXAuZXhlCk1NSHg1VDdPZFUwRW5FaGExNE5RN3lkT3FNYThwQklEcUltcXpUNGpOMFlIZ0JWSjE5djg3N2ppY0RLcnQ1ZDFkR2RnWVBhbnZEbHRPR09IV2JXZUJBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.7/FF7.Ultima_1.4.7_x64-setup.exe"
     }
   }
 }

@@ -107,10 +107,16 @@ export const BattleLogRow: React.FC<BattleLogItemProps> = ({ log }) => {
           {/* Render Inflicted Statuses */}
           {inflictedStatuses.length > 0 && (
             <span className="ml-1">
-              <span className="text-slate-400">inflicted with </span>
-              <span className="text-orange-400 font-medium">
-                {inflictedStatuses.join(', ')}
-              </span>
+              {inflictedStatuses.length === 1 && inflictedStatuses[0] === "Dead" ? (
+                <span className="text-red-500 font-medium">died</span>
+              ) : (
+                <>
+                  <span className="text-slate-400">inflicted with </span>
+                  <span className="text-orange-400 font-medium">
+                    {inflictedStatuses.join(', ')}
+                  </span>
+                </>
+              )}
             </span>
           )}
 
@@ -143,7 +149,7 @@ export const BattleLogRow: React.FC<BattleLogItemProps> = ({ log }) => {
     // Determine target names with suffix logic for enemies
     const targetNames: string[] = [];
     if (commandHasTargets(log.commandId)) {
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 10; i++) {
         if ((log.targetMask & (1 << i)) !== 0) {
           const name = i < 4 
             ? gameState.battleAllies[i]?.name 

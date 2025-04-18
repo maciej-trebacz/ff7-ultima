@@ -5,6 +5,15 @@
 ### General
 
 * Auto-updater popup that asks if you want to update instead of performing it automatically
+* Rewrote the settings internal code to hopefully be more robust and reliable
+
+### Field
+
+* Loading save states should be more reliable now
+
+### Battle
+
+* Small fixes and improvements to Battle Log
 
 ## 1.4.6 (2025-04-15)
 

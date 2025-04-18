@@ -922,18 +922,20 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
       // Use regionOffsets from the save state if available, otherwise fall back to SaveRegions
       const regionOffsets = state.regionOffsets || SaveRegions;
       
-      for (let i = 0; i < state.regions.length; i++) {
-        const length = regionOffsets[i][1] - regionOffsets[i][0];
-        const start = regionOffsets[i][0];
-        await writeMemory(start, state.regions[i].slice(0, length), DataType.Buffer);
-      }
+      setTimeout(async () => {
+        for (let i = 0; i < state.regions.length; i++) {
+          const length = regionOffsets[i][1] - regionOffsets[i][0];
+          const start = regionOffsets[i][0];
+          await writeMemory(start, state.regions[i].slice(0, length), DataType.Buffer);
+        }
 
-      // Reset the field model pointers
-      for (let i = 0; i < 16; i++) {
-        const addr = 0xcc1670 + i * 0x88;
-        await writeMemory(addr, 0, DataType.Int);
-        await writeMemory(addr + 4, 0, DataType.Int);
-      }
+        // Reset the field model pointers
+        for (let i = 0; i < 16; i++) {
+          const addr = 0xcc1670 + i * 0x88;
+          await writeMemory(addr, 0, DataType.Int);
+          await writeMemory(addr + 4, 0, DataType.Int);
+        }
+      }, 100);
 
       // Restore the tick function
       // await writeMemory(tickFunctionAddr, tickFunctionPtr, DataType.Int);

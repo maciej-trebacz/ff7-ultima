@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "ff7-ultima"
-version = "1.4.6"
+version = "1.4.7"
 dependencies = [
  "chrono",
  "fern",

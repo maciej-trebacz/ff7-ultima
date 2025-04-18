@@ -164,7 +164,6 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const checkStatusChanges = (currentChar: BattleCharObj | undefined, charIndex: number) => {
     const prevStatus = previousStatusesRef.current[charIndex];
-    console.log(`Checking status for index ${charIndex}:`, { current: currentChar?.status, prev: prevStatus });
 
     // Exit if no character data OR if status is unchanged from the previous known status
     if (!currentChar || (prevStatus !== undefined && currentChar.status === prevStatus)) {
@@ -428,32 +427,34 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           walkAnywhereEnabled: basic.walk_anywhere_check === 0xe9,
         }));
 
-        // --- Status Change Detection Logic ---
-        const newStatuses: Record<number, number> = {};
-        if (basic.current_module === GameModule.Battle) {
-          // Allies (index 0-3)
-          for (let i = 0; i < 4; i++) {
-            const ally = ff7Data.battle_allies[i] as BattleCharObj | undefined;
-            checkStatusChanges(ally, i);
-            if (ally) {
-              newStatuses[i] = ally.status;
+        // Status Change Detection Logic - wait 50ms to ensure battle log was updated before
+        setTimeout(() => {
+          const newStatuses: Record<number, number> = {};
+          if (basic.current_module === GameModule.Battle) {
+            // Allies (index 0-3)
+            for (let i = 0; i < 4; i++) {
+              const ally = ff7Data.battle_allies[i] as BattleCharObj | undefined;
+              checkStatusChanges(ally, i);
+              if (ally) {
+                newStatuses[i] = ally.status;
+              }
+            }
+            // Enemies (index 4-7)
+            for (let i = 0; i < 6; i++) {
+              const enemy = ff7Data.battle_enemies[i] as BattleCharObj | undefined;
+              checkStatusChanges(enemy, i + 4);
+              if (enemy) {
+                newStatuses[i + 4] = enemy.status;
+              }
+            }
+            previousStatusesRef.current = newStatuses;
+          } else {
+            // If not in battle, clear previous statuses ref
+            if (Object.keys(previousStatusesRef.current).length > 0) {
+              previousStatusesRef.current = {};
             }
           }
-          // Enemies (index 4-7)
-          for (let i = 0; i < 4; i++) {
-            const enemy = ff7Data.battle_enemies[i] as BattleCharObj | undefined;
-            checkStatusChanges(enemy, i + 4);
-            if (enemy) {
-              newStatuses[i + 4] = enemy.status;
-            }
-          }
-          previousStatusesRef.current = newStatuses;
-        } else {
-          // If not in battle, clear previous statuses ref
-          if (Object.keys(previousStatusesRef.current).length > 0) {
-             previousStatusesRef.current = {};
-          }
-        }
+        }, 50);
 
         previousModuleRef.current = currentModule;
 
