@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { RotateCcw, RotateCw, Home, Grid, Grip, Boxes } from 'lucide-react';
+import { RotateCcw, RotateCw, Home, Grid, Grip, Boxes, User } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RenderingMode } from '../types';
 import { useFF7Context } from '@/FF7Context';
+import { useEffect } from 'react';
 
 interface MapControlsProps {
   onRotate: (direction: 'left' | 'right') => void;
@@ -16,6 +17,9 @@ interface MapControlsProps {
   onModelsToggle?: () => void;
   renderingMode: RenderingMode;
   onRenderingModeChange: (mode: RenderingMode) => void;
+  followPlayer?: boolean;
+  onFollowPlayerToggle?: () => void;
+  onPlayerPositionUpdate?: (x: number, z: number) => void;
 }
 
 export function MapControls({ 
@@ -28,10 +32,34 @@ export function MapControls({
   showModels = false,
   onModelsToggle,
   renderingMode,
-  onRenderingModeChange
+  onRenderingModeChange,
+  followPlayer = false,
+  onFollowPlayerToggle,
+  onPlayerPositionUpdate
 }: MapControlsProps) {
   const { gameState } = useFF7Context();
   const { x = 0, z = 0 } = gameState.worldCurrentModel || {};
+
+  // Notify parent of player position changes when following
+  useEffect(() => {
+    if (followPlayer && onPlayerPositionUpdate) {
+      onPlayerPositionUpdate(x, z);
+    }
+  }, [followPlayer, x, z, onPlayerPositionUpdate]);
+
+  // Listen for requests to update player position
+  useEffect(() => {
+    const handleRequestPosition = () => {
+      if (onPlayerPositionUpdate) {
+        onPlayerPositionUpdate(x, z);
+      }
+    };
+
+    document.addEventListener('requestPlayerPosition', handleRequestPosition);
+    return () => {
+      document.removeEventListener('requestPlayerPosition', handleRequestPosition);
+    };
+  }, [x, z, onPlayerPositionUpdate]);
 
   return (
     <div className="w-full bg-sidebar border-b border-slate-800/40 flex items-center justify-between gap-2 px-2 py-1">
@@ -131,6 +159,24 @@ export function MapControls({
       {/* Right side - Camera controls */}
       <div className="flex items-center gap-1.5">
         <span className="text-[10px] text-muted-foreground font-medium">Camera:</span>
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={followPlayer ? "default" : "outline"}
+                size="icon"
+                className={`h-6 w-6 ${followPlayer ? 'bg-primary hover:bg-primary/90' : ''}`}
+                onClick={onFollowPlayerToggle}
+              >
+                <User className={`h-3.5 w-3.5 ${followPlayer ? 'text-primary-foreground' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">
+              <p>Follow player {followPlayer ? '(on)' : '(off)'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>

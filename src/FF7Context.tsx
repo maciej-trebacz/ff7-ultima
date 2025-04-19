@@ -117,6 +117,8 @@ const defaultGameState = {
   fieldLines: [] as FieldLine[],
   battleQueue: [] as number[],
   walkAnywhereEnabled: false,
+  lovePoints: [] as number[],
+  battlePoints: 0,
 };
 
 export type FF7State = typeof defaultGameState;
@@ -427,6 +429,8 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           fieldLines: ff7Data.field_lines as FieldLine[],
           battleQueue: basic.battle_queue as number[],
           walkAnywhereEnabled: basic.walk_anywhere_check === 0xe9,
+          lovePoints: basic.love_points as number[],
+          battlePoints: basic.battle_points as number,
         }));
 
         // Status Change Detection Logic - wait 50ms to ensure battle log was updated before

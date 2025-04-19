@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.4.9 (2025-04-19)
+
+### General
+
+* View and edit Love Points and Battle Points
+
+### World
+
+* Map Viewer: Follow Player option that will pan around the map as the player moves and also highlight the triangle the player model is currently standing on
+
 ## 1.4.8 (2025-04-19)
 
 ### General

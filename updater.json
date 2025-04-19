@@ -1,11 +1,11 @@
 {
-  "version": "1.4.8",
-  "notes": "New keyboard shortcuts for often used toggles, Gil multiplier option, performance fixes",
-  "pub_date": "2024-02-19T12:00:00Z",
+  "version": "1.4.9",
+  "notes": "View and edit Love Points and Battle Points. Follow Player option in Map viewer to follow you around as you move on the world map",
+  "pub_date": "2024-04-19T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjIvQjJOc3p5TTZHV2ltcUxWMGx3Y1RTTTVUQzhQR1B5VHF0SkJsNnAxbk93TnYwSEdqYk0xa0RBakUyRFBzQTFuY1NtVDhVaDlFY0NYc1ZHSzBEMVFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1MDY2MjQwCWZpbGU6RkY3IFVsdGltYV8xLjQuOF94NjQtc2V0dXAuZXhlCnVEMTFybTdYeGJTSjRqRk04c05yQ3h6NHRXdVkzdklUUExkS0w5YnE1SjFmOG1ZZkZGZVp4dnBJaG1uUU1ReHYxRUkzcjNzSVFFNVVRbENnRXNpbEJ3PT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.8/FF7.Ultima_1.4.8_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TnlPRHJCT0VHQUt2MGEwYTNlMFhDY1pmWGxEU3BnZUNsa2xzY2tJbk9KdkpONyttcW42YUk4ajI0OUJ1VHVsdzlZOU0xZ3FVVDZpK0xySktMZnYreHdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1MDc4NDM3CWZpbGU6RkY3IFVsdGltYV8xLjQuOV94NjQtc2V0dXAuZXhlCi92U2YxNXdTMlFtSnkydGNFTi9jbE15aWR1Y0pERnNqU2RoYUE3Rzc5MFN2VzNiTGpEeWx0Y3UwUWtjRGJLem1RZnN5ZGFva2NLMjFFd2Roa3Vxb0F3PT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.9/FF7.Ultima_1.4.9_x64-setup.exe"
     }
   }
 }

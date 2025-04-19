@@ -100,6 +100,8 @@ export interface FF7Addresses {
   field_models_objs: number;
   field_line_objs: number;
   battle_obj_ptr: number;
+  love_points: number;
+  battle_points: number;
 }
 
 export function useFF7Addresses() {

@@ -721,6 +721,12 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     setInGameTime: async (inGameTime: number) => {
       await writeMemory(addresses.in_game_time, inGameTime, DataType.Int);
     },
+    setLovePoints: async (characterIndex: number, lovePoints: number) => {
+      await writeMemory(addresses.love_points + characterIndex, lovePoints, DataType.Byte);
+    },
+    setBattlePoints: async (battlePoints: number) => {
+      await writeMemory(addresses.battle_points, battlePoints, DataType.Short);
+    },
     setHP: async (hp: number, index: number) => {
       if (gameState.currentModule !== GameModule.Battle) {
         await writeMemory(addresses.character_records + index * 0x84 + 0x2c, hp, DataType.Short);

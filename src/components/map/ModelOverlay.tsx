@@ -28,8 +28,8 @@ const ModelOverlay: React.FC<ModelOverlayProps> = ({ zoomRef, visible = true }) 
   if (!connected) return null;
 
   const offset = 10;
-  let MIN_SIZE = 100;
-  let MAX_SIZE = 1500;
+  let MIN_SIZE = 75;
+  let MAX_SIZE = 1600;
 
   const additionalModels = []
   if (gameState.zolomCoords) {

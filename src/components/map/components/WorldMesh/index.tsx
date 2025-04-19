@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef, forwardRef } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
 import { useTextureAtlas } from './hooks';
@@ -13,27 +13,27 @@ import { SELECTION_Y_OFFSET } from '../../constants';
 
 interface WorldMeshProps {
   renderingMode: RenderingMode;
-  onTriangleSelect: (triangle: Triangle | null, faceIndex: number | null) => void;
-  selectedFaceIndex: number | null;
-  debugCanvasRef: React.RefObject<HTMLCanvasElement>;
-  mapCenter: { x: number; y: number; z: number };
+  onTriangleSelect?: (triangle: Triangle | null, faceIndex: number | null) => void;
+  selectedFaceIndex?: number | null;
+  debugCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  mapCenter: { x: number, y: number, z: number };
   rotation: number;
   showGrid?: boolean;
   disablePainting?: boolean;
   wireframe?: boolean;
 }
 
-export function WorldMesh({ 
-  renderingMode, 
-  onTriangleSelect, 
-  selectedFaceIndex,
+export const WorldMesh = forwardRef<THREE.Mesh, WorldMeshProps>(function WorldMesh({
+  renderingMode,
+  onTriangleSelect,
+  selectedFaceIndex = null,
   debugCanvasRef,
   mapCenter,
   rotation,
-  showGrid = false,
+  showGrid,
   disablePainting,
   wireframe,
-}: WorldMeshProps) {
+}: WorldMeshProps, ref) {
   const [mouseDownPos, setMouseDownPos] = useState<{ x: number; y: number } | null>(null);
   const [paintingMouseDownPos, setPaintingMouseDownPos] = useState<{ x: number; y: number } | null>(null);
   const [paintingDragActive, setPaintingDragActive] = useState(false);
@@ -45,7 +45,10 @@ export function WorldMesh({
 
   const { texture, canvas, texturePositions } = useTextureAtlas(textures, mapType);
   const { geometry, triangleMap, updateTriangleUVs, updateTrianglePosition, updateColors, updateTriangleTexture } = useGeometry(worldmap, mapType, renderingMode, textures, texturePositions);
-  const selectedTriangleGeometry = useSelectedTriangleGeometry(triangleMap, selectedFaceIndex);
+  const selectedGeometry = useSelectedTriangleGeometry(
+    triangleMap,
+    selectedFaceIndex
+  );
 
   const selectedTriangle = triangleMap && selectedFaceIndex !== null ? triangleMap[selectedFaceIndex] : null;
 
@@ -93,16 +96,49 @@ export function WorldMesh({
     }
   }, [selectedTriangle, updateTriangleUVs, updateTrianglePosition]);
 
-  // Copy the texture atlas to the debug canvas
-  useEffect(() => {
-    if (debugCanvasRef.current && canvas) {
-      const ctx = debugCanvasRef.current.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, 512, 512);
-        ctx.drawImage(canvas, 0, 0, 512, 512);
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  // Expose method to find triangle at coordinates using raycasting
+  const findTriangleAtCoordinates = useCallback((x: number, z: number, meshRotation: number = 0) => {
+    if (!meshRef.current || !triangleMap) return null;
+    
+    // Apply inverse rotation to the coordinates since the mesh is rotated
+    // but raycasting happens in local space
+    const angle = -meshRotation; // Need to reverse the rotation to get local coordinates
+    const rotatedX = Math.cos(angle) * x - Math.sin(angle) * z;
+    const rotatedZ = Math.sin(angle) * x + Math.cos(angle) * z;
+    
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+
+    // Cast from high up directly down
+    const rayOrigin = new THREE.Vector3(rotatedX, 1000, rotatedZ);
+    const rayDirection = new THREE.Vector3(0, -1, 0);
+    rayDirection.normalize();
+    raycaster.set(rayOrigin, rayDirection);
+    
+    // Perform raycasting
+    const intersects = raycaster.intersectObject(meshRef.current, false);
+    
+    if (intersects.length > 0 && intersects[0].faceIndex !== undefined && intersects[0].faceIndex !== null) {
+      const faceIndex = intersects[0].faceIndex;
+      if (triangleMap && faceIndex < triangleMap.length) {
+        return {
+          triangle: triangleMap[faceIndex],
+          faceIndex: faceIndex
+        };
       }
     }
-  }, [canvas, debugCanvasRef]);
+    
+    return null;
+  }, [triangleMap]);
+  
+  // Make the function available to parent components
+  useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.userData.findTriangleAtCoordinates = findTriangleAtCoordinates;
+    }
+  }, [findTriangleAtCoordinates]);
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (showGrid) return;
@@ -165,6 +201,15 @@ export function WorldMesh({
     setPaintingHasToggled(false);
   };
 
+  // Use a separate effect to sync our internal ref with the forwarded ref
+  useEffect(() => {
+    if (meshRef.current && ref) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      }
+    }
+  }, [ref, meshRef.current]);
+
   if (!geometry || !triangleMap) return null;
 
   return (
@@ -175,6 +220,7 @@ export function WorldMesh({
       >
         <group position={[-mapCenter.x, 0, -mapCenter.z]}>
           <mesh 
+            ref={meshRef}
             geometry={geometry}
             onPointerDown={mode === 'painting' ? handlePaintingPointerDown : handlePointerDown}
             onPointerMove={mode === 'painting' ? handlePaintingPointerMove : undefined}
@@ -203,9 +249,9 @@ export function WorldMesh({
               depthWrite={false}
             />
           </mesh>
-          {!showGrid && selectedTriangleGeometry && mode !== 'painting' && (
+          {!showGrid && selectedGeometry && mode !== 'painting' && (
             <lineSegments renderOrder={10}>
-              <edgesGeometry attach="geometry" args={[selectedTriangleGeometry]} />
+              <edgesGeometry attach="geometry" args={[selectedGeometry]} />
               <lineBasicMaterial 
                 color="#ff00ff" 
                 linewidth={2} 
@@ -266,4 +312,4 @@ export function WorldMesh({
       </group>
     </group>
   );
-} 
+}); 

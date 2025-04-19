@@ -28,6 +28,35 @@ export function General(props: { ff7: FF7 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [gameMomentId, setGameMomentId] = useState<string>("");
   const [isGameMomentModalOpen, setIsGameMomentModalOpen] = useState(false);
+  const [tempLovePoints, setTempLovePoints] = useState<number[]>([]);
+  const [focusedInputs, setFocusedInputs] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    if (popoverOpen) {
+      setTempLovePoints([...state.lovePoints]);
+      setFocusedInputs(new Array(4).fill(false));
+    }
+  }, [popoverOpen, state.lovePoints]);
+
+  const handleLovePointChange = (index: number, value: string) => {
+    const numValue = parseInt(value) || 0;
+    const newTempLovePoints = [...tempLovePoints];
+    newTempLovePoints[index] = numValue;
+    setTempLovePoints(newTempLovePoints);
+    ff7.setLovePoints(index, numValue);
+  };
+
+  const handleFocus = (index: number) => {
+    const newFocusedInputs = [...focusedInputs];
+    newFocusedInputs[index] = true;
+    setFocusedInputs(newFocusedInputs);
+  };
+
+  const handleBlur = (index: number) => {
+    const newFocusedInputs = [...focusedInputs];
+    newFocusedInputs[index] = false;
+    setFocusedInputs(newFocusedInputs);
+  };
 
   const gameModuleAsString = GameModule[state.currentModule];
 
@@ -50,6 +79,8 @@ export function General(props: { ff7: FF7 }) {
       ff7.setBattleCount(parseInt(editValue));
     } else if (editTitle === "Battles Escaped") {
       ff7.setBattleEscapeCount(parseInt(editValue));
+    } else if (editTitle === "Battle Points") {
+      ff7.setBattlePoints(parseInt(editValue));
     } else if (editTitle === "In Game Time") {
       // Parse time in format "[HH:][MM:]SS"
       const segments = editValue.split(":");
@@ -188,6 +219,34 @@ export function General(props: { ff7: FF7 }) {
               </TooltipProvider>
             </EditPopover>
           </Row>
+          <Row label="Love Points">
+            <Popover>
+              <PopoverTrigger className="flex items-center">
+                Change
+                <ChevronDown className="h-3 w-3 ml-0.5 mt-0.5 opacity-50" />
+              </PopoverTrigger>
+              <PopoverContent className="text-xs flex flex-col gap-1">
+                {[
+                  { name: names[3], index: 0 }, // Aeris
+                  { name: names[2], index: 1 }, // Tifa
+                  { name: names[5], index: 2 }, // Yuffie
+                  { name: names[1], index: 3 }  // Barret
+                ].map((character) => (
+                  <div className="flex bg-zinc-800 p-1 px-2 rounded-sm items-center gap-2" key={character.index}>
+                    <div className="flex-1">{character.name}</div>
+                    <input
+                      type="text"
+                      className="w-12 bg-zinc-700 border border-zinc-600 rounded px-1 py-0.5 text-xs"
+                      value={focusedInputs[character.index] ? tempLovePoints[character.index] : state.lovePoints[character.index]}
+                      onChange={(e) => handleLovePointChange(character.index, e.target.value)}
+                      onFocus={() => handleFocus(character.index)}
+                      onBlur={() => handleBlur(character.index)}
+                    />
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </Row>
           <Row label="PHS">
             <Popover>
               <PopoverTrigger className="flex items-center">
@@ -296,6 +355,31 @@ export function General(props: { ff7: FF7 }) {
                   <TooltipTrigger asChild>
                     <span className="cursor-pointer" onClick={() => openEditPopover("Battles Escaped", state.battleEscapeCount.toString())}>
                       {state.battleEscapeCount}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Click to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </EditPopover>
+          </Row>
+          <Row
+            label="Battle Points"
+            onRowClick={() => openEditPopover("Battle Points", state.battlePoints.toString())}
+          >
+            <EditPopover
+              open={popoverOpen && editTitle === "Battle Points"}
+              onOpenChange={setPopoverOpen}
+              value={editValue}
+              onValueChange={setEditValue}
+              onSubmit={submitValue}
+            >
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-pointer" onClick={() => openEditPopover("Battle Points", state.battlePoints.toString())}>
+                      {state.battlePoints}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>

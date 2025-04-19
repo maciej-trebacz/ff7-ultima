@@ -33,11 +33,13 @@ function MapViewer({
   const [showModels, setShowModels] = useState(true);
   const [renderingMode, setRenderingMode] = useState<RenderingMode>("textured");
   const [loaded, setLoaded] = useState(false);
+  const [followPlayer, setFollowPlayer] = useState(false);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const controlsRef = useRef<MapControlsImpl>(null);
   const cameraRef = useRef<ThreeOrthographicCamera>(null);
+  const worldMeshRef = useRef<any>(null);
   const zoomRef = useRef(1);
-  const { worldmap, mapType, mode } = useMapState();
+  const { worldmap, mapType } = useMapState();
 
   useEffect(() => {
     if (!onTriangleSelect) {
@@ -260,6 +262,69 @@ function MapViewer({
     }, 50);
   }, [mapDimensions]);
 
+  // Handle player position updates from MapControls
+  const handlePlayerPositionUpdate = (x: number, z: number) => {
+    if (!controlsRef.current || !cameraRef.current) return;
+
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    const scale = 20;
+
+    // Calculate the position in Three.js scene coordinates
+    const sceneX = x / scale;
+    const sceneZ = z / scale;
+
+    // Update camera and controls target to follow player
+    camera.position.set(sceneX, CAMERA_HEIGHT[mapType], sceneZ);
+    controls.target.set(sceneX, 0, sceneZ);
+    controls.update();
+
+    // Find and highlight the triangle at player position if following
+    if (followPlayer && worldMeshRef.current) {
+      const mesh = worldMeshRef.current;
+      
+      // Access the findTriangleAtCoordinates method we added to the mesh
+      if (mesh.userData && mesh.userData.findTriangleAtCoordinates) {
+        // Log the coordinates for debugging
+        console.log(`Finding triangle at coordinates (${sceneX}, ${sceneZ}) with rotation ${rotation}`);
+        
+        // Pass the scene coordinates to findTriangleAtCoordinates
+        const result = mesh.userData.findTriangleAtCoordinates(sceneX, sceneZ, rotation);
+        if (result) {
+          setSelectedFaceIndex(result.faceIndex);
+          if (onTriangleSelect) {
+            onTriangleSelect(result.triangle);
+          }
+        } else {
+          console.log("No triangle found at player position");
+        }
+      }
+    } else if (followPlayer && !worldMeshRef.current) {
+      // If mesh ref is not available yet, set a timeout to try again
+      setTimeout(() => handlePlayerPositionUpdate(x, z), 100);
+    }
+  };
+
+  // Add a handler to get a reference to the WorldMesh
+  const handleWorldMeshRef = (mesh: any) => {
+    worldMeshRef.current = mesh;
+    
+    // If we're already following when the ref becomes available, try to highlight
+    if (followPlayer && worldMeshRef.current && worldMeshRef.current.userData.findTriangleAtCoordinates) {
+      // Force a position update to highlight the triangle
+      document.dispatchEvent(new CustomEvent('requestPlayerPosition'));
+    }
+  };
+
+  // When follow player is toggled off, clear the selection
+  useEffect(() => {
+    if (!followPlayer) {
+      setSelectedFaceIndex(null);
+      if (onTriangleSelect) {
+        onTriangleSelect(null);
+      }
+    }
+  }, [followPlayer, onTriangleSelect]);
 
   return (
     <div className="relative flex flex-col w-full h-full">
@@ -274,6 +339,9 @@ function MapViewer({
         onModelsToggle={handleModelsToggle}
         renderingMode={renderingMode}
         onRenderingModeChange={setRenderingMode}
+        followPlayer={followPlayer}
+        onFollowPlayerToggle={() => setFollowPlayer(prev => !prev)}
+        onPlayerPositionUpdate={handlePlayerPositionUpdate}
       />
 
       <div className="relative flex-1">
@@ -285,8 +353,9 @@ function MapViewer({
 
         <Canvas style={{ width: '100%', height: '100%', opacity: !isLoading && loaded ? 1 : 0 }}>
           <OrthographicCamera makeDefault {...cameraConfig} ref={cameraRef} />
-          {SHOW_DEBUG && <Stats />}
-          {SHOW_DEBUG && <CameraDebugInfo onDebugInfo={setDebugInfo} />}
+          {SHOW_DEBUG && <CameraDebugInfo onDebugInfo={(info) => {
+            console.log(info);
+          }} />}
           <ambientLight intensity={0.3} />
           <directionalLight
             position={[20000, 40000, 20000]}
@@ -316,11 +385,11 @@ function MapViewer({
               rotation={rotation}
               showGrid={showGrid}
               wireframe={wireframe}
+              ref={handleWorldMeshRef}
             />
           )}
           <ModelOverlay zoomRef={zoomRef} visible={showModels} />
         </Canvas>
-        {SHOW_DEBUG && <CameraDebugOverlay debugInfo={debugInfo} />}
       </div>
     </div>
   );
