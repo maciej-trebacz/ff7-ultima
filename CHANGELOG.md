@@ -1,6 +1,17 @@
 # Change Log
 
-## 1.4.7 (2025-04-17)
+## 1.4.8 (2025-04-19)
+
+### General
+
+* Added keyboard shortcuts for Skip Dialogues, Walk Anywhere, Invincibility and Manual Slots toggles
+* Performance fix when the app starts with many save states
+
+### Battle
+
+* Gil multiplier option
+
+## 1.4.7 (2025-04-18)
 
 ### General
 

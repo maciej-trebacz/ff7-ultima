@@ -84,4 +84,47 @@ export const defaultShortcuts: Shortcut[] = [
       await ff7.gameOver();
     },
   },
+  {
+    key: "",
+    action: "Toggle Skip Dialogues",
+    callback: async (ff7) => {
+      await ff7.toggleSkipDialogues();
+    },
+  },
+  {
+    key: "",
+    action: "Toggle Walk Anywhere",
+    callback: async (ff7) => {
+      ff7.gameState.walkAnywhereEnabled
+        ? await ff7.disableWalkAnywhere()
+        : await ff7.enableWalkAnywhere();
+    },
+  },
+  {
+    key: "",
+    action: "Toggle Manual Slots",
+    callback: async (ff7) => {
+      ff7.gameState.manualSlotsEnabled
+        ? await ff7.disableManualSlots()
+        : await ff7.enableManualSlots();
+    },
+  },
+  {
+    key: "",
+    action: "Toggle Invincibility",
+    callback: async (ff7) => {
+      ff7.gameState.invincibilityEnabled
+        ? await ff7.disableInvincibility()
+        : await ff7.enableInvincibility();
+    },
+  },
+  {
+    key: "",
+    action: "Toggle Instant ATB",
+    callback: async (ff7) => {
+      ff7.gameState.instantATBEnabled
+        ? await ff7.disableInstantATB()
+        : await ff7.enableInstantATB();
+    },
+  },
 ]; 

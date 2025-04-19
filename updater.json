@@ -1,11 +1,11 @@
 {
-  "version": "1.4.7",
-  "notes": "See the changelog at https://github.com/maciej-trebacz/ff7-ultima/blob/main/CHANGELOG.md",
-  "pub_date": "2025-04-17T00:00:00Z",
+  "version": "1.4.8",
+  "notes": "New keyboard shortcuts for often used toggles, Gil multiplier option, performance fixes",
+  "pub_date": "2024-02-19T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjFXOVY2S01icHo2Ty9QdDVJN1BwZHVWNzhNa2NVOGtscCtwNGZHM1hwZk5UWlRLQmhkcEVHdEQ0UjBhRXdjeS9nWGY5eGc0ZTB1bll3enNsUjI2NkFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ0OTgxNTA3CWZpbGU6RkY3IFVsdGltYV8xLjQuN194NjQtc2V0dXAuZXhlCk1NSHg1VDdPZFUwRW5FaGExNE5RN3lkT3FNYThwQklEcUltcXpUNGpOMFlIZ0JWSjE5djg3N2ppY0RLcnQ1ZDFkR2RnWVBhbnZEbHRPR09IV2JXZUJBPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.7/FF7.Ultima_1.4.7_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjIvQjJOc3p5TTZHV2ltcUxWMGx3Y1RTTTVUQzhQR1B5VHF0SkJsNnAxbk93TnYwSEdqYk0xa0RBakUyRFBzQTFuY1NtVDhVaDlFY0NYc1ZHSzBEMVFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1MDY2MjQwCWZpbGU6RkY3IFVsdGltYV8xLjQuOF94NjQtc2V0dXAuZXhlCnVEMTFybTdYeGJTSjRqRk04c05yQ3h6NHRXdVkzdklUUExkS0w5YnE1SjFmOG1ZZkZGZVp4dnBJaG1uUU1ReHYxRUkzcjNzSVFFNVVRbENnRXNpbEJ3PT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.8/FF7.Ultima_1.4.8_x64-setup.exe"
     }
   }
 }

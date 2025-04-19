@@ -57,38 +57,40 @@ export function ShortcutsContent({ ff7 }: ShortcutsContentProps) {
       <div className="text-slate-400 text-xs">
         Click on an action to bind a shortcut to it. Press ESC while binding to unbind the action.
       </div>
-      <div className="space-y-0.5">
-        {shortcuts.map((shortcut) => (
-          <button
-            key={shortcut.action}
-            onClick={() => startListening(shortcut.action)}
-            className={cn(
-              "w-full px-2 py-1 rounded text-left hover:bg-slate-800/50 ring-0 outline-none",
-              listeningFor === shortcut.action && "bg-slate-800"
-            )}
-          >
-            <div className="flex justify-between items-center">
-              <div>{shortcut.action}</div>
-              <div
-                className={cn(
-                  "px-2 py-0.5 min-w-20 text-xs rounded text-center",
-                  listeningFor === shortcut.action 
-                    ? "bg-slate-700 animate-pulse" 
+      <div className="h-[60vh] min-h-[200px] overflow-y-auto pr-2">
+        <div className="space-y-0.5">
+          {shortcuts.map((shortcut) => (
+            <button
+              key={shortcut.action}
+              onClick={() => startListening(shortcut.action)}
+              className={cn(
+                "w-full px-2 py-1 rounded text-left hover:bg-slate-800/50 ring-0 outline-none",
+                listeningFor === shortcut.action && "bg-slate-800"
+              )}
+            >
+              <div className="flex justify-between items-center">
+                <div>{shortcut.action}</div>
+                <div
+                  className={cn(
+                    "px-2 py-0.5 min-w-20 text-xs rounded text-center",
+                    listeningFor === shortcut.action 
+                      ? "bg-slate-700 animate-pulse" 
+                      : shortcut.key 
+                        ? "bg-slate-800"
+                        : "bg-gray-900/50"
+                  )}
+                >
+                  {listeningFor === shortcut.action 
+                    ? "Press key..." 
                     : shortcut.key 
-                      ? "bg-slate-800"
-                      : "bg-gray-900/50"
-                )}
-              >
-                {listeningFor === shortcut.action 
-                  ? "Press key..." 
-                  : shortcut.key 
-                    ? formatKeyForDisplay(shortcut.key)
-                    : "Unbound"
-                }
+                      ? formatKeyForDisplay(shortcut.key)
+                      : "Unbound"
+                  }
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
