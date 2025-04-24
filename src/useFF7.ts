@@ -14,11 +14,12 @@ import { useSettings } from "./useSettings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
 import { useShortcuts } from "./useShortcuts";
 import { useBattleLog } from "./hooks/useBattleLog";
+import { randFloat } from "three/src/math/MathUtils.js";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 
 export function useFF7(addresses: FF7Addresses) {
-  const { connected, gameState, hacks, setHacks } = useFF7Context();
+  const { connected, gameState, gameData, hacks, setHacks } = useFF7Context();
   const saveStates = useSaveStates();
   const initialized = useRef(false);
   const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
@@ -1060,10 +1061,107 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     async addItem(id: number, quantity: number) {
       const itemId = id | quantity << 9;
       await callGameFn(addresses.party_add_item_fn, [itemId]);
+      if (gameState.currentModule === GameModule.Battle) {
+        // Add the item to the battle inventory
+        const items = await readMemoryBuffer(addresses.battle_party_items, 0x140 * 6);
+        let found = false;
+        let emptySlot = -1;
+        for (let i = 0; i < 0x140; i++) {
+          const itemId = items[i * 6] + items[i * 6 + 1] * 256;
+          let itemQuantity = items[i * 6 + 2];
+          if (itemId === id) {
+            itemQuantity = Math.min(itemQuantity + quantity, 99);
+            await writeMemory(addresses.battle_party_items + i * 6 + 2, itemQuantity, DataType.Byte);
+            found = true;
+            break;
+          }
+          else if (itemId === 0xffff && emptySlot === -1) {
+            emptySlot = i;
+          }
+        }
+        if (!found) {
+          // Add the item to the end of the inventory
+          if (emptySlot !== -1) {
+            await writeMemory(addresses.battle_party_items + emptySlot * 6, id, DataType.Short);
+            await writeMemory(addresses.battle_party_items + emptySlot * 6 + 2, quantity, DataType.Byte);
+            const targetMask = gameData.itemData[id].target_flags;
+            const restrictionMask = gameData.itemData[id].restriction_mask & 0xb;
+            await writeMemory(addresses.battle_party_items + emptySlot * 6 + 3, targetMask, DataType.Byte);
+            await writeMemory(addresses.battle_party_items + emptySlot * 6 + 4, restrictionMask, DataType.Byte);
+            await writeMemory(addresses.battle_party_items + emptySlot * 6 + 5, 0, DataType.Byte);
+
+            const itemsCountAddr = addresses.battle_party_items - 0x244;
+            const itemsCount = await readMemory(itemsCountAddr, DataType.Byte);
+            if ((emptySlot + 1) / 2 > itemsCount) {
+              console.log("Increasing items count", itemsCount, emptySlot, itemsCountAddr);
+              await writeMemory(itemsCountAddr, itemsCount + 1, DataType.Byte);
+            }
+          }
+        }
+      }
     },
     async addMateria(id: number, ap: number) {
       const materiaId = (id | ap << 8) >>> 0; // Convert to unsigned
       await callGameFn(addresses.party_add_materia_fn, [materiaId]);
+    },
+    async addMaxItems() {
+      const itemCount = 0x140; // Total number of items (0x13F + 1)
+      const bytesPerItem = 2;
+      const buffer = new ArrayBuffer(itemCount * bytesPerItem);
+      const view = new DataView(buffer);
+
+      // Fill buffer with item records
+      let itemIndex = 0;
+      let skipped = 0;
+      for (let i = 0; i < itemCount; i++) {
+        if (gameData.itemNames[i] === "") {
+          skipped++;
+          continue;
+        }
+
+        // Item ID in first 9 bits, quantity (99) in remaining 7 bits
+        const itemRecord = i | (99 << 9);
+        view.setUint16(itemIndex * bytesPerItem, itemRecord, true); // true for little-endian
+        itemIndex++;
+      }
+
+      let trimmedBuffer = buffer;
+      // Trim buffer to exclude skipped items
+      if (skipped > 0) {
+        trimmedBuffer = buffer.slice(0, (itemCount - skipped) * bytesPerItem);
+      }
+
+      await writeMemory(addresses.savemap + 0x4fc, Array.from(new Uint8Array(trimmedBuffer)), DataType.Buffer);
+    },
+    async addMaxMateria() {
+      const materiaCount = 0x5F;
+      const bytesPerMateria = 4;
+      const buffer = new ArrayBuffer(materiaCount * bytesPerMateria);
+      const view = new DataView(buffer);
+
+      // Fill buffer with materia records
+      let materiaIndex = 0;
+      let skipped = 0;
+      for (let i = 0; i < materiaCount; i++) {
+        if (gameData.materiaNames[i] === "") {
+          skipped++;
+          continue;
+        }
+
+        // Materia ID in first 8 bits, AP is in the last 24 bits
+        const materiaRecord = i | (0xFFFFFF << 8);  
+        view.setUint32(materiaIndex * bytesPerMateria, materiaRecord, true);
+        materiaIndex++;
+      }
+
+      let trimmedBuffer = buffer;
+      // Trim buffer to exclude skipped materia
+      if (skipped > 0) {
+        trimmedBuffer = buffer.slice(0, (materiaCount - skipped) * bytesPerMateria);
+      }
+
+      const address = addresses.savemap + 0x77c + 0x320 - ((materiaCount - skipped) * bytesPerMateria);
+      await writeMemory(address, Array.from(new Uint8Array(trimmedBuffer)), DataType.Buffer);
     },
     async setKeyItems(keyItemIds: number[]) {
       const bytes = new Array(8).fill(0);

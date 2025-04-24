@@ -1,11 +1,11 @@
 {
-  "version": "1.4.9",
-  "notes": "View and edit Love Points and Battle Points. Follow Player option in Map viewer to follow you around as you move on the world map",
-  "pub_date": "2024-04-19T16:00:00Z",
+  "version": "1.4.10",
+  "notes": "Max Items and Max Materia options in the Add Items/Materia modals. Adding items now works in battle.",
+  "pub_date": "2024-04-24T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TnlPRHJCT0VHQUt2MGEwYTNlMFhDY1pmWGxEU3BnZUNsa2xzY2tJbk9KdkpONyttcW42YUk4ajI0OUJ1VHVsdzlZOU0xZ3FVVDZpK0xySktMZnYreHdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1MDc4NDM3CWZpbGU6RkY3IFVsdGltYV8xLjQuOV94NjQtc2V0dXAuZXhlCi92U2YxNXdTMlFtSnkydGNFTi9jbE15aWR1Y0pERnNqU2RoYUE3Rzc5MFN2VzNiTGpEeWx0Y3UwUWtjRGJLem1RZnN5ZGFva2NLMjFFd2Roa3Vxb0F3PT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.9/FF7.Ultima_1.4.9_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjBxTWk1dVhZOVl6YzdOOUU4VHcwTFY5SUhQUjhyWndRNTdMMDJiNDNnV1kwSkJMNTIyN0lMQ09xZnRrQ2NRYVB5dDN1NHpsYlNLNE1QUzJQdXpqYUEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1NTE3NzQ4CWZpbGU6RkY3IFVsdGltYV8xLjQuMTBfeDY0LXNldHVwLmV4ZQpHWERvSkRaTWtnczhaL2YwS0lSVFFPakVRbEhoQlBHc2FlNmZ3a3pzOTVSUXhwbFlIOHZwamUzZlphZk1MV3hqb0NWSjVDWU5OeUUyYWtxZlV3eDJEQT09Cg==",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.10/FF7.Ultima_1.4.10_x64-setup.exe"
     }
   }
 }

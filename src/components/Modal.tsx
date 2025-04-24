@@ -19,9 +19,11 @@ interface ModalProps {
   disableClose?: boolean;
   buttonDisabled?: boolean;
   callback?: () => void;
+  leftButtonText?: string;
+  leftButtonCallback?: () => void;
 }
 
-export function Modal({ open, setIsOpen, title, children, buttonText, size = "md", disableClose = false, buttonDisabled = false, callback }: ModalProps) {
+export function Modal({ open, setIsOpen, title, children, buttonText, size = "md", disableClose = false, buttonDisabled = false, callback, leftButtonText, leftButtonCallback }: ModalProps) {
   const handleOpenChange = (open: boolean) => {
     if (!disableClose) {
       setIsOpen(open);
@@ -47,7 +49,16 @@ export function Modal({ open, setIsOpen, title, children, buttonText, size = "md
         </DialogHeader>
         {children}
         {buttonText && callback && (
-          <DialogFooter>
+          <DialogFooter className="flex justify-between sm:justify-between">
+            {leftButtonText && leftButtonCallback && (
+              <Button 
+                onClick={leftButtonCallback}
+                variant="outline"
+                className="mr-2"
+              >
+                {leftButtonText}
+              </Button>
+            )}
             <Button 
               onClick={callback}
               disabled={buttonDisabled}

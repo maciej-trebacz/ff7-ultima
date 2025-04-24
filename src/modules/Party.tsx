@@ -23,11 +23,21 @@ export function Party({ ff7 }: PartyProps) {
     }
   };
 
+  const handleMaxItems = async () => {
+    await ff7.addMaxItems();
+    setIsAddItemModalOpen(false);
+  };
+
   const handleAddMateria = async (materiaId: string | null, ap: number) => {
     if (materiaId) {
       await ff7.addMateria(parseInt(materiaId), ap);
       setIsAddMateriaModalOpen(false);
     }
+  };
+
+  const handleMaxMateria = async () => {
+    await ff7.addMaxMateria();
+    setIsAddMateriaModalOpen(false);
   };
 
   const names = ff7.gameState.partyMembers.map(p => p.name);
@@ -132,12 +142,14 @@ export function Party({ ff7 }: PartyProps) {
         isOpen={isAddItemModalOpen}
         onClose={() => setIsAddItemModalOpen(false)}
         onSubmit={handleAddItem}
+        onMaxItems={handleMaxItems}
         ff7={ff7}
       />
       <AddMateriaModal
         isOpen={isAddMateriaModalOpen}
         onClose={() => setIsAddMateriaModalOpen(false)}
         onSubmit={handleAddMateria}
+        onMaxMateria={handleMaxMateria}
         ff7={ff7}
       />
       <KeyItemsModal

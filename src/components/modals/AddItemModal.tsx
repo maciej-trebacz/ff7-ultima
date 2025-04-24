@@ -9,6 +9,7 @@ interface AddItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (itemId: string | null, quantity: number) => void;
+  onMaxItems?: () => void;
   ff7: FF7;
 }
 
@@ -17,7 +18,7 @@ interface ItemOption {
   name: string;
 }
 
-export function AddItemModal({ isOpen, onClose, onSubmit, ff7 }: AddItemModalProps) {
+export function AddItemModal({ isOpen, onClose, onSubmit, onMaxItems, ff7 }: AddItemModalProps) {
   const [itemId, setItemId] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [isMaxQuantity, setIsMaxQuantity] = useState(false);
@@ -69,6 +70,8 @@ export function AddItemModal({ isOpen, onClose, onSubmit, ff7 }: AddItemModalPro
       buttonText={quantity >= 0 ? "Add" : "Remove"}
       callback={() => onSubmit(itemId, quantity)}
       buttonDisabled={!itemId}
+      leftButtonText={onMaxItems ? "Max Items" : undefined}
+      leftButtonCallback={onMaxItems}
     >
       <div className="space-y-4">
         <div className="relative">

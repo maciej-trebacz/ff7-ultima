@@ -102,6 +102,7 @@ export interface FF7Addresses {
   battle_obj_ptr: number;
   love_points: number;
   battle_points: number;
+  battle_party_items: number;
 }
 
 export function useFF7Addresses() {

@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.10 (2025-04-24)
+
+## General
+
+* "Max Items" option in the Add Items modal that gives you 99 of each item
+* "Max Materia" option in the Add Materia modal that gives you one of each materia (mastered)
+* Adding items now works in battle (you can immediately use added items)
+
 ## 1.4.9 (2025-04-19)
 
 ### General

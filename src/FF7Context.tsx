@@ -40,6 +40,7 @@ interface GameDataType {
   enemyAttackNames: string[];
   itemData: ItemData[];
   itemNames: string[];
+  materiaNames: string[];
 }
 
 // Default state for game data
@@ -51,6 +52,7 @@ const defaultGameData: GameDataType = {
   enemyAttackNames: [],
   itemData: [],
   itemNames: [],
+  materiaNames: [],
 };
 
 // Default state for game state
@@ -210,6 +212,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
       const fetchedAttackNames: string[] = await invoke("read_attack_names");
       const fetchedItemData: ItemData[] = await invoke("read_item_data");
       const fetchedItemNames: string[] = await invoke("read_item_names");
+      const fetchedMateriaNames: string[] = await invoke("read_materia_names");
 
       const fetchedMagicNames = fetchedAttackNames.slice(0, 56);
       const fetchedSummonNames = fetchedAttackNames.slice(56, 72);
@@ -223,6 +226,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         enemySkillNames: fetchedEnemySkillNames,
         itemData: fetchedItemData,
         itemNames: fetchedItemNames,
+        materiaNames: fetchedMateriaNames,
       }));
       setGameDataError(null);
       console.debug("Core game data loaded.");

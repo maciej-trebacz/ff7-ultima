@@ -9,6 +9,7 @@ interface AddMateriaModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (materiaId: string | null, ap: number) => void;
+  onMaxMateria?: () => void;
   ff7: FF7;
 }
 
@@ -17,7 +18,7 @@ interface MateriaOption {
   name: string;
 }
 
-export function AddMateriaModal({ isOpen, onClose, onSubmit, ff7 }: AddMateriaModalProps) {
+export function AddMateriaModal({ isOpen, onClose, onSubmit, onMaxMateria, ff7 }: AddMateriaModalProps) {
   const [materiaId, setMateriaId] = useState<string>("");
   const [ap, setAp] = useState<number>(0);
   const [isMaxAp, setIsMaxAp] = useState(false);
@@ -74,6 +75,8 @@ export function AddMateriaModal({ isOpen, onClose, onSubmit, ff7 }: AddMateriaMo
       buttonText="Add"
       callback={() => onSubmit(materiaId, ap)}
       buttonDisabled={!materiaId}
+      leftButtonText={onMaxMateria ? "Max Materia" : undefined}
+      leftButtonCallback={onMaxMateria}
     >
       <div className="space-y-4">
         <div className="relative">
@@ -124,6 +127,9 @@ export function AddMateriaModal({ isOpen, onClose, onSubmit, ff7 }: AddMateriaMo
             <div className="flex-1" />
           </div>
         </div>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          Note: Max Materia adds 1 of each materia at the end of materia list
+        </p>
       </div>
     </Modal>
   );
