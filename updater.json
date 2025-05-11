@@ -1,11 +1,11 @@
 {
-  "version": "1.4.10",
-  "notes": "Max Items and Max Materia options in the Add Items/Materia modals. Adding items now works in battle.",
-  "pub_date": "2024-04-24T16:00:00Z",
+  "version": "1.4.11",
+  "notes": "Updated version with CLAUDE.md file for better development documentation.",
+  "pub_date": "2025-05-11T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjBxTWk1dVhZOVl6YzdOOUU4VHcwTFY5SUhQUjhyWndRNTdMMDJiNDNnV1kwSkJMNTIyN0lMQ09xZnRrQ2NRYVB5dDN1NHpsYlNLNE1QUzJQdXpqYUEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1NTE3NzQ4CWZpbGU6RkY3IFVsdGltYV8xLjQuMTBfeDY0LXNldHVwLmV4ZQpHWERvSkRaTWtnczhaL2YwS0lSVFFPakVRbEhoQlBHc2FlNmZ3a3pzOTVSUXhwbFlIOHZwamUzZlphZk1MV3hqb0NWSjVDWU5OeUUyYWtxZlV3eDJEQT09Cg==",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.10/FF7.Ultima_1.4.10_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjQ2clFTZ0xFaDhKbmZPZDdNdXE2MkNrdDFDblJvd3RaSlVqZEsxR0dFL1ByaVhxcDVBS0pCeHhaWWF2ZHdaL0Vqc05UYzR6TmxhS0UzRHNmNjR3R0F3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ2OTcxNzQzCWZpbGU6RkY3IFVsdGltYV8xLjQuMTFfeDY0LXNldHVwLmV4ZQpaelUrSG9uL0RVVHNNTjNFZjZEeFk2bm5ZTStkek9hZ3kyS0l1VEJiUjdpM1IxQUJXMFFPMVlxSzZlTndHa2w4d2VqbUZqSTJZYXZHdVd1czhicnVBQT09Cg==",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.4.11/FF7.Ultima_1.4.11_x64-setup.exe"
     }
   }
 }

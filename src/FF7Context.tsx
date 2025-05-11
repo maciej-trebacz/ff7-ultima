@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext, createContext, ReactNode, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useFF7Addresses, FF7Addresses } from './ff7Addresses';
-import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType, BattleScene } from "./types";
 import { DataType, readMemory } from "./memory";
 import { StatusChange, BattleLogItem } from '@/hooks/useBattleLog';
 import { statuses as statusEnum } from '@/ff7Statuses';
 import { useSetAtom } from 'jotai';
 import { battleLogAtom } from '@/hooks/useBattleLog';
+import { readFile } from "@tauri-apps/plugin-fs"
 
 export enum SpecialAttackFlags {
   DamageMP = 1,
@@ -41,6 +42,7 @@ interface GameDataType {
   itemData: ItemData[];
   itemNames: string[];
   materiaNames: string[];
+  battleScenes: BattleScene[];
 }
 
 // Default state for game data
@@ -53,6 +55,7 @@ const defaultGameData: GameDataType = {
   itemData: [],
   itemNames: [],
   materiaNames: [],
+  battleScenes: [],
 };
 
 // Default state for game state
@@ -213,6 +216,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
       const fetchedItemData: ItemData[] = await invoke("read_item_data");
       const fetchedItemNames: string[] = await invoke("read_item_names");
       const fetchedMateriaNames: string[] = await invoke("read_materia_names");
+      const fetchedBattleScenes: BattleScene[] = await invoke("read_battle_scenes");
 
       const fetchedMagicNames = fetchedAttackNames.slice(0, 56);
       const fetchedSummonNames = fetchedAttackNames.slice(56, 72);
@@ -227,6 +231,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         itemData: fetchedItemData,
         itemNames: fetchedItemNames,
         materiaNames: fetchedMateriaNames,
+        battleScenes: fetchedBattleScenes,
       }));
       setGameDataError(null);
       console.debug("Core game data loaded.");

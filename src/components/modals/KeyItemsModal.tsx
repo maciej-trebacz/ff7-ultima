@@ -64,7 +64,7 @@ export function KeyItemsModal({ isOpen, setIsOpen, ff7 }: KeyItemsModalProps) {
             variant={ff7.gameState.keyItems.includes(index) ? "default" : "outline"}
             size="sm"
             onClick={() => toggleKeyItem(index)}
-            className="w-full text-xs"
+            className="w-full text-xs whitespace-normal h-10"
           >
             {name}
           </Button>

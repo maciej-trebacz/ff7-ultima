@@ -2,7 +2,7 @@
 
 use ff7_lib::ff7;
 use ff7_lib::ff7::addresses::FF7Addresses;
-use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData};
+use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData, Scene};
 use ff7_lib::utils::memory;
 use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
@@ -202,6 +202,11 @@ pub async fn execute_update(app: tauri::AppHandle) -> Result<(), String> {
     perform_update(app).await.map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+pub async fn read_battle_scenes() -> Result<Vec<Scene>, String> {
+    ff7::data::battle::read_scene_bin()
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -239,5 +244,6 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         log_from_frontend,
         check_for_updates,
         execute_update,
+        read_battle_scenes,
     ]
 }

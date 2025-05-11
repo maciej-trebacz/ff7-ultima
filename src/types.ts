@@ -289,3 +289,90 @@ export type UpdateInfo = {
   date: string | null;
   body: string | null;
 };
+
+export interface SceneCameraPosition {
+  x_pos: number;
+  y_pos: number;
+  z_pos: number;
+  x_dir: number;
+  y_dir: number;
+  z_dir: number;
+}
+
+export interface SceneBattleSetup {
+  battle_location: number;
+  next_formation_id_on_win: number;
+  escape_counter: number;
+  next_battle_arena_candidates: number[];
+  flags: number;
+  battle_layout_type: number;
+  pre_battle_camera_pos_index: number;
+}
+
+export interface SceneCameraPlacement {
+  primary_idle_camera: SceneCameraPosition;
+  other_camera_positions: SceneCameraPosition[];
+}
+
+export interface SceneBattleFormationEntry {
+  enemy_id: number;
+  pos_x: number;
+  pos_y: number;
+  pos_z: number;
+  row: number;
+  cover_flags: number;
+  initial_condition_flags: number;
+}
+
+export interface SceneElementRate {
+  element_type: number;
+  rate: number;
+}
+
+export interface SceneEnemyItem {
+  rate: number;
+  item_id: number;
+}
+
+export interface SceneEnemy {
+  id: number;
+  name: string;
+  level: number;
+  speed: number;
+  luck: number;
+  evade: number;
+  strength: number;
+  defense: number;
+  magic: number;
+  magic_defense: number;
+  element_rates: SceneElementRate[];
+  enemy_attack_ids: number[];
+  enemy_attack_camera_movement_ids: number[];
+  items: SceneEnemyItem[];
+  manipulated_berserk_attack_indexes: number[];
+  mp: number;
+  ap: number;
+  morph_item_id: number;
+  back_damage_multiplier: number;
+  hp: number;
+  exp: number;
+  gil: number;
+  status_immunities: number;
+}
+
+export interface SceneAttack {
+  id: number;
+  name: string;
+}
+
+export interface SceneFormation {
+  setup: SceneBattleSetup;
+  camera_placement: SceneCameraPlacement;
+  enemies: SceneBattleFormationEntry[];
+}
+
+export interface BattleScene {
+  enemies: SceneEnemy[];
+  formations: SceneFormation[];
+  attacks: SceneAttack[];
+}

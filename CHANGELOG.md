@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.11 (2025-05-11)
+
+## Battle
+
+* Load battle scenes directly from the game data, show additional details in Start Battle modal
+
 ## 1.4.10 (2025-04-24)
 
 ## General

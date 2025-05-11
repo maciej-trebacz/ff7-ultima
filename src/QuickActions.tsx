@@ -2,16 +2,19 @@ import { useState } from "react";
 import { Button } from "./components/ui/button";
 import { GameModule } from "./types";
 import { FF7 } from "./useFF7";
-import { battles } from "./ff7Battles";
 import { musicList } from "./ff7Music";
-import AutocompleteInput, { BattleItem } from "./components/Autocomplete";
+import BattleAutocomplete, { BattleFormationItem } from "./components/BattleAutocomplete";
 import { Modal } from "./components/Modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
+import { useFF7Context } from "./FF7Context";
+import { BattleLocations } from "./ff7BattleLocations";
 
 export function QuickActions(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const currentModule = ff7.gameState.currentModule;
+  const { gameData } = useFF7Context();
+  const battleScenes = gameData.battleScenes;
 
   const [battleId, setBattleId] = useState<null | string>("");
 
@@ -49,12 +52,16 @@ export function QuickActions(props: { ff7: FF7 }) {
     }
   };
 
-  const battleList: BattleItem[] = battles.map((battle, index) => {
-    const tmp = battle.split(" - ");
-    return {
-      id: parseInt(tmp[0]),
-      name: battle,
-    };
+  // Create a list of all battle formations with their enemies and locations
+  const battleFormations: BattleFormationItem[] = [];
+  battleScenes.forEach((scene, sceneIndex) => {
+    scene.formations.forEach((formation, formationIndex) => {
+      battleFormations.push({
+        id: (sceneIndex * 4) + formationIndex, // Each scene has 4 formations
+        formation,
+        enemies: scene.enemies
+      });
+    });
   });
 
   return <>
@@ -79,6 +86,7 @@ export function QuickActions(props: { ff7: FF7 }) {
     <Button size={"sm"} variant={"secondary"} onClick={() => ff7.gameOver()}>Game Over</Button>
 
     <Modal
+      size="lg"
       open={isStartBattleModalOpen}
       setIsOpen={setIsStartBattleModalOpen}
       title="Start Battle"
@@ -86,12 +94,12 @@ export function QuickActions(props: { ff7: FF7 }) {
       callback={() => onSubmitBattleId(battleId)}
     >
       <div className="mt-4 space-y-4">
-        <AutocompleteInput
-          battles={battleList}
+        <BattleAutocomplete
+          formations={battleFormations}
           isVisible={true}
           onSelect={(id) => setBattleId(id?.toString() ?? "")}
           onAccept={onBattleModalKeyDown}
-          placeholder="Enter enemy name or battle ID"
+          placeholder="Enter enemy name, location, or battle ID"
         />
 
         <div className="flex gap-2 whitespace-nowrap">

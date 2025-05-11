@@ -1059,6 +1059,8 @@ dependencies = [
 name = "ff7-lib"
 version = "1.4.5"
 dependencies = [
+ "byteorder",
+ "flate2",
  "lazy_static",
  "log",
  "parking_lot",
@@ -1074,9 +1076,11 @@ dependencies = [
 name = "ff7-ultima"
 version = "1.4.10"
 dependencies = [
+ "byteorder",
  "chrono",
  "fern",
  "ff7-lib",
+ "flate2",
  "log",
  "serde",
  "serde_json",

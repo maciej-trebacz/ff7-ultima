@@ -1,7 +1,7 @@
 {
   "name": "ff7-ultima",
   "private": true,
-  "version": "1.4.10",
+  "version": "1.4.11",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,6 +36,7 @@
     "@tauri-apps/plugin-store": "^2.2.0",
     "@tauri-apps/plugin-updater": "^2.3.0",
     "@tauri-apps/plugin-window-state": "^2.2.0",
+    "@types/pako": "^2.0.3",
     "binary-parser": "^1.9.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -44,6 +45,7 @@
     "jotai": "^2.12.0",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.468.0",
+    "pako": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^2.5.5",
