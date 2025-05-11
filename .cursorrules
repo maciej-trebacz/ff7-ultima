@@ -1,4 +1,40 @@
-This project is a Tauri 2.0 app that uses Rust on the backend (src-tauri directory) and TypeScript for the frontend (src directory). The TypeScript part utilizes shadcn-ui components and TailwindCSS for styling. The UI uses a dark theme with "slate" base color. When writing UI code make sure it's sleek and compact, use small buttons and minimal padding.
+FF7 Ultima is a real-time editor for Final Fantasy VII (FF7) for PC. It allows users to modify various aspects of the game while it is running. This includes editing character stats, inventory, game variables, and applying various cheats or "hacks". The application provides a user interface to interact with the game's memory, view game data, manage save states, and trigger in-game events or changes. It aims to provide a comprehensive toolset for players who want to customize their FF7 experience or explore the game's mechanics in depth.
+
+The application is broadly divided into the following modules:
+
+*   **General:** Manages global game aspects like Party Gil, In-Game Time, Current Disc, Love Points for key characters, PHS availability, Game Moment ID (story progression), battle statistics (fights, escapes, battle points), Gold Saucer GP, and menu availability. It also provides access to party management and advanced settings.
+*   **Field:** Handles interactions within field maps (towns, dungeons, etc.). This includes warping between maps, toggling player movement, editing step/encounter values (like danger value and formation index), skipping dialogues, managing save states, and viewing/editing coordinates and properties of 3D models on the field.
+*   **Battle:** Focuses on combat scenarios. It allows users to display battle information (like scene ID), toggle cheats (invincibility, instant ATB, manual slot control), set multipliers for EXP/AP/Gil, edit character/enemy HP, MP, and statuses, instantly kill characters, view detailed enemy data (stats, elemental weaknesses/resistances), and review a battle log.
+*   **World:** Deals with the world map. It displays the player's current coordinates, direction, model, location, and terrain. It features an interactive map for teleportation and viewing key model positions (vehicles, WEAPONs), a separate detailed map viewer, and options to toggle zoom/tilt, super speed, and a "walk anywhere" mode. It also allows editing coordinates of world map models.
+*   **Party:** Manages party-related aspects, including character stats, inventory, and equipment.
+
+This project is a Tauri 2.0 app that uses Rust on the backend (src-tauri directory) and TypeScript and React for the frontend (src directory). The TypeScript part utilizes shadcn components and TailwindCSS for styling. The UI uses a dark theme with "slate" base color. When writing UI code make sure it's sleek and compact, use small buttons and minimal padding.
+
+## Project Structure
+
+The project is organized as follows:
+
+*   **`src/`**: This directory contains all the frontend code for the application, written in TypeScript. It utilizes the React framework along with shadcn-ui components and TailwindCSS for styling. You'll find the user interface components, application state management, and frontend logic here.
+    *   **`components/`**: Contains reusable UI components, further divided into `modals/`, `map/` (for the detailed map viewer), and `ui/` (customized shadcn components).
+    *   **`modules/`**: Holds the main UI views for different editor functionalities (e.g., `General.tsx`, `Field.tsx`, `Battle.tsx`, `World.tsx`, `Party.tsx`) that are accessible via the sidebar.
+    *   **`hooks/`**: Custom React hooks for managing stateful logic and side effects (e.g., `useBattleLog.ts`, `useMapState.ts`).
+    *   **`ff7/`**: Contains logic for parsing and handling FF7-specific game file formats (e.g., map files, texture files, LGP archives).
+    *   **`assets/`**: Stores static image assets like icons and maps.
+    *   **`data/`**: Holds larger static data files, such as `scenes.json`.
+    *   **`lib/`**: Contains utility functions and other shared library-like code.
+    *   TypeScript type definitions are primarily managed in `types.ts` and the `src/@types/` directory.
+*   **`src-tauri/`**: This is the heart of the backend, containing all the Rust code. It manages native functionalities, system interactions, and the core Tauri application setup, including the `tauri.conf.json` file which configures the application's build, windows, and plugin settings.
+*   **`public/`**: Holds static assets that are directly accessible by the webview. This typically includes the main `index.html` file and could also contain images, fonts, or other resources that don't need to be processed by the frontend build system.
+*   **`.github/`**: Contains GitHub-specific configurations, primarily for defining workflows (e.g., Continuous Integration/Continuous Deployment pipelines) using GitHub Actions.
+*   **`.vscode/`**: Stores settings specific to the Visual Studio Code editor, such as recommended extensions, debugger configurations, and workspace settings to help maintain a consistent development environment.
+
+Key files and components used by the app:
+
+* `src/Home.tsx` - contains the main layout with the sidebar and content view.
+
+## Updating .cursorrules
+
+Each time a functionality is added or a directory is created you should update the above section to include it.
 
 ## Installing shadcn components
 
@@ -15,3 +51,16 @@ To update to a new version several edits need to be made:
 3. Update the `updater.json` file with the new version number in the `version` field and also in the `url` field, update the `signature` using contents of the file: `src-tauri/target/release/bundle/nsis/FF7 Ultima_[version]_x64-setup.exe.sig`
 4. Ask the user for a commit message and then perform `git add .` and commit changes with message "Version [version], [user message]" (do not include the files in ff7-lib as they're outside of this repo)
 5. Tag this commit as "[version]" and push it to origin, both the commit and the new tag
+
+## Invoking Rust backend commands from the frontend
+
+In Tauri 2.0 this is how you invoke backend commands:
+
+```js
+import { invoke } from '@tauri-apps/api/core';
+
+// Invocation from JavaScript
+invoke('my_custom_command', {
+  number: 42,
+})
+```

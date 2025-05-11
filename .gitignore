@@ -30,3 +30,5 @@ src-tauri/settings.backup.json
 # windsurf rules
 .windsurfrules
 .aider*
+
+**/.claude/settings.local.json
