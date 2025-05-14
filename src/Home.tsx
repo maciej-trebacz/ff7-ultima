@@ -13,6 +13,7 @@ import { General } from "./modules/General";
 import { Field } from "./modules/Field";
 import { World } from "./modules/World";
 import { Battle } from "./modules/Battle";
+import { Party } from "./modules/Party";
 import { useShortcuts } from './useShortcuts';
 
 function Home() {
@@ -44,6 +45,8 @@ function Home() {
         return <World ff7={ff7} />;
       case Tabs.Battle:
         return <Battle ff7={ff7} />;
+      case Tabs.Party:
+        return <Party ff7={ff7} />;
       default:
         return <General ff7={ff7} />;
     }

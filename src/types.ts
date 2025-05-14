@@ -5,6 +5,7 @@ export enum Tabs {
   Field = "field",
   World = "world",
   Battle = "battle",
+  Party = "party",
 }
 
 export enum GameModule {
@@ -74,17 +75,49 @@ export interface BattleCharObj {
   name: string,
   scene_id: number,
 }
+export interface MateriaSlot {
+  id: number,
+  ap: number,
+}
 
 export interface PartyMember {
   id: number,
   name: string,
+  level: number,
+  strength: number,
+  vitality: number,
+  magic: number,
+  spirit: number,
+  dexterity: number,
+  luck: number,
+  strength_bonus: number,
+  vitality_bonus: number,
+  magic_bonus: number,
+  spirit_bonus: number,
+  dexterity_bonus: number,
+  luck_bonus: number,
+  limit_level: number,
+  order: number,
   status: number,
   hp: number,
+  base_hp: number,
   max_hp: number,
   mp: number,
+  base_mp: number,
   max_mp: number,
   limit: number,
-  exp: number
+  exp: number,
+  weapon: number,
+  armor: number,
+  accessory: number,
+  limit_skills: number,
+  kills: number,
+  limit_1_1_uses: number,
+  limit_2_1_uses: number,
+  limit_3_1_uses: number,
+  weapon_materia: MateriaSlot[],
+  armor_materia: MateriaSlot[],
+  exp_to_next_level: number,
 }
 
 export interface WorldModel {

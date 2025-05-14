@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { gameMoments } from "@/ff7GameMoments";
-import { Party } from "./Party";
+import { Party } from "@/components/Party";
 import { Advanced } from "./Advanced";
 
 export function General(props: { ff7: FF7 }) {

@@ -33,6 +33,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Slow Speed (0.25x)",
     callback: async (ff7) => {
       await ff7.setSpeed(0.25);
+      await ff7.showGameMessage("0.25x Speed", 2000);
     },
   },
   {
@@ -40,6 +41,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Normal Speed (1x)",
     callback: async (ff7) => {
       await ff7.setSpeed(1);
+      await ff7.showGameMessage("Normal Speed", 2000);
     },
   },
   {
@@ -47,6 +49,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Speed Up (5x)",
     callback: async (ff7) => {
       await ff7.setSpeed(5);
+      await ff7.showGameMessage("5x Speed", 2000);
     },
   },
   {
@@ -54,6 +57,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Load State (on field)",
     callback: async (ff7) => {
       await ff7.loadState();
+      await ff7.showGameMessage("State Loaded", 2000, 5);
     },
   },
   {
@@ -61,6 +65,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Save State (on field)",
     callback: async (ff7) => {
       await ff7.saveState();
+      await ff7.showGameMessage("State Saved", 2000, 5);
     },
   },
   {
@@ -68,6 +73,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Full Heal and remove bad status effects",
     callback: async (ff7) => {
       await ff7.fullHeal();
+      await ff7.showGameMessage("Full Party Heal", 2000);
     },
   },
   {
@@ -75,6 +81,7 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Toggle Limit Bar (full or empty)",
     callback: async (ff7) => {
       await ff7.toggleLimitBar();
+      await ff7.showGameMessage("Toggled Limit Bars", 2000);
     },
   },
   {
@@ -89,6 +96,8 @@ export const defaultShortcuts: Shortcut[] = [
     action: "Toggle Skip Dialogues",
     callback: async (ff7) => {
       await ff7.toggleSkipDialogues();
+      const enabled = !ff7.gameState.fieldSkipDialoguesEnabled;
+      await ff7.showGameMessage("Skip Dialogues " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
   {
@@ -98,6 +107,8 @@ export const defaultShortcuts: Shortcut[] = [
       ff7.gameState.walkAnywhereEnabled
         ? await ff7.disableWalkAnywhere()
         : await ff7.enableWalkAnywhere();
+      const enabled = !ff7.gameState.walkAnywhereEnabled;
+      await ff7.showGameMessage("Walk Anywhere " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
   {
@@ -107,6 +118,8 @@ export const defaultShortcuts: Shortcut[] = [
       ff7.gameState.manualSlotsEnabled
         ? await ff7.disableManualSlots()
         : await ff7.enableManualSlots();
+      const enabled = !ff7.gameState.manualSlotsEnabled;
+      await ff7.showGameMessage("Manual Slots " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
   {
@@ -116,6 +129,8 @@ export const defaultShortcuts: Shortcut[] = [
       ff7.gameState.invincibilityEnabled
         ? await ff7.disableInvincibility()
         : await ff7.enableInvincibility();
+      const enabled = !ff7.gameState.invincibilityEnabled;
+      await ff7.showGameMessage("Invincibility " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
   {
@@ -125,6 +140,8 @@ export const defaultShortcuts: Shortcut[] = [
       ff7.gameState.instantATBEnabled
         ? await ff7.disableInstantATB()
         : await ff7.enableInstantATB();
+      const enabled = !ff7.gameState.instantATBEnabled;
+      await ff7.showGameMessage("Instant ATB " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
 ]; 

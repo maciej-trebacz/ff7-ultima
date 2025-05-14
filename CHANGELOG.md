@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.5.0 (2025-05-14)
+
+## General
+
+* Now showing in-game messages when toggling speed and other hacks
+
+## Party
+
+* View and edit party stats, equipment, limits and more
+
 ## 1.4.11 (2025-05-11)
 
 ## Battle

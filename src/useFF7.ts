@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7Context } from "./FF7Context";
-import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination } from "./types";
+import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination, PartyMember } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
@@ -14,9 +14,10 @@ import { useSettings } from "./useSettings";
 import { SaveRegions, useSaveStates } from "./useSaveStates";
 import { useShortcuts } from "./useShortcuts";
 import { useBattleLog } from "./hooks/useBattleLog";
-import { randFloat } from "three/src/math/MathUtils.js";
+import { encodeText } from "./ff7/fftext";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
+let messageTimeout: number | null = null;
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, gameData, hacks, setHacks } = useFF7Context();
@@ -26,24 +27,28 @@ export function useFF7(addresses: FF7Addresses) {
   const { generalSettings, hackSettings } = useSettings();
 
   const fnCallerBaseAddr = addresses.code_cave_fn_caller;
-  const fnCallerMainAddr = fnCallerBaseAddr + 18;
-  const fnCallerAfterFlipAddr = fnCallerBaseAddr + 33;
+  const fnCallerMainAddr = fnCallerBaseAddr + 0x12;
+  const fnCallerAfterFlipAddr = fnCallerBaseAddr + 0x5F;
   const fnCallerResultAddr = fnCallerBaseAddr - 4;
   const fnSkipDialoguesAddr = addresses.code_cave + 0x20;
+  const gameMessageColorAddr = fnCallerBaseAddr + 0x1B;
 
   useEffect(() => {
     async function initializeGfxFlip() {
-      console.log("initializeGfxFlip");
-      let code = hex("55 8B EC 8B 45 08 50 E8 7E 45 24 00 83 C4 04 5D C3");
+      await writeMemory(addresses.data_cave, 0xFFFF, DataType.Short);
+
+      let code = hex("55 8B EC 68 AC C5 27 37 6A 04 68 C4 0C 7C 00 6A 10 6A 10 E8 D9 9A 2D 00 83 C4 14 8B 45 08 50 8B 0D 0C 10 DC 00 51 E8 04 26 25 00 83 C4 08 8B 45 08 50 8B 0D 10 10 DC 00 51 E8 F1 25 25 00 83 C4 08 8B 45 08 50 E8 40 45 24 00 83 C4 04 5D C3");
       await writeMemory(fnCallerMainAddr, code, DataType.Buffer);
 
+      // Call our custom function
       code = hex("E8 4F E2 D9 FF");
       await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
 
+      // Self-modifying trampoline to ensure the custom functions are called only once
       code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
       await writeMemory(fnCallerBaseAddr, code, DataType.Buffer);
 
-      setMemoryProtection(fnCallerBaseAddr, 0x50);
+      setMemoryProtection(fnCallerBaseAddr, 0x7F);
     }
 
     async function applyHackSettings() {
@@ -310,6 +315,7 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     }
   }, [gameState.battleQueue, gameState.currentModule, addLogItem]);
 
+
   const ff7 = {
     connected,
     gameState,
@@ -319,6 +325,23 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     saveStates,
     callGameFn,
     callGameFns,
+    showGameMessage:  async (text: string, duration: number, color: number = 0x04) => {
+      const encodedText = encodeText(text);
+      await writeMemory(gameMessageColorAddr, color, DataType.Byte);
+      await writeMemory(addresses.data_cave, Array.from(encodedText), DataType.Buffer);
+
+      // Clear any existing timeout
+      if (messageTimeout) {
+        clearTimeout(messageTimeout);
+        messageTimeout = null;
+      }
+      
+      // Set new timeout
+      messageTimeout = setTimeout(async () => {
+        await writeMemory(addresses.data_cave, 0xFFFF, DataType.Short);
+        messageTimeout = null;
+      }, duration);
+    },
     setSpeed: async (speed: number) => {
       const ffnxCheck = await readMemory(addresses.ffnx_check, DataType.Byte);
       if (ffnxCheck === 0xE9) {
@@ -393,6 +416,7 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
         // Restore the original code
         await writeMemory(addresses.field_skip_dialogues, hex("8b 45 08 25 ff 00 00 00 6b c0 30"), DataType.Buffer);
       }
+      return gameState.fieldSkipDialoguesEnabled;
     },
     enableAllMenus: async () => {
       await writeMemory(addresses.menu_visibility, 0xffff, DataType.Short);
@@ -1256,6 +1280,58 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     async setFieldFormationIndex(value: number) {
       await writeMemory(addresses.formation_idx, value, DataType.Byte);
     },
+    async updatePartyMember(id: number, field: keyof PartyMember, value: number | string) {
+      if (field === "name") {
+        const name = Array.from(encodeText(value as string));
+        await writeMemory(addresses.character_records + id * 0x84 + 0x10, name, DataType.Buffer);
+      } else {
+        const fieldMetadata: Record<keyof PartyMember, { offset: number; dataType: DataType }> = {
+          id: { offset: 0x00, dataType: DataType.Byte },
+          level: { offset: 0x01, dataType: DataType.Byte },
+          strength: { offset: 0x02, dataType: DataType.Byte },
+          vitality: { offset: 0x03, dataType: DataType.Byte },
+          magic: { offset: 0x04, dataType: DataType.Byte },
+          spirit: { offset: 0x05, dataType: DataType.Byte },
+          dexterity: { offset: 0x06, dataType: DataType.Byte },
+          luck: { offset: 0x07, dataType: DataType.Byte },
+          strength_bonus: { offset: 0x08, dataType: DataType.Byte },
+          vitality_bonus: { offset: 0x09, dataType: DataType.Byte },
+          magic_bonus: { offset: 0x0A, dataType: DataType.Byte },
+          spirit_bonus: { offset: 0x0B, dataType: DataType.Byte },
+          dexterity_bonus: { offset: 0x0C, dataType: DataType.Byte },
+          luck_bonus: { offset: 0x0D, dataType: DataType.Byte },
+          limit_level: { offset: 0x0E, dataType: DataType.Byte },
+          limit: { offset: 0x0F, dataType: DataType.Byte },
+          name: { offset: 0x10, dataType: DataType.Buffer },
+          weapon: { offset: 0x1C, dataType: DataType.Byte },
+          armor: { offset: 0x1D, dataType: DataType.Byte },
+          accessory: { offset: 0x1E, dataType: DataType.Byte },
+          status: { offset: 0x1F, dataType: DataType.Byte },
+          order: { offset: 0x20, dataType: DataType.Byte },
+          limit_skills: { offset: 0x22, dataType: DataType.Short },
+          kills: { offset: 0x24, dataType: DataType.Short },
+          limit_1_1_uses: { offset: 0x26, dataType: DataType.Short },
+          limit_2_1_uses: { offset: 0x28, dataType: DataType.Short },
+          limit_3_1_uses: { offset: 0x2A, dataType: DataType.Short },
+          hp: { offset: 0x2C, dataType: DataType.Short },
+          base_hp: { offset: 0x2E, dataType: DataType.Short },
+          mp: { offset: 0x30, dataType: DataType.Short },
+          base_mp: { offset: 0x32, dataType: DataType.Short },
+          max_hp: { offset: 0x38, dataType: DataType.Short },
+          max_mp: { offset: 0x3A, dataType: DataType.Short },
+          exp: { offset: 0x3C, dataType: DataType.Int },
+          weapon_materia: { offset: 0x40, dataType: DataType.Buffer },
+          armor_materia: { offset: 0x60, dataType: DataType.Buffer },
+          exp_to_next_level: { offset: 0x80, dataType: DataType.Int }
+        };
+
+        const { offset, dataType } = fieldMetadata[field];
+        await writeMemory(addresses.character_records + id * 0x84 + offset, value as number, dataType);
+      }
+
+      // Recalc the stats
+      await callGameFn(0x61f739, []);
+    }
   };
 
   return ff7;

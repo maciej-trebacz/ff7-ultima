@@ -103,6 +103,7 @@ export interface FF7Addresses {
   love_points: number;
   battle_points: number;
   battle_party_items: number;
+  data_cave: number;
 }
 
 export function useFF7Addresses() {
