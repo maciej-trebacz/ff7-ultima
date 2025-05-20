@@ -18,6 +18,7 @@ import { encodeText } from "./ff7/fftext";
 
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 let messageTimeout: number | null = null;
+let messageColorAddr: number = 0;
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, gameData, hacks, setHacks } = useFF7Context();
@@ -26,29 +27,64 @@ export function useFF7(addresses: FF7Addresses) {
   const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
   const { generalSettings, hackSettings } = useSettings();
 
-  const fnCallerBaseAddr = addresses.code_cave_fn_caller;
-  const fnCallerMainAddr = fnCallerBaseAddr + 0x12;
-  const fnCallerAfterFlipAddr = fnCallerBaseAddr + 0x5F;
-  const fnCallerResultAddr = fnCallerBaseAddr - 4;
-  const fnSkipDialoguesAddr = addresses.code_cave + 0x20;
-  const gameMessageColorAddr = fnCallerBaseAddr + 0x1B;
+  // const fnCallerBaseAddr = addresses.code_cave_fn_caller;
+  // const fnCallerMainAddr = fnCallerBaseAddr + 0x12;
+  // const fnCallerAfterFlipAddr = fnCallerBaseAddr + 0x5F;
+  // const fnCallerResultAddr = fnCallerBaseAddr - 4;
+  // const fnSkipDialoguesAddr = addresses.code_cave + 0x20;
+  // const gameMessageColorAddr = fnCallerBaseAddr + 0x1B;
+
+  const codeCaveAddresses = {
+    invincibility: addresses.code_cave,
+    skipDialogues: addresses.code_cave + 0x20,
+    functionCaller: addresses.code_cave + 0x40,
+  }
+
+  const fnCallerAfterFlipAddr = codeCaveAddresses.functionCaller + 0x5F;
+  const fnCallerMainAddr = codeCaveAddresses.functionCaller + 0x12;  
 
   useEffect(() => {
     async function initializeGfxFlip() {
       await writeMemory(addresses.data_cave, 0xFFFF, DataType.Short);
 
-      let code = hex("55 8B EC 68 AC C5 27 37 6A 04 68 C4 0C 7C 00 6A 10 6A 10 E8 D9 9A 2D 00 83 C4 14 8B 45 08 50 8B 0D 0C 10 DC 00 51 E8 04 26 25 00 83 C4 08 8B 45 08 50 8B 0D 10 10 DC 00 51 E8 F1 25 25 00 83 C4 08 8B 45 08 50 E8 40 45 24 00 83 C4 04 5D C3");
-      await writeMemory(fnCallerMainAddr, code, DataType.Buffer);
+      let writer = new OpcodeWriter(codeCaveAddresses.functionCaller);
+      // Self-modifying trampoline to ensure the custom functions are called only once
+      writer.writeHex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
+
+      // Function prologue
+      writer.writeHex("55 8B EC");
+
+      // If there's no text to draw, skip the rest of the code
+      writer.writeHex("A0") // Load the text pointer
+      writer.writeInt32(addresses.data_cave) // Load the text pointer
+      writer.writeHex("3C FF 74 00") // If the text pointer is FF, skip the rest of the code
+      const jmpAddr = writer.offset - 1
+
+      // Draw notification text
+      messageColorAddr = writer.offset + 6;
+      writer.writeHex("68 AC C5 27 37 6A 04 68 C4 0C 7C 00 6A 10 6A 10");
+      writer.writeCall(0x6F5B03); // MenuDrawText
+      writer.writeHex("83 C4 14 8B 45 08 50 8B 0D 0C 10 DC 00 51");
+      writer.writeCall(0x66E641); // GraphicsDrawObj
+      writer.writeHex("83 C4 08 8B 45 08 50 8B 0D 10 10 DC 00 51");
+      writer.writeCall(0x66E641); // GraphicsDrawObj
+      writer.writeHex("83 C4 08 8B 45 08 50");
+
+      // Calculate the jump offset
+      const jmpOffset = writer.offset - jmpAddr - 5
+
+      // Call the original GfxFlip
+      writer.writeCall(0x66059C);
+      writer.writeHex("83 C4 04 5D C3");
+      await writeMemory(codeCaveAddresses.functionCaller, writer.opcodes, DataType.Buffer);
+      await writeMemory(jmpAddr, jmpOffset, DataType.Byte);
 
       // Call our custom function
-      code = hex("E8 4F E2 D9 FF");
-      await writeMemory(addresses.main_gfx_flip_call, code, DataType.Buffer);
+      writer = new OpcodeWriter(addresses.main_gfx_flip_call);
+      writer.writeCall(fnCallerMainAddr);
+      await writeMemory(addresses.main_gfx_flip_call, writer.opcodes, DataType.Buffer);
 
-      // Self-modifying trampoline to ensure the custom functions are called only once
-      code = hex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
-      await writeMemory(fnCallerBaseAddr, code, DataType.Buffer);
-
-      setMemoryProtection(fnCallerBaseAddr, 0x7F);
+      setMemoryProtection(codeCaveAddresses.functionCaller, 0x7F);
     }
 
     async function applyHackSettings() {
@@ -113,7 +149,7 @@ export function useFF7(addresses: FF7Addresses) {
 
     // Call the overwrite function to make sure we call only once
     const length = writer.offset - startOffset;
-    writer.writeCall(fnCallerBaseAddr, [length], true);
+    writer.writeCall(codeCaveAddresses.functionCaller, [length], true);
 
     writer.writeReturn();
     await writeMemory(startOffset, writer.opcodes, DataType.Buffer);
@@ -211,7 +247,7 @@ export function useFF7(addresses: FF7Addresses) {
     }
   }
 
-const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
+  const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
 
   // When speed hack is enabled disable temperature dropping on the Great Glacier climbing sections
   const snowFields = [689, 692, 694];
@@ -327,7 +363,7 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
     callGameFns,
     showGameMessage:  async (text: string, duration: number, color: number = 0x04) => {
       const encodedText = encodeText(text);
-      await writeMemory(gameMessageColorAddr, color, DataType.Byte);
+      await writeMemory(messageColorAddr, color, DataType.Byte);
       await writeMemory(addresses.data_cave, Array.from(encodedText), DataType.Buffer);
 
       // Clear any existing timeout
@@ -402,14 +438,14 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
       if (!gameState.fieldSkipDialoguesEnabled) {
         // Write the function that checks whether the window is non-closable and only skips the closable ones
         const code = hex("8B 45 08 25 FF 00 00 00 69 C0 30 00 00 00 53 8B D8 0F BF 93 E4 F5 CF 00 66 85 D2 75 19 0F BF 8B E6 F5 CF 00 83 E1 01 85 C9 75 0B B8 01 00 00 00 5B E9 84 51 21 00 5B C3");
-        await writeMemory(fnSkipDialoguesAddr, code, DataType.Buffer);
-        const writer = new OpcodeWriter(fnSkipDialoguesAddr + code.length);
+        await writeMemory(codeCaveAddresses.skipDialogues, code, DataType.Buffer);
+        const writer = new OpcodeWriter(codeCaveAddresses.skipDialogues + code.length);
         writer.writeJmp(addresses.field_skip_dialogues + 0x30D);
-        await writeMemory(fnSkipDialoguesAddr + code.length, writer.opcodes, DataType.Buffer);
+        await writeMemory(codeCaveAddresses.skipDialogues + code.length, writer.opcodes, DataType.Buffer);
 
         // Call the new function
         const writer2 = new OpcodeWriter(addresses.field_skip_dialogues);
-        writer2.writeCall(fnSkipDialoguesAddr);
+        writer2.writeCall(codeCaveAddresses.skipDialogues);
         await writeMemory(addresses.field_skip_dialogues, writer2.opcodes, DataType.Buffer);
         await writeMemory(addresses.field_skip_dialogues + 5, hex("90 90 90 90 90 90"), DataType.Buffer);
       } else {
@@ -797,7 +833,10 @@ const speedHackEnhancementsOn = generalSettings?.speedHackEnhancements ?? true;
       // Function to write state flags for all allies
       const code = hex("E8 C4 37 1B 00 53 BB DC B0 9A 00 C6 43 05 07 C6 43 6D 07 C6 83 D5 00 00 00 07 5B C3");
       await writeMemory(addresses.code_cave, code, DataType.Buffer);
-      await writeMemory(addresses.battle_init_chars_call, 0xfffe3f85, DataType.Int);
+
+      const writer = new OpcodeWriter(addresses.battle_init_chars_call);
+      writer.writeCall(addresses.code_cave);
+      await writeMemory(addresses.battle_init_chars_call, writer.opcodes, DataType.Buffer);
 
       // Set state flags for all allies immediately
       let flags = 0;

@@ -1,11 +1,11 @@
 {
-  "version": "1.5.0",
-  "notes": "New Party screen! View and edit party stats, equipment, limits and more. Plus, showing in-game messages when toggling speed and other hacks.",
-  "pub_date": "2025-05-14T16:00:00Z",
+  "version": "1.5.1",
+  "notes": "Fix crashes and visual issues introduced by the previous release",
+  "pub_date": "2025-05-20T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Ti9qTmFhTVM5djJpM0k0cUtsZkwzTUhVMnpkdGVxbDlSQ210bnhDdVo3NWxrUXRJOEllQjBGbGwyMGJyZDc1RnFWOUxrRWx3a2FWekloQUdpc2ZEREFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ3MjI2NTg2CWZpbGU6RkY3IFVsdGltYV8xLjUuMF94NjQtc2V0dXAuZXhlClF5eVM0YytPMHdycXVQaExzY3psc3RtcFVLK2FjZHNwNk01d1JUTnhUaEpZRE95S01aSmZZS2ZEdzloZkR1cXRMNkV5RGk2SVZSWTZzZlBZMWxsK0RRPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.5.0/FF7.Ultima_1.5.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjUvdk9ScTNsQ0lUMlBrME5XWndqUkZlblZITkdzSytOclhyOTJJdTRkcE9vYkppcjh5Skl6aGtVdHFFK1N3SjhKUEkrMm5QKzBreis1bC9oUGUyRXdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ3NzY2ODMzCWZpbGU6RkY3IFVsdGltYV8xLjUuMV94NjQtc2V0dXAuZXhlClVCM292OEk1MGE1ajJaNEFrNUkvM0w0TUVMUW5aVkdNYllYNWh1NUljdkhVNW51eHBWODRCZjBibzdMYzV2SjRLVVpGNitYdERaSE9uUkU1bko0bUFRPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.5.1/FF7.Ultima_1.5.1_x64-setup.exe"
     }
   }
 }

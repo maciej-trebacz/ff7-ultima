@@ -104,6 +104,10 @@ export class OpcodeWriter {
     writeReturn() {
       this.write([0x5D, 0xC3]) // POP EBP ; RET
     }
+
+    writeHex(hex: string) {
+      this.write(hex.split(" ").map(s => parseInt(s, 16)))
+    }
   
     toArray() {
       return [...this.opcodes]
