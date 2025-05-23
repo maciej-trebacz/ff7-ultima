@@ -1,11 +1,11 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "notes": "Fix crashes and visual issues introduced by the previous release",
-  "pub_date": "2025-05-20T16:00:00Z",
+  "pub_date": "2025-05-23T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjUvdk9ScTNsQ0lUMlBrME5XWndqUkZlblZITkdzSytOclhyOTJJdTRkcE9vYkppcjh5Skl6aGtVdHFFK1N3SjhKUEkrMm5QKzBreis1bC9oUGUyRXdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ3NzY2ODMzCWZpbGU6RkY3IFVsdGltYV8xLjUuMV94NjQtc2V0dXAuZXhlClVCM292OEk1MGE1ajJaNEFrNUkvM0w0TUVMUW5aVkdNYllYNWh1NUljdkhVNW51eHBWODRCZjBibzdMYzV2SjRLVVpGNitYdERaSE9uUkU1bko0bUFRPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.5.1/FF7.Ultima_1.5.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjR3OGI2VWdQcHJjQmJWOWx2a2pKQVd5dnd0YzdtQmFQbTdJdnlyc0V5NFVVM2VsWmE3aW5BZ0RYUlExQlVxV080SWpYZlN6a09sSzhJOHdSS0pzbUEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ4MDA0NzkzCWZpbGU6RkY3IFVsdGltYV8xLjUuMl94NjQtc2V0dXAuZXhlCkNKc1lLa3Y3K0IyZkhaK1QwZ0owOTVSRW5uTERVeS83SUxUTnl3K3Zza2tCMHhlSzNMQTEyUTdCTWZXenhWYk8rT05xSW1OeUxOZVpGRW1LUmRSdEJBPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.5.2/FF7.Ultima_1.5.2_x64-setup.exe"
     }
   }
 }

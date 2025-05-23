@@ -19,6 +19,7 @@ import { encodeText } from "./ff7/fftext";
 const hex = (str: string) => str.split(" ").map((s) => parseInt(s, 16));
 let messageTimeout: number | null = null;
 let messageColorAddr: number = 0;
+let functionCallerAddr: number = 0;
 
 export function useFF7(addresses: FF7Addresses) {
   const { connected, gameState, gameData, hacks, setHacks } = useFF7Context();
@@ -27,32 +28,36 @@ export function useFF7(addresses: FF7Addresses) {
   const { registerCustomShortcut, unregisterCustomShortcut } = useShortcuts();
   const { generalSettings, hackSettings } = useSettings();
 
-  // const fnCallerBaseAddr = addresses.code_cave_fn_caller;
-  // const fnCallerMainAddr = fnCallerBaseAddr + 0x12;
-  // const fnCallerAfterFlipAddr = fnCallerBaseAddr + 0x5F;
-  // const fnCallerResultAddr = fnCallerBaseAddr - 4;
-  // const fnSkipDialoguesAddr = addresses.code_cave + 0x20;
-  // const gameMessageColorAddr = fnCallerBaseAddr + 0x1B;
-
   const codeCaveAddresses = {
     invincibility: addresses.code_cave,
     skipDialogues: addresses.code_cave + 0x20,
-    functionCaller: addresses.code_cave + 0x40,
+    customCodePreFlip: addresses.code_cave + 0x60,
   }
 
-  const fnCallerAfterFlipAddr = codeCaveAddresses.functionCaller + 0x5F;
-  const fnCallerMainAddr = codeCaveAddresses.functionCaller + 0x12;  
-
   useEffect(() => {
-    async function initializeGfxFlip() {
+    async function writeCustomGameCode() {
       await writeMemory(addresses.data_cave, 0xFFFF, DataType.Short);
+      let writer = new OpcodeWriter(codeCaveAddresses.customCodePreFlip);
 
-      let writer = new OpcodeWriter(codeCaveAddresses.functionCaller);
       // Self-modifying trampoline to ensure the custom functions are called only once
       writer.writeHex("5E 58 83 C0 07 8B DE 29 C3 C6 03 5D C6 43 01 C3 56 C3");
 
-      // Function prologue
-      writer.writeHex("55 8B EC");
+      const customCodePreFlipJmpAddr = writer.offset;
+      writer.writeStart();
+
+      const dummyCallAddr = writer.offset;
+      writer.writeCall(0x0); // Dummy call for the custom draw text notification function
+      writer.writeCall(0x0); // Dummy call for the custom function caller
+
+      // Call the original GfxFlip function
+      writer.writeHex("8B 45 08 50"); // mov eax, [ebp+8], push eax
+      writer.writeCall(0x66059C); 
+      writer.writeHex("83 C4 04"); // add esp, 4
+      writer.writeReturn();
+
+      // Custom draw text notification function
+      const drawTextAddr = writer.offset;
+      writer.writeStart();
 
       // If there's no text to draw, skip the rest of the code
       writer.writeHex("A0") // Load the text pointer
@@ -62,29 +67,43 @@ export function useFF7(addresses: FF7Addresses) {
 
       // Draw notification text
       messageColorAddr = writer.offset + 6;
-      writer.writeHex("68 AC C5 27 37 6A 04 68 C4 0C 7C 00 6A 10 6A 10");
-      writer.writeCall(0x6F5B03); // MenuDrawText
-      writer.writeHex("83 C4 14 8B 45 08 50 8B 0D 0C 10 DC 00 51");
+      writer.writeCall(0x6F5B03, [16, 16, 0x7C0CC4, 4, 0x3727C5AC]); // MenuDrawText(x, y, textPtr, color, z)
+
+      writer.writeHex("8B 45 08 50 8B 0D 0C 10 DC 00 51"); // mov eax, [ebp+8], push eax, mov ecx, [0xDC0C10], push ecx
       writer.writeCall(0x66E641); // GraphicsDrawObj
-      writer.writeHex("83 C4 08 8B 45 08 50 8B 0D 10 10 DC 00 51");
+      writer.writeHex("83 C4 08 8B 45 08 50 8B 0D 10 10 DC 00 51"); // add esp, 8, mov eax, [ebp+8], push eax, mov ecx, [0xDC1010], push ecx
       writer.writeCall(0x66E641); // GraphicsDrawObj
-      writer.writeHex("83 C4 08 8B 45 08 50");
+      writer.writeHex("83 C4 08"); // add esp, 8
+
+      writer.writeReturn();
 
       // Calculate the jump offset
-      const jmpOffset = writer.offset - jmpAddr - 5
+      const jmpOffset = writer.offset - jmpAddr - 3      
 
-      // Call the original GfxFlip
-      writer.writeCall(0x66059C);
-      writer.writeHex("83 C4 04 5D C3");
-      await writeMemory(codeCaveAddresses.functionCaller, writer.opcodes, DataType.Buffer);
+      // Stub for the function caller
+      writer.writeStart();
+      functionCallerAddr = writer.offset;
+      writer.writeReturn();
+
+      // Write the custom code to the code cave
+      await writeMemory(codeCaveAddresses.customCodePreFlip, writer.opcodes, DataType.Buffer);
+
+      // Write the jump offset for the custom draw text notification function
       await writeMemory(jmpAddr, jmpOffset, DataType.Byte);
 
-      // Call our custom function
+      // Replace dummy calls with the actual function addresses
+      writer = new OpcodeWriter(dummyCallAddr);
+      writer.writeCall(drawTextAddr);
+      writer.writeCall(functionCallerAddr - 3); // offset to the start of the function caller
+      await writeMemory(dummyCallAddr, writer.opcodes, DataType.Buffer);
+
+      // Call our custom function instead of the original GfxFlip
       writer = new OpcodeWriter(addresses.main_gfx_flip_call);
-      writer.writeCall(fnCallerMainAddr);
+      writer.writeCall(customCodePreFlipJmpAddr);
       await writeMemory(addresses.main_gfx_flip_call, writer.opcodes, DataType.Buffer);
 
-      setMemoryProtection(codeCaveAddresses.functionCaller, 0x7F);
+      setMemoryProtection(codeCaveAddresses.customCodePreFlip, 0x7F);
+
     }
 
     async function applyHackSettings() {
@@ -126,7 +145,7 @@ export function useFF7(addresses: FF7Addresses) {
 
     if (connected && !initialized.current) {
       initialized.current = true;
-      initializeGfxFlip();
+      writeCustomGameCode();
       applyHackSettings();
     } else if (!connected) {
       initialized.current = false;
@@ -136,7 +155,7 @@ export function useFF7(addresses: FF7Addresses) {
   type FnCall = { address: number; params?: number[] };
 
   const callGameFns = async (fns: FnCall[]) => {
-    const startOffset = fnCallerAfterFlipAddr;
+    const startOffset = functionCallerAddr;
     const writer = new OpcodeWriter(startOffset);
 
     // Call the requested functions
@@ -149,7 +168,7 @@ export function useFF7(addresses: FF7Addresses) {
 
     // Call the overwrite function to make sure we call only once
     const length = writer.offset - startOffset;
-    writer.writeCall(codeCaveAddresses.functionCaller, [length], true);
+    writer.writeCall(codeCaveAddresses.customCodePreFlip, [length], true);
 
     writer.writeReturn();
     await writeMemory(startOffset, writer.opcodes, DataType.Buffer);
@@ -832,10 +851,10 @@ export function useFF7(addresses: FF7Addresses) {
     enableInvincibility: async () => {
       // Function to write state flags for all allies
       const code = hex("E8 C4 37 1B 00 53 BB DC B0 9A 00 C6 43 05 07 C6 43 6D 07 C6 83 D5 00 00 00 07 5B C3");
-      await writeMemory(addresses.code_cave, code, DataType.Buffer);
+      await writeMemory(codeCaveAddresses.invincibility, code, DataType.Buffer);
 
       const writer = new OpcodeWriter(addresses.battle_init_chars_call);
-      writer.writeCall(addresses.code_cave);
+      writer.writeCall(codeCaveAddresses.invincibility);
       await writeMemory(addresses.battle_init_chars_call, writer.opcodes, DataType.Buffer);
 
       // Set state flags for all allies immediately
@@ -847,7 +866,7 @@ export function useFF7(addresses: FF7Addresses) {
       }
     },
     disableInvincibility: async () => {
-      await writeMemory(addresses.battle_init_chars_call, 0x19774e, DataType.Int);
+      await writeMemory(addresses.battle_init_chars_call + 1, 0x19774e, DataType.Int);
 
       // Set state flags for all allies immediately
       let flags = 0;

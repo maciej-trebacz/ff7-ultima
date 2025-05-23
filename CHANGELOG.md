@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.2 (2025-05-23)
+
+## General
+
+* Fixed another crash introduced by the previous release
+
 ## 1.5.1 (2025-05-20)
 
 ## General

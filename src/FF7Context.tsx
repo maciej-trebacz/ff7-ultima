@@ -417,7 +417,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           fieldModels,
           battleAllies: ff7Data.battle_allies as BattleCharObj[],
           battleEnemies: ff7Data.battle_enemies as BattleCharObj[],
-          invincibilityEnabled: !(basic.invincibility_check === 0x774e),
+          invincibilityEnabled: !(basic.invincibility_check === 0x4ee8),
           worldCurrentModel,
           expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
           gilMultiplier: !(basic.gil_multiplier === 0xB1) ? basic.gil_multiplier as number : 1,
