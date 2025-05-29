@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use chrono::Local;
-use log::{Level, LevelFilter};
+use log::{LevelFilter};
 use serde::{Serialize, Deserialize};
 use tauri::{AppHandle, Manager};
 

@@ -40,13 +40,35 @@ export function EditPopover({
 
   useEffect(() => {
     if (open) {
+      // Disable modal focus trap
+      const dialogElement = document.querySelector('[role="dialog"]') as HTMLElement;
+      if (dialogElement) {
+        dialogElement.setAttribute('data-modal-disabled', 'true');
+        // Remove tabindex to disable focus trap
+        dialogElement.removeAttribute('tabindex');
+      }
+      
+      // Focus the input after modal focus trap is disabled
+      const currentPopoverCount = document.querySelectorAll('.edit-popover-input').length;
       setTimeout(() => {
         const input = document.querySelector('.edit-popover-input') as HTMLInputElement;
         if (input) {
           input.focus();
           input.select();
         }
-      }, 0);
+      }, currentPopoverCount > 0 ? 250 : 10);
+    } else {
+      // Re-enable modal focus trap when popover closes
+      setTimeout(() => {
+        const dialogElement = document.querySelector('[role="dialog"]') as HTMLElement;
+        if (dialogElement && dialogElement.hasAttribute('data-modal-disabled')) {
+          const currentPopoverCount = document.querySelectorAll('[data-state="open"][role="dialog"] .edit-popover-input').length;
+          if (currentPopoverCount === 0) {
+            dialogElement.removeAttribute('data-modal-disabled');
+            dialogElement.setAttribute('tabindex', '-1');
+          }
+        }
+      }, 10);
     }
   }, [open]);
 
@@ -62,7 +84,7 @@ export function EditPopover({
       </PopoverTrigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content 
-          className="z-[60] w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+          className="z-[60] w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 pointer-events-auto"
           sideOffset={4}
           align="center"
           onInteractOutside={(e) => {
