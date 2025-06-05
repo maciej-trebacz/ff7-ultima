@@ -2,7 +2,7 @@
 
 use ff7_lib::ff7;
 use ff7_lib::ff7::addresses::FF7Addresses;
-use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData, Scene};
+use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData, Scene, ChocoboData, ChocoboSlot};
 use ff7_lib::utils::memory;
 use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
@@ -162,6 +162,51 @@ pub fn write_variable_16bit(bank: u32, address: u32, value: u16) -> Result<(), S
 }
 
 #[tauri::command]
+pub fn read_chocobo_data() -> Result<ChocoboData, String> {
+    ff7::data::read_chocobo_data(&FF7Addresses::new())
+}
+
+#[tauri::command]
+pub fn write_chocobo_slot(slot_index: usize, chocobo: ChocoboSlot) -> Result<(), String> {
+    ff7::data::write_chocobo_slot(&FF7Addresses::new(), slot_index, &chocobo)
+}
+
+#[tauri::command]
+pub fn write_fenced_chocobo(slot_index: usize, rating: u8) -> Result<(), String> {
+    ff7::data::write_fenced_chocobo(&FF7Addresses::new(), slot_index, rating)
+}
+
+#[tauri::command]
+pub fn write_stable_occupation_mask(mask: u8) -> Result<(), String> {
+    ff7::data::write_stable_occupation_mask(&FF7Addresses::new(), mask)
+}
+
+#[tauri::command]
+pub fn write_chocobo_name(slot_index: usize, encoded_name: Vec<u8>) -> Result<(), String> {
+    ff7::data::write_chocobo_name(&FF7Addresses::new(), slot_index, encoded_name)
+}
+
+#[tauri::command]
+pub fn write_chocobo_stamina(slot_index: usize, stamina: u16) -> Result<(), String> {
+    ff7::data::write_chocobo_stamina(&FF7Addresses::new(), slot_index, stamina)
+}
+
+#[tauri::command]
+pub fn write_stables_owned(count: u8) -> Result<(), String> {
+    ff7::data::write_stables_owned(&FF7Addresses::new(), count)
+}
+
+#[tauri::command]
+pub fn write_occupied_stables(count: u8) -> Result<(), String> {
+    ff7::data::write_occupied_stables(&FF7Addresses::new(), count)
+}
+
+#[tauri::command]
+pub fn set_chocobo_can_mate(slot_index: usize, can_mate: bool) -> Result<(), String> {
+    ff7::data::set_chocobo_can_mate(&FF7Addresses::new(), slot_index, can_mate)
+}
+
+#[tauri::command]
 pub fn get_current_game_directory() -> Result<String, String> {
     process::get_current_dir().ok_or("Failed to get current directory".to_string())
 }
@@ -245,5 +290,14 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         check_for_updates,
         execute_update,
         read_battle_scenes,
+        read_chocobo_data,
+        write_chocobo_slot,
+        write_fenced_chocobo,
+        write_stable_occupation_mask,
+        write_chocobo_name,
+        write_chocobo_stamina,
+        write_stables_owned,
+        write_occupied_stables,
+        set_chocobo_can_mate,
     ]
 }

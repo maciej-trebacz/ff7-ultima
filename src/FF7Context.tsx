@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, createContext, ReactNode, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useFF7Addresses, FF7Addresses } from './ff7Addresses';
-import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType, BattleScene } from "./types";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType, BattleScene, ChocoboData } from "./types";
 import { DataType, readMemory } from "./memory";
 import { StatusChange, BattleLogItem } from '@/hooks/useBattleLog';
 import { statuses as statusEnum } from '@/ff7Statuses';
@@ -124,6 +124,7 @@ const defaultGameState = {
   walkAnywhereEnabled: false,
   lovePoints: [] as number[],
   battlePoints: 0,
+  chocoboData: null as ChocoboData | null,
 };
 
 export type FF7State = typeof defaultGameState;
@@ -374,6 +375,14 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         const worldModels = ff7Data.world_models as WorldModel[];
 
+        // Load chocobo data
+        let chocoboData: ChocoboData | null = null;
+        try {
+          chocoboData = await invoke("read_chocobo_data");
+        } catch (error) {
+          console.warn("Failed to load chocobo data:", error);
+        }
+
         setGameState(prevState => ({
           ...prevState,
           currentModule: basic.current_module as number,
@@ -440,6 +449,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           walkAnywhereEnabled: basic.walk_anywhere_check === 0xe9,
           lovePoints: basic.love_points as number[],
           battlePoints: basic.battle_points as number,
+          chocoboData,
         }));
 
         // Status Change Detection Logic - wait 50ms to ensure battle log was updated before
@@ -485,7 +495,6 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => clearInterval(intervalId);
   }, [addresses, isLoadingAddresses, errorAddresses, connected, gameState.currentModule]); // Added connected and gameState.currentModule dependencies
-
 
   const loadEnemyAttackNames = async () => {
     if (!connected) return;

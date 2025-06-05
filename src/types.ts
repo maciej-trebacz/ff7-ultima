@@ -6,6 +6,7 @@ export enum Tabs {
   World = "world",
   Battle = "battle",
   Party = "party",
+  Chocobos = "chocobos",
 }
 
 export enum GameModule {
@@ -408,4 +409,36 @@ export interface BattleScene {
   enemies: SceneEnemy[];
   formations: SceneFormation[];
   attacks: SceneAttack[];
+}
+
+// Chocobo types
+export interface ChocoboSlot {
+  sprint_speed: number;
+  max_sprint_speed: number;
+  speed: number;
+  max_speed: number;
+  acceleration: number;
+  cooperation: number;
+  intelligence: number;
+  personality: number;
+  pcount: number;
+  races_won: number;
+  sex: number; // 1 = female, 0 = male
+  color: number; // 0=Yellow, 1=Green, 2=Blue, 3=Black, 4=Gold
+}
+
+export interface FencedChocobo {
+  rating: number; // 1=Wonderful, 2=Great, 3=Good, 4=Average, 5=Poor, 6=So-So, 7=?, 8=Worst
+}
+
+export interface ChocoboData {
+  fenced_chocobos: FencedChocobo[]; // Penned chocobo ratings (4 slots)
+  stables_owned: number; // Number of chocobo stables owned
+  occupied_stables: number; // Number of occupied stables
+  stables_occupied_mask: number; // Bitmask for occupied stables
+  cant_mate_mask: number; // Bitmask for chocobos that can't mate
+  stable_chocobos: (ChocoboSlot | null)[]; // 6 stable slots, some may be empty
+  chocobo_names: string[]; // Names for each stable chocobo (6 slots)
+  chocobo_stamina: number[]; // Stamina values for each stable chocobo (6 slots)
+  chocobo_target_battle_counts: number[]; // Target battle counts for mating eligibility (6 slots)
 }
