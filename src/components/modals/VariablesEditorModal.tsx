@@ -3,7 +3,9 @@ import { Modal } from "@/components/Modal";
 import { FF7 } from "@/useFF7";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditPopover } from "@/components/EditPopover";
+import SimpleVariables from "@/components/simple/SimpleVariables";
 
 interface VariablesEditorModalProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ type ViewFormat = "Decimal" | "Hex" | "Binary";
 
 export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditorModalProps) {
   const [selectedBank, setSelectedBank] = useState("1");
+  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
   const [variables, setVariables] = useState<number[]>([]);
   const [viewFormat, setViewFormat] = useState<ViewFormat>("Decimal");
   const [is16BitMode, setIs16BitMode] = useState(false);
@@ -165,80 +168,109 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
       size="lg"
       callback={() => {}}
     >
-      <div className="p-2 flex flex-col gap-2">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Bank:</span>
-            <Select value={selectedBank} onValueChange={handleBankChange}>
-              <SelectTrigger className="w-[100px] h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5].map((bank) => (
-                  <SelectItem key={bank} value={bank.toString()} className="text-xs">
-                    Bank {bank} ({bankTitles[bank - 1]})
+      <Tabs value={mode} onValueChange={(v) => setMode(v as 'simple' | 'advanced')} className="w-full">
+        <TabsList className="w-full mb-2">
+          <TabsTrigger value="simple" className="flex-1">Simple</TabsTrigger>
+          <TabsTrigger value="advanced" className="flex-1">Advanced</TabsTrigger>
+        </TabsList>
+        <TabsContent value="simple" className="p-2">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Bank:</span>
+              <Select value={selectedBank} onValueChange={handleBankChange}>
+                <SelectTrigger className="w-[100px] h-7 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map((bank) => (
+                    <SelectItem key={bank} value={bank.toString()} className="text-xs">
+                      Bank {bank} ({bankTitles[bank - 1]})
+                    </SelectItem>
+                  ))}
+                  <SelectItem key={6} value={"6"} className="text-xs">
+                    Temp Bank (5/6)
                   </SelectItem>
-                ))}
-                <SelectItem key={6} value={"6"} className="text-xs">
-                  Temp Bank (5/6)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">View as:</span>
-            <Select value={viewFormat} onValueChange={(value: ViewFormat) => setViewFormat(value)}>
-              <SelectTrigger className="w-24 h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Decimal" className="text-xs">Decimal</SelectItem>
-                <SelectItem value="Hex" className="text-xs">Hex</SelectItem>
-                <SelectItem value="Binary" className="text-xs" disabled={is16BitMode}>Binary</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">16-bit mode:</span>
-            <Switch
-              checked={is16BitMode}
-              onCheckedChange={handle16BitModeChange}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-x-4 gap-y-1 max-h-[60vh] overflow-y-auto pr-2">
-          {getDisplayVariables().map((value, index) => (
-            <div key={index} className="contents">
-              <div 
-                className={`flex items-center gap-2 text-xs px-2 py-1 rounded-sm transition-colors duration-200 ${
-                  isChanged(index) 
-                    ? 'bg-yellow-500/25' 
-                    : 'bg-zinc-800/50'
-                } cursor-pointer hover:bg-zinc-700/50`}
-                data-trigger="true"
-                onClick={() => handleEdit(index)}
-              >
-                <EditPopover
-                  open={editIndex === index}
-                  onOpenChange={(open) => {
-                    if (!open) setEditIndex(null);
-                  }}
-                  value={editValue}
-                  onValueChange={setEditValue}
-                  onSubmit={handleSubmitEdit}
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="text-slate-400 w-6">#{is16BitMode ? index * 2 : index}</span>
-                    <span className="flex-1 font-mono">{formatValue(value, index)}</span>
-                  </div>
-                </EditPopover>
-              </div>
-              {index % 4 === 3 && <div className="col-span-4 h-px bg-zinc-800/50 -mx-2" />}
+                </SelectContent>
+              </Select>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+          <SimpleVariables ff7={ff7} bank={parseInt(selectedBank)} variables={variables} reload={loadVariables} />
+        </TabsContent>
+        <TabsContent value="advanced" className="p-2">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Bank:</span>
+              <Select value={selectedBank} onValueChange={handleBankChange}>
+                <SelectTrigger className="w-[100px] h-7 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map((bank) => (
+                    <SelectItem key={bank} value={bank.toString()} className="text-xs">
+                      Bank {bank} ({bankTitles[bank - 1]})
+                    </SelectItem>
+                  ))}
+                  <SelectItem key={6} value={"6"} className="text-xs">
+                    Temp Bank (5/6)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">View as:</span>
+              <Select value={viewFormat} onValueChange={(value: ViewFormat) => setViewFormat(value)}>
+                <SelectTrigger className="w-24 h-7 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Decimal" className="text-xs">Decimal</SelectItem>
+                  <SelectItem value="Hex" className="text-xs">Hex</SelectItem>
+                  <SelectItem value="Binary" className="text-xs" disabled={is16BitMode}>Binary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">16-bit mode:</span>
+              <Switch
+                checked={is16BitMode}
+                onCheckedChange={handle16BitModeChange}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-x-4 gap-y-1 max-h-[60vh] overflow-y-auto pr-2">
+            {getDisplayVariables().map((value, index) => (
+              <div key={index} className="contents">
+                <div
+                  className={`flex items-center gap-2 text-xs px-2 py-1 rounded-sm transition-colors duration-200 ${
+                    isChanged(index)
+                      ? 'bg-yellow-500/25'
+                      : 'bg-zinc-800/50'
+                  } cursor-pointer hover:bg-zinc-700/50`}
+                  data-trigger="true"
+                  onClick={() => handleEdit(index)}
+                >
+                  <EditPopover
+                    open={editIndex === index}
+                    onOpenChange={(open) => {
+                      if (!open) setEditIndex(null);
+                    }}
+                    value={editValue}
+                    onValueChange={setEditValue}
+                    onSubmit={handleSubmitEdit}
+                  >
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-slate-400 w-6">#{is16BitMode ? index * 2 : index}</span>
+                      <span className="flex-1 font-mono">{formatValue(value, index)}</span>
+                    </div>
+                  </EditPopover>
+                </div>
+                {index % 4 === 3 && <div className="col-span-4 h-px bg-zinc-800/50 -mx-2" />}
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </Modal>
   );
 } 
