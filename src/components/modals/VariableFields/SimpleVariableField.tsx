@@ -6,8 +6,10 @@ export function SimpleVariableField({ variable, value, onChange, isChanged }: Va
   const [editOpen, setEditOpen] = useState(false);
   const [editValue, setEditValue] = useState("");
   const handleEdit = () => {
+    console.log('🔍 SimpleVariableField handleEdit called for:', variable.name, 'value:', value);
     setEditValue(value.toString());
     setEditOpen(true);
+    console.log('🔍 SimpleVariableField editOpen set to true');
   };
 
   const handleSubmit = () => {
@@ -40,14 +42,23 @@ export function SimpleVariableField({ variable, value, onChange, isChanged }: Va
         <span className="text-xs text-slate-500">#{variable.offset}</span>
         <EditPopover
           open={editOpen}
-          onOpenChange={setEditOpen}
+          onOpenChange={(open) => {
+            console.log('🔍 SimpleVariableField EditPopover onOpenChange:', open);
+            setEditOpen(open);
+          }}
           value={editValue}
-          onValueChange={setEditValue}
+          onValueChange={(value) => {
+            console.log('🔍 SimpleVariableField EditPopover onValueChange:', value);
+            setEditValue(value);
+          }}
           onSubmit={handleSubmit}
         >
           <span
             className="text-xs font-mono text-slate-200 min-w-[3rem] text-right cursor-pointer hover:text-blue-400"
-            onClick={handleEdit}
+            onClick={(e) => {
+              console.log('🔍 SimpleVariableField span clicked, event:', e);
+              handleEdit();
+            }}
           >
             {value}
           </span>

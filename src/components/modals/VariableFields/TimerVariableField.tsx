@@ -45,7 +45,7 @@ export function TimerVariableField({ variable, value, onChange, isChanged }: Var
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-500">#{variable.offset}@@</span>
+        <span className="text-xs text-slate-500">#{variable.offset}</span>
         <EditPopover
           open={editOpen}
           onOpenChange={setEditOpen}
