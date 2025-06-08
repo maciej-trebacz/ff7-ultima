@@ -1,24 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
+import { VariableFieldProps } from "./types";
 
-interface VariableFieldDefinition {
-  offset: number;
-  size: 1 | 2 | 3;
-  name: string;
-  description: string;
-  type: 'simple' | 'bitmask' | 'timer' | 'unknown';
-  bitDescriptions?: string[];
-  min?: number;
-  max?: number;
-}
-
-interface BitmaskVariableFieldProps {
-  variable: VariableFieldDefinition;
-  value: number;
-  onChange: (value: number) => void;
-  isChanged: boolean;
-}
-
-export function BitmaskVariableField({ variable, value, onChange, isChanged }: BitmaskVariableFieldProps) {
+export function BitmaskVariableField({ variable, value, onChange, isChanged }: VariableFieldProps) {
   const handleBitChange = (bitIndex: number, checked: boolean) => {
     const newValue = checked 
       ? value | (1 << bitIndex)
@@ -51,7 +34,7 @@ export function BitmaskVariableField({ variable, value, onChange, isChanged }: B
         </div>
       </div>
       
-      <div className="grid grid-cols-1 gap-1">
+      <div className="grid grid-cols-2 gap-1">
         {Array.from({ length: maxBits }, (_, i) => {
           const isSet = (value & (1 << i)) !== 0;
           const description = variable.bitDescriptions?.[i] || `Bit ${i}`;

@@ -7,10 +7,10 @@ import { EditPopover } from "@/components/EditPopover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-// Temporarily disabled due to TypeScript configuration issues
-// import { SimpleVariableField } from "./VariableFields/SimpleVariableField";
-// import { BitmaskVariableField } from "./VariableFields/BitmaskVariableField";
-// import { TimerVariableField } from "./VariableFields/TimerVariableField";
+import { SimpleVariableField } from "./VariableFields/SimpleVariableField";
+import { BitmaskVariableField } from "./VariableFields/BitmaskVariableField";
+import { TimerVariableField } from "./VariableFields/TimerVariableField";
+import { VariableFieldDefinition } from "./VariableFields/types";
 
 interface VariablesEditorModalProps {
   isOpen: boolean;
@@ -19,17 +19,6 @@ interface VariablesEditorModalProps {
 }
 
 type ViewFormat = "Decimal" | "Hex" | "Binary";
-
-interface VariableFieldDefinition {
-  offset: number;
-  size: 1 | 2 | 3;
-  name: string;
-  description: string;
-  type: 'simple' | 'bitmask' | 'timer' | 'unknown';
-  bitDescriptions?: string[];
-  min?: number;
-  max?: number;
-}
 
 // Variable definitions based on savemap documentation for Banks 1/2
 const BANK_1_2_VARIABLES: VariableFieldDefinition[] = [
@@ -895,13 +884,29 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
     await loadVariables();
   };
 
+
+
   const bankTitles = ["1/2", "3/4", "B/C", "D/E", "7/F"];
 
   // Filter variables based on search query
-  const filteredVariables = BANK_1_2_VARIABLES.filter(variable =>
-    variable.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    variable.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredVariables = BANK_1_2_VARIABLES.filter(variable => {
+    const query = searchQuery.toLowerCase();
+    
+    // Check variable name and description
+    if (variable.name.toLowerCase().includes(query) ||
+        variable.description.toLowerCase().includes(query)) {
+      return true;
+    }
+    
+    // For bitmask variables, also check bit descriptions
+    if (variable.type === 'bitmask' && variable.bitDescriptions) {
+      return variable.bitDescriptions.some(desc => 
+        desc && desc.toLowerCase().includes(query)
+      );
+    }
+    
+    return false;
+  });
 
   // Helper function to get value from variables array
   const getVariableValue = (offset: number, size: 1 | 2 | 3): number => {
@@ -983,14 +988,14 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
             {(selectedBank === "1" || selectedBank === "2") ? (
               <>
                 {/* Search field - sticky */}
-                <div className="sticky top-0 bg-slate-900 z-10 pb-2 border-b border-slate-700 mb-2">
+                <div className="sticky top-0 z-10 pb-2 border-b border-slate-700 mb-2">
                   <div className="relative">
                     <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
                     <Input
                       placeholder="Search variables..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-7 h-7 text-xs"
+                      className="pl-7 h-7 text-xs bg-transparent border-slate-600 focus:border-slate-500"
                     />
                   </div>
                 </div>
@@ -999,46 +1004,56 @@ export function VariablesEditorModal({ isOpen, setIsOpen, ff7 }: VariablesEditor
                 <div className="max-h-[60vh] overflow-y-auto space-y-2">
                   {filteredVariables.map((variable) => {
                     const value = getVariableValue(variable.offset, variable.size);
-                    
-                    // Simplified inline field implementation
-                    return (
-                      <div 
-                        key={variable.offset}
-                        className={`flex items-center justify-between p-2 rounded-sm transition-colors duration-200 cursor-pointer hover:bg-zinc-700/50 ${
-                          isChanged(variable.offset) ? 'bg-yellow-500/25' : 'bg-zinc-800/50'
-                        }`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-slate-200 truncate">
-                            {variable.name}
-                          </div>
-                          <div className="text-xs text-slate-400 truncate">
-                            {variable.description} ({variable.type})
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500">#{variable.offset}</span>
-                          <EditPopover
-                            defaultValue={value.toString()}
-                            onSubmit={(editValue: string) => {
-                              const newValue = parseInt(editValue, 10);
-                              if (!isNaN(newValue)) {
-                                const maxValue = variable.size === 1 ? 255 : variable.size === 2 ? 65535 : 16777215;
-                                const clampedValue = Math.max(
-                                  variable.min ?? 0,
-                                  Math.min(variable.max ?? maxValue, newValue)
-                                );
-                                setVariableValue(variable.offset, variable.size, clampedValue);
-                              }
-                            }}
-                          >
-                            <span className="text-xs font-mono text-slate-200 min-w-[3rem] text-right cursor-pointer hover:text-blue-400">
-                              {value}
-                            </span>
-                          </EditPopover>
-                        </div>
-                      </div>
-                    );
+                    const changed = isChanged(variable.offset);
+
+                    const handleVariableChange = async (newValue: number) => {
+                      await setVariableValue(variable.offset, variable.size, newValue);
+                    };
+
+                    // Render appropriate field component based on variable type
+                    switch (variable.type) {
+                      case 'simple':
+                        return (
+                          <SimpleVariableField
+                            key={variable.offset}
+                            variable={variable}
+                            value={value}
+                            onChange={handleVariableChange}
+                            isChanged={changed}
+                          />
+                        );
+                      case 'bitmask':
+                        return (
+                          <BitmaskVariableField
+                            key={variable.offset}
+                            variable={variable}
+                            value={value}
+                            onChange={handleVariableChange}
+                            isChanged={changed}
+                          />
+                        );
+                      case 'timer':
+                        return (
+                          <TimerVariableField
+                            key={variable.offset}
+                            variable={variable}
+                            value={value}
+                            onChange={handleVariableChange}
+                            isChanged={changed}
+                          />
+                        );
+                      default:
+                        // Fallback to simple field for unknown types
+                        return (
+                          <SimpleVariableField
+                            key={variable.offset}
+                            variable={variable}
+                            value={value}
+                            onChange={handleVariableChange}
+                            isChanged={changed}
+                          />
+                        );
+                    }
                   })}
                 </div>
               </>

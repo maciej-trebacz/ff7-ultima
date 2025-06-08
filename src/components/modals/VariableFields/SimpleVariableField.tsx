@@ -1,25 +1,16 @@
+import { useState } from "react";
 import { EditPopover } from "@/components/EditPopover";
+import { VariableFieldProps } from "./types";
 
-interface VariableFieldDefinition {
-  offset: number;
-  size: 1 | 2 | 3;
-  name: string;
-  description: string;
-  type: 'simple' | 'bitmask' | 'timer' | 'unknown';
-  bitDescriptions?: string[];
-  min?: number;
-  max?: number;
-}
+export function SimpleVariableField({ variable, value, onChange, isChanged }: VariableFieldProps) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const handleEdit = () => {
+    setEditValue(value.toString());
+    setEditOpen(true);
+  };
 
-interface SimpleVariableFieldProps {
-  variable: VariableFieldDefinition;
-  value: number;
-  onChange: (value: number) => void;
-  isChanged: boolean;
-}
-
-export function SimpleVariableField({ variable, value, onChange, isChanged }: SimpleVariableFieldProps) {
-  const handleSubmit = (editValue: string) => {
+  const handleSubmit = () => {
     const newValue = parseInt(editValue, 10);
     if (!isNaN(newValue)) {
       const clampedValue = Math.max(
@@ -28,6 +19,7 @@ export function SimpleVariableField({ variable, value, onChange, isChanged }: Si
       );
       onChange(clampedValue);
     }
+    setEditOpen(false);
   };
 
   return (
@@ -47,10 +39,16 @@ export function SimpleVariableField({ variable, value, onChange, isChanged }: Si
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-500">#{variable.offset}</span>
         <EditPopover
-          defaultValue={value.toString()}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          value={editValue}
+          onValueChange={setEditValue}
           onSubmit={handleSubmit}
         >
-          <span className="text-xs font-mono text-slate-200 min-w-[3rem] text-right cursor-pointer hover:text-blue-400">
+          <span
+            className="text-xs font-mono text-slate-200 min-w-[3rem] text-right cursor-pointer hover:text-blue-400"
+            onClick={handleEdit}
+          >
             {value}
           </span>
         </EditPopover>
