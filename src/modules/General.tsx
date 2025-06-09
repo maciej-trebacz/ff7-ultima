@@ -17,7 +17,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { gameMoments } from "@/ff7GameMoments";
 import { Party } from "@/components/Party";
-import { Advanced } from "./Advanced";
 
 export function General(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -423,8 +422,6 @@ export function General(props: { ff7: FF7 }) {
         </div>
       </div>
       <Party ff7={ff7} />
-      <br />
-      <Advanced ff7={ff7} />
     </div>
   );
 }

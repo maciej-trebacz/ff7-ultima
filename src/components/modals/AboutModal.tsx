@@ -27,6 +27,7 @@ export function AboutModal({ isOpen, setIsOpen }: AboutModalProps) {
         <p>petfriendamy - list of game moments</p>
         <p>picklejar76 - for the extracted scene.bin data</p>
         <p>myst6re, NFITC1 - authors of invaluable FF7 tools</p>
+        <p>FF7 Wiki authors - savemap and other game data</p>
         <p>... and the whole Qhimm and FF7 community.</p>
       </div>
     </Modal>

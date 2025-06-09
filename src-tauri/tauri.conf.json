@@ -12,8 +12,8 @@
     "windows": [
       {
         "title": "Ultima - FF7 Real-time Game Editor",
-        "width": 620,
-        "height": 525,
+        "width": 720,
+        "height": 635,
         "theme": "Dark",
         "visible": true,
         "resizable": true,

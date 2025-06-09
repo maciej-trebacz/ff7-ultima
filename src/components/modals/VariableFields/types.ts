@@ -14,4 +14,5 @@ export interface VariableFieldProps {
   value: number;
   onChange: (value: number) => void;
   isChanged: boolean;
+  searchQuery?: string;
 }

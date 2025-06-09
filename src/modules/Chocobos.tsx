@@ -7,7 +7,6 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
@@ -16,11 +15,12 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { EditPopover } from "@/components/EditPopover";
 import { ChocoboStatsModal, ChocoboStats, ChocoboPersonality, FencedChocoboType } from "@/components/modals/ChocoboStatsModal";
 import { FF7 } from "@/useFF7";
-import { Trash2, BarChart3, Plus, Minus } from "lucide-react";
-import { ChocoboData, ChocoboSlot } from "@/types";
+import { Trash2, BarChart3, Plus } from "lucide-react";
+import { ChocoboSlot } from "@/types";
 import { encodeText } from "@/ff7/fftext";
 import { useFF7Context } from "@/FF7Context";
 
@@ -50,7 +50,7 @@ interface LocalFencedChocobo {
   type: FencedChocoboType;
 }
 
-// Helper components for editable fields -----------------
+// Helper component for editable fields matching Party.tsx pattern
 const EditableStat = ({
   label,
   value,
@@ -61,7 +61,7 @@ const EditableStat = ({
   disabled = false,
   className
 }: {
-  label?: string;
+  label: string;
   value: string | number;
   onSave: (newValue: string | number) => void;
   type?: "text" | "number";
@@ -92,10 +92,11 @@ const EditableStat = ({
   }, [disabled, editValue, type, min, max, onSave]);
 
   return (
-    <div 
-      className={`flex items-center ${label ? 'justify-between' : 'justify-center'} ${className} ${disabled ? 'cursor-default text-muted-foreground' : 'cursor-pointer hover:text-primary'}`}
+    <div
+      className={`flex items-center justify-between py-1 ${className} ${disabled ? 'cursor-default text-muted-foreground' : 'cursor-pointer hover:text-primary'}`}
+      onClick={() => !disabled && setPopoverOpen(true)}
     >
-      {label && <span className="text-xs whitespace-nowrap mr-2">{label}</span>}
+      <Label className="text-xs whitespace-nowrap mr-2">{label}</Label>
       <EditPopover
         open={popoverOpen && !disabled}
         onOpenChange={setPopoverOpen}
@@ -104,53 +105,12 @@ const EditableStat = ({
         onSubmit={handleSubmit}
       >
         <span
-          className="text-xs text-right cursor-pointer hover:text-primary bg-gray-800 rounded px-2 py-1"
+          className="text-xs text-right"
           data-trigger="true"
-          onClick={() => !disabled && setPopoverOpen(true)}
         >
           {value}
         </span>
       </EditPopover>
-    </div>
-  );
-};
-
-const EditableSelect = ({
-  label,
-  value,
-  options,
-  onSave,
-  disabled = false,
-  className
-}: {
-  label?: string;
-  value: string;
-  options: string[];
-  onSave: (newValue: string) => void;
-  disabled?: boolean;
-  className?: string;
-}) => {
-  return (
-    <div 
-      className={`flex items-center ${label ? 'justify-between' : 'justify-center'} ${className}`}
-    >
-      {label && <span className="text-xs whitespace-nowrap mr-2">{label}</span>}
-      <Select
-        value={value}
-        onValueChange={onSave}
-        disabled={disabled}
-      >
-        <SelectTrigger className="h-7 text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option} className="text-xs">
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
     </div>
   );
 };
@@ -257,7 +217,7 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
   // Get chocobo data from context
   const chocoboData = gameState?.chocoboData;
   const loading = !chocoboData;
-  
+
   // Extract stable counts
   const stablesOwned = chocoboData?.stables_owned || 0;
   const occupiedStables = chocoboData?.occupied_stables || 0;
@@ -461,271 +421,240 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
     saveChocoboSlot(index, stableChocobos[index], stats);
   };
 
+  // Prepare data for rendering
+  const stableChocoboData = stableChocobos.map((chocobo, index) => ({
+    chocobo,
+    index,
+    isOwned: index < stablesOwned
+  }));
+
+  const fencedChocoboData = fencedChocobos.map((chocobo, index) => ({
+    chocobo,
+    index
+  }));
+
   if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-2">
-        <Card>
-          <CardContent className="p-6 text-center">
-            Loading chocobo data...
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="p-6 text-center">
+          Launch the game to see chocobo data.
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2">
-      {/* Stable Info Panel -------------------------------- */}
-      <Card>
-        <CardContent className="p-3">
+    <div className="grid grid-cols-2 gap-2">
+      {/* Stable Info Panel */}
+      <Card className="col-span-2">
+        <CardContent className="p-2">
           <div className="flex justify-between items-center text-xs">
             <span>Stables Owned: <strong>{stablesOwned}/6</strong></span>
             <span>Occupied: <strong>{occupiedStables}/{stablesOwned}</strong></span>
           </div>
         </CardContent>
       </Card>
-      
-      {/* Stable Chocobos ---------------------------------- */}
-      <Card>
-        <CardHeader className="p-3 pb-0">
-          <CardTitle className="text-sm">Stable Chocobos</CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 pt-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="bg-zinc-800">
-                <tr>
-                  <th className="p-1 w-24 text-left">Name</th>
-                  <th className="p-1 w-24 text-left">Color</th>
-                  <th className="p-1 w-20 text-left">Sex</th>
-                  <th className="p-1 w-20 text-center">Can mate</th>
-                  <th className="p-1 w-20 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stableChocobos.map((slot, index) => {
-                  if (slot) {
-                    return (
-                      <tr key={index} className="bg-zinc-800 even:bg-zinc-900">
-                        {/* Name */}
-                        <td className="p-1">
-                          <Input
-                            value={slot.name}
-                            onChange={(e) =>
-                              updateStable(index, {
-                                ...slot,
-                                name: e.target.value,
-                              })
-                            }
-                            className="h-6 text-xs px-1"
-                          />
-                        </td>
-                        {/* Color */}
-                        <td className="p-1">
-                          <Select
-                            value={slot.color}
-                            onValueChange={(val) =>
-                              updateStable(index, {
-                                ...slot,
-                                color: val as ChocoboColor,
-                              })
-                            }
-                          >
-                            <SelectTrigger className={`h-6 text-xs ${getColorStyle(slot.color)}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.values(ChocoboColor).map((c) => (
-                                <SelectItem key={c} value={c} className={`text-xs ${getColorStyle(c)}`}>
-                                  {c}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        {/* Sex */}
-                        <td className="p-1">
-                          <Select
-                            value={slot.sex}
-                            onValueChange={(val) =>
-                              updateStable(index, {
-                                ...slot,
-                                sex: val as ChocoboSex,
-                              })
-                            }
-                          >
-                            <SelectTrigger className="h-6 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(Object.values(ChocoboSex)).map((s) => (
-                                <SelectItem key={s} value={s} className="text-xs">
-                                  {s}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        {/* Can mate */}
-                        <td className="p-1 text-center">
-                          <Checkbox
-                            checked={slot.canMate}
-                            onCheckedChange={(checked) =>
-                              updateStable(index, {
-                                ...slot,
-                                canMate: Boolean(checked),
-                              })
-                            }
-                          />
-                        </td>
-                        {/* Actions */}
-                        <td className="p-1 text-center flex gap-1 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => updateStable(index, null)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setStatsModalIndex(index);
-                              setStatsModalOpen(true);
-                            }}
-                          >
-                            <BarChart3 className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  }
-                  // Empty slot UI -------------------------------------
-                  const isStableOwned = index < stablesOwned;
-                  
-                  return (
-                    <tr key={index} className="bg-zinc-800 even:bg-zinc-900">
-                      <td className="p-1" colSpan={4}>
-                        {isStableOwned ? (
-                          <span className="italic text-muted-foreground">- empty stable -</span>
-                        ) : (
-                          <span className="italic text-muted-foreground">- stable not owned -</span>
-                        )}
-                      </td>
-                      <td className="p-1 flex gap-1 justify-center">
-                        {isStableOwned ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => updateStable(index, null)}
-                              disabled
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => updateStable(index, makeDefaultStableChocobo())}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={buyStable}
-                            className="h-6 px-2 text-xs"
-                          >
-                            Buy Stable
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Fenced Chocobos ---------------------------------- */}
-      <Card>
-        <CardHeader className="p-3 pb-0">
-          <CardTitle className="text-sm">Fenced Chocobos (Penned)</CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 pt-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="bg-zinc-800">
-                <tr>
-                  <th className="p-1 w-32 text-left">Type</th>
-                  <th className="p-1 w-20 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fencedChocobos.map((slot, index) => {
-                  if (slot) {
-                    return (
-                      <tr key={index} className="bg-zinc-800 even:bg-zinc-900">
-                        <td className="p-1">
-                          <Select
-                            value={slot.type}
-                            onValueChange={(val) =>
-                              updateFenced(index, { type: val as FencedChocoboType })
-                            }
-                          >
-                            <SelectTrigger className="h-6 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.values(FencedChocoboType).map((t) => (
-                                <SelectItem key={t} value={t} className="text-xs">
-                                  {t}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="p-1 flex gap-1 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => updateFenced(index, null)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  }
-                  return (
-                    <tr key={index} className="bg-zinc-800 even:bg-zinc-900">
-                      <td className="p-1" colSpan={1}>
-                        <span className="italic text-muted-foreground">- empty -</span>
-                      </td>
-                      <td className="p-1 flex gap-1 justify-center">
+      {/* Stable Chocobos */}
+      <div className="col-span-2 space-y-2">
+        <h3 className="text-sm font-medium text-slate-300 px-1">Stable Chocobos</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {stableChocoboData.map(({ chocobo, index, isOwned }) => (
+            <Card key={index}>
+              <CardHeader className="p-2 pb-1">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Slot {index + 1}</CardTitle>
+                  <div className="flex gap-1">
+                    {chocobo && (
+                      <>
                         <Button
                           variant="ghost"
-                          size="icon"
-                          onClick={() => updateFenced(index, makeDefaultFencedChocobo())}
+                          size="sm"
+                          onClick={() => {
+                            setStatsModalIndex(index);
+                            setStatsModalOpen(true);
+                          }}
+                          className="h-5 w-5 p-0"
                         >
-                          <Plus className="h-4 w-4" />
+                          <BarChart3 className="h-3 w-3" />
                         </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateStable(index, null)}
+                          className="h-5 w-5 p-0"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
+                    {!chocobo && isOwned && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updateStable(index, makeDefaultStableChocobo())}
+                        className="h-5 w-5 p-0"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {!chocobo && !isOwned && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={buyStable}
+                        className="h-5 px-2 text-xs"
+                      >
+                        Buy
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                {chocobo ? (
+                  <div className="space-y-1">
+                    <EditableStat
+                      label="Name"
+                      value={chocobo.name}
+                      onSave={(value) => updateStable(index, { ...chocobo, name: value as string })}
+                      type="text"
+                      className="py-0.5"
+                    />
+                    <div className="flex items-center justify-between py-0.5">
+                      <Label className="text-xs whitespace-nowrap mr-2">Color</Label>
+                      <Select
+                        value={chocobo.color}
+                        onValueChange={(val) => updateStable(index, { ...chocobo, color: val as ChocoboColor })}
+                      >
+                        <SelectTrigger className={`h-6 text-xs w-20 ${getColorStyle(chocobo.color)}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(ChocoboColor).map((c) => (
+                            <SelectItem key={c} value={c} className={`text-xs ${getColorStyle(c)}`}>
+                              {c}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between py-0.5">
+                      <Label className="text-xs whitespace-nowrap mr-2">Sex</Label>
+                      <div className="flex bg-slate-800 rounded-md p-0.5 w-32">
+                        <Button
+                          type="button"
+                          variant={chocobo.sex === ChocoboSex.Male ? "default" : "ghost"}
+                          size="sm"
+                          className={`flex-1 h-5 px-0 text-xs rounded-sm ${
+                            chocobo.sex === ChocoboSex.Male
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-slate-700 text-muted-foreground"
+                          }`}
+                          onClick={() => updateStable(index, { ...chocobo, sex: ChocoboSex.Male })}
+                        >
+                          ♂ Male
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={chocobo.sex === ChocoboSex.Female ? "default" : "ghost"}
+                          size="sm"
+                          className={`flex-1 h-5 px-0 text-xs rounded-sm ${
+                            chocobo.sex === ChocoboSex.Female
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-slate-700 text-muted-foreground"
+                          }`}
+                          onClick={() => updateStable(index, { ...chocobo, sex: ChocoboSex.Female })}
+                        >
+                          ♀ Female
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between py-0.5">
+                      <Label className="text-xs whitespace-nowrap mr-2">Can mate</Label>
+                      <Checkbox
+                        checked={chocobo.canMate}
+                        onCheckedChange={(checked) => updateStable(index, { ...chocobo, canMate: Boolean(checked) })}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-3">
+                    <span className="text-xs text-muted-foreground italic">
+                      {isOwned ? "Empty stable" : "Stable not owned"}
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
-      {/* Stats modal --------------------------------------- */}
+      {/* Fenced Chocobos */}
+      <div className="col-span-2 space-y-2">
+        <h3 className="text-sm font-medium text-slate-300 px-1">Fenced Chocobos (Penned)</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {fencedChocoboData.map(({ chocobo, index }) => (
+            <Card key={index}>
+              <CardHeader className="p-2 pb-1">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Pen {index + 1}</CardTitle>
+                  <div className="flex gap-1">
+                    {chocobo ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updateFenced(index, null)}
+                        className="h-5 w-5 p-0"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updateFenced(index, makeDefaultFencedChocobo())}
+                        className="h-5 w-5 p-0"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-2 pt-0">
+                {chocobo ? (
+                  <div className="flex items-center justify-between py-0.5">
+                    <Label className="text-xs whitespace-nowrap mr-2">Type</Label>
+                    <Select
+                      value={chocobo.type}
+                      onValueChange={(val) => updateFenced(index, { type: val as FencedChocoboType })}
+                    >
+                      <SelectTrigger className="h-6 text-xs w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(FencedChocoboType).map((t) => (
+                          <SelectItem key={t} value={t} className="text-xs">
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="text-center py-1">
+                    <span className="text-xs text-muted-foreground italic">Empty pen</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats modal */}
       {statsModalIndex !== null && (
         <ChocoboStatsModal
           open={statsModalOpen}
@@ -740,4 +669,4 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
       )}
     </div>
   );
-} 
+}

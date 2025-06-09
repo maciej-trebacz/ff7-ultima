@@ -165,7 +165,11 @@ export function Party({ ff7 }: { ff7: FF7 }) {
   }, [currentCharacter, ff7]);
 
   if (!gameState || !gameState.partyMembers || gameState.partyMembers.length === 0) {
-    return <div className="p-4 text-sm text-muted-foreground">No party data available. Ensure the game is running and connected.</div>;
+    return <Card>
+      <CardContent className="p-6 text-center">
+        Launch the game to see party data.
+      </CardContent>
+    </Card>              
   }
 
   if (!currentCharacter) {

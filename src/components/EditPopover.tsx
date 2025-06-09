@@ -284,18 +284,13 @@ export function EditPopover({
               <Button
                 size="sm"
                 onClick={(e) => {
-                  console.log('🔍 Manual focus button clicked');
                   e.stopPropagation();
-                  if (inputRef.current) {
-                    inputRef.current.focus();
-                    inputRef.current.select();
-                    console.log('🔍 Manual focus applied, activeElement:', document.activeElement);
-                  }
+                  onOpenChange(false);
                 }}
                 variant="outline"
                 className="flex-1"
               >
-                Focus
+                Cancel
               </Button>
               <Button
                 size="sm"

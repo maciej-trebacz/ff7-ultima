@@ -15,6 +15,7 @@ import { World } from "./modules/World";
 import { Battle } from "./modules/Battle";
 import { Party } from "./modules/Party";
 import { Chocobos } from "./modules/Chocobos";
+import { Variables } from "./modules/Variables";
 import { useShortcuts } from './useShortcuts';
 
 function Home() {
@@ -50,6 +51,8 @@ function Home() {
         return <Party ff7={ff7} />;
       case Tabs.Chocobos:
         return <Chocobos ff7={ff7} />;
+      case Tabs.Variables:
+        return <Variables ff7={ff7} />;
       default:
         return <General ff7={ff7} />;
     }
