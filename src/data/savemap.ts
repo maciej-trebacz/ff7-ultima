@@ -3,7 +3,7 @@ export interface BitDefinition {
   label: string;
 }
 
-export type VarType = 'u8' | 'u16' | 'u24' | 'bitmask';
+export type VarType = 'u8' | 'u16' | 'u24' | 'bitmask' | 'text';
 
 export interface SaveVarDefinition {
   offset: number;
@@ -636,7 +636,7 @@ export const bank1Fields: SaveVarDefinition[] = [
     type: 'bitmask',
     label: 'Bombing mission flags 1',
     bits: [
-      { mask: 0x01, label: 'Elevator on top floor' },
+      { mask: 0x01, label: 'Elevator on bottom floor' },
       { mask: 0x08, label: '1st door opened' },
       { mask: 0x10, label: '2nd door opened' },
       { mask: 0x20, label: 'Jessie freed from stuck' },
@@ -1072,7 +1072,7 @@ export const bank3Fields: SaveVarDefinition[] = [
 ];
 
 export const bank11Fields: SaveVarDefinition[] = [
-  { offset: 0, length: 6, type: 'u8', label: 'Chocobo race name', description: 'Chocobo name in FF Text format' },
+  { offset: 0, length: 6, type: 'text', label: 'Chocobo race name', description: 'Chocobo name in FF Text format' },
   { offset: 6, length: 1, type: 'u8', label: 'Chocobo race jockey', description: '00: Cloud, 01: Tifa, 02: Cid' },
   { offset: 7, length: 1, type: 'u8', label: 'Chocobo race course', description: '00: Long course, 01: Short course' },
   { offset: 8, length: 1, type: 'u8', label: 'Bet selection screen', description: '00: Enabled, 01: Disabled' },
@@ -1233,7 +1233,7 @@ export const bank13Fields: SaveVarDefinition[] = [
   { offset: 91, length: 1, type: 'u8', label: 'Save flag', description: '0x02: In save menu' },
   { offset: 96, length: 1, type: 'u8', label: 'Northern Cave progress 1' },
   { offset: 97, length: 1, type: 'u8', label: 'Northern Cave progress 2' },
-  { offset: 104, length: 24, type: 'u8', label: 'Location name', description: 'FF Text format' },
+  { offset: 104, length: 24, type: 'text', label: 'Location name', description: 'FF Text format' },
   { offset: 133, length: 1, type: 'u8', label: 'World map tutorial seen', description: '0x3B: Seen, 0x33: Not seen' },
   {
     offset: 134,

@@ -36,6 +36,9 @@ export function useFF7(addresses: FF7Addresses) {
 
   useEffect(() => {
     async function writeCustomGameCode() {
+      const check = await readMemory(codeCaveAddresses.customCodePreFlip, DataType.Byte);
+      const alreadyWritten = check === 0x5E;
+
       await writeMemory(addresses.data_cave, 0xFFFF, DataType.Short);
       let writer = new OpcodeWriter(codeCaveAddresses.customCodePreFlip);
 
@@ -85,6 +88,11 @@ export function useFF7(addresses: FF7Addresses) {
       functionCallerAddr = writer.offset;
       writer.writeReturn();
 
+      // At this point we've already written all the global variables, so we can return if the code is already written
+      if (alreadyWritten) {
+        return;
+      }
+
       // Write the custom code to the code cave
       await writeMemory(codeCaveAddresses.customCodePreFlip, writer.opcodes, DataType.Buffer);
 
@@ -103,7 +111,6 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(addresses.main_gfx_flip_call, writer.opcodes, DataType.Buffer);
 
       setMemoryProtection(codeCaveAddresses.customCodePreFlip, 0x7F);
-
     }
 
     async function applyHackSettings() {

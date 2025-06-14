@@ -21,15 +21,27 @@ const bankTitles = ["1/2", "3/4", "B/C", "D/E", "7/F"];
 
 // Convert savemap format to VariableFieldDefinition format
 const convertSaveVarToFieldDefinition = (saveVar: SaveVarDefinition): VariableFieldDefinition[] => {
-  let type: 'simple' | 'bitmask' | 'timer' | 'unknown' = 'simple';
+  let type: 'simple' | 'bitmask' | 'timer' | 'text' | 'unknown' = 'simple';
   let bitDescriptions: string[] | undefined;
   let min: number | undefined;
   let max: number | undefined;
 
   // Determine type based on savemap type and presence of bits
-  if (saveVar.type === 'bitmask' && saveVar.bits) {
+  if (saveVar.type === 'text') {
+    type = 'text';
+  } else if (saveVar.type === 'bitmask' && saveVar.bits) {
     type = 'bitmask';
-    bitDescriptions = saveVar.bits.map(bit => bit.label);
+    // Create an array where the index corresponds to the actual bit position
+    const maxBits = saveVar.length === 1 ? 8 : saveVar.length === 2 ? 16 : 24;
+    bitDescriptions = new Array(maxBits);
+
+    // Map each bit definition to its correct position based on the mask
+    saveVar.bits.forEach(bit => {
+      const bitPosition = Math.log2(bit.mask);
+      if (bitPosition >= 0 && bitPosition < maxBits && Number.isInteger(bitPosition)) {
+        bitDescriptions![bitPosition] = bit.label;
+      }
+    });
   } else if (saveVar.label.toLowerCase().includes('timer') ||
              saveVar.label.toLowerCase().includes('hours') ||
              saveVar.label.toLowerCase().includes('minutes') ||
@@ -75,6 +87,21 @@ const convertSaveVarToFieldDefinition = (saveVar: SaveVarDefinition): VariableFi
       min = 1;
       max = 99;
     }
+  }
+
+  // Handle text variables as single entries regardless of length
+  if (saveVar.type === 'text') {
+    return [{
+      offset: saveVar.offset,
+      size: Math.min(saveVar.length, 3) as 1 | 2 | 3,
+      name: saveVar.label,
+      description: saveVar.description || '',
+      type,
+      bitDescriptions,
+      min,
+      max,
+      length: saveVar.length // Store the full length for text variables
+    }];
   }
 
   // Handle arrays (length > 3) by creating multiple entries
@@ -404,6 +431,16 @@ export function Variables({ ff7 }: VariablesProps) {
     }
   };
 
+  // Helper function to get text value from all bank variables (for Simple view)
+  const getAllBankTextVariableValue = (bankNumber: number, offset: number, length: number): Uint8Array => {
+    const bankVars = allBankVariables[bankNumber] || [];
+    const result = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = bankVars[offset + i] || 0;
+    }
+    return result;
+  };
+
   // Helper function to check if variable changed (for Advanced view)
   const isVariableChanged = (offset: number): boolean => {
     if (is16BitMode) {
@@ -462,6 +499,14 @@ export function Variables({ ff7 }: VariablesProps) {
     await loadAllBankVariables();
   };
 
+  // Helper function to set text variable value (for Simple view)
+  const setAllBankTextVariableValue = async (bankNumber: number, offset: number, value: Uint8Array) => {
+    for (let i = 0; i < value.length; i++) {
+      await ff7.setVariable(bankNumber, offset + i, value[i]);
+    }
+    await loadAllBankVariables();
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
@@ -515,12 +560,23 @@ export function Variables({ ff7 }: VariablesProps) {
                     {/* Bank variables */}
                     <div className="space-y-1">
                       {bankVariables.map((variable) => {
-                        const value = getAllBankVariableValue(bankNumber, variable.offset, variable.size);
-                        const changed = isAllBankVariableChanged(bankNumber, variable.offset);
+                        // Handle different variable types
+                        let value: number | Uint8Array;
+                        let handleVariableChange: (newValue: number | Uint8Array) => Promise<void>;
 
-                        const handleVariableChange = async (newValue: number) => {
-                          await setAllBankVariableValue(bankNumber, variable.offset, variable.size, newValue);
-                        };
+                        if (variable.type === 'text') {
+                          value = getAllBankTextVariableValue(bankNumber, variable.offset, variable.length || variable.size);
+                          handleVariableChange = async (newValue: number | Uint8Array) => {
+                            await setAllBankTextVariableValue(bankNumber, variable.offset, newValue as Uint8Array);
+                          };
+                        } else {
+                          value = getAllBankVariableValue(bankNumber, variable.offset, variable.size);
+                          handleVariableChange = async (newValue: number | Uint8Array) => {
+                            await setAllBankVariableValue(bankNumber, variable.offset, variable.size, newValue as number);
+                          };
+                        }
+
+                        const changed = isAllBankVariableChanged(bankNumber, variable.offset);
 
                         // Create unique ID for this variable field
                         const uniqueId = `simple-${bankNumber}-${variable.offset}`;

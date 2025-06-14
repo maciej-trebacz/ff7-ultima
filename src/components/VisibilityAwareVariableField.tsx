@@ -2,20 +2,21 @@ import React, { useRef, useEffect, memo } from 'react';
 import { SimpleVariableField } from '@/components/modals/VariableFields/SimpleVariableField';
 import { BitmaskVariableField } from '@/components/modals/VariableFields/BitmaskVariableField';
 import { TimerVariableField } from '@/components/modals/VariableFields/TimerVariableField';
+import { TextVariableField } from '@/components/modals/VariableFields/TextVariableField';
 import { VariableFieldDefinition } from '@/components/modals/VariableFields/types';
 import { useVisibilityObserver } from '@/hooks/useVisibilityObserver';
 
 interface VisibilityAwareVariableFieldProps {
   variable: VariableFieldDefinition & { bankNumber?: number; bankTitle?: string };
-  value: number;
-  onChange: (value: number) => void;
+  value: number | Uint8Array;
+  onChange: (value: number | Uint8Array) => void;
   isChanged: boolean;
   searchQuery?: string;
   uniqueId: string; // Unique identifier for this field instance
 }
 
 interface FieldState {
-  value: number;
+  value: number | Uint8Array;
   isChanged: boolean;
 }
 
@@ -68,24 +69,58 @@ const VisibilityAwareVariableFieldComponent: React.FC<VisibilityAwareVariableFie
 
   // Render the appropriate field component based on variable type
   const renderField = () => {
-    const commonProps = {
-      variable,
-      value: displayValue,
-      onChange,
-      isChanged: displayIsChanged,
-      searchQuery
-    };
-
     switch (variable.type) {
+      case 'text':
+        return (
+          <TextVariableField
+            variable={variable}
+            value={displayValue as Uint8Array}
+            onChange={onChange as (value: Uint8Array) => void}
+            isChanged={displayIsChanged}
+            searchQuery={searchQuery}
+          />
+        );
       case 'simple':
-        return <SimpleVariableField {...commonProps} />;
+        return (
+          <SimpleVariableField
+            variable={variable}
+            value={displayValue as number}
+            onChange={onChange as (value: number) => void}
+            isChanged={displayIsChanged}
+            searchQuery={searchQuery}
+          />
+        );
       case 'bitmask':
-        return <BitmaskVariableField {...commonProps} />;
+        return (
+          <BitmaskVariableField
+            variable={variable}
+            value={displayValue as number}
+            onChange={onChange as (value: number) => void}
+            isChanged={displayIsChanged}
+            searchQuery={searchQuery}
+          />
+        );
       case 'timer':
-        return <TimerVariableField {...commonProps} />;
+        return (
+          <TimerVariableField
+            variable={variable}
+            value={displayValue as number}
+            onChange={onChange as (value: number) => void}
+            isChanged={displayIsChanged}
+            searchQuery={searchQuery}
+          />
+        );
       default:
         // Fallback to simple field for unknown types
-        return <SimpleVariableField {...commonProps} />;
+        return (
+          <SimpleVariableField
+            variable={variable}
+            value={displayValue as number}
+            onChange={onChange as (value: number) => void}
+            isChanged={displayIsChanged}
+            searchQuery={searchQuery}
+          />
+        );
     }
   };
 
