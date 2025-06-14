@@ -109,7 +109,8 @@ try {
     
     # Convert back to JSON with proper formatting
     $jsonOutput = $updaterJson | ConvertTo-Json -Depth 10
-    [System.IO.File]::WriteAllText($updaterPath, $jsonOutput, [System.Text.Encoding]::UTF8)
+    $Utf8NoBomEncoding = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $False
+    [System.IO.File]::WriteAllText($updaterPath, $jsonOutput, $Utf8NoBomEncoding)
     
     # Format with prettier
     & npx prettier --write $updaterRelativePath

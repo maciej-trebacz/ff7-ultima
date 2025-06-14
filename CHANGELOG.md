@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.6.0 (2025-06-14)
+
+## General
+
+* New module: Chocobos - manage Chocobos in your stables and pen
+* New module: Variables - moved the variable editor into a new module and added a Simple editor with descriptions for most of the variables
+* Fixed edit popovers in some areas
+
 ## 1.5.2 (2025-05-23)
 
 ## General
