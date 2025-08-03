@@ -1,11 +1,11 @@
 {
-  "version": "1.6.0",
-  "notes": "New modules: Chocobos and Variables. Simplified variable editing.",
-  "pub_date": "2025-06-14T18:01:21Z",
+  "version": "1.7.0",
+  "notes": "View and edit field model lights",
+  "pub_date": "2025-08-03T19:08:28Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290Ti9jTnF0NG1paTJMU3FUUTh5bFlkck9ZYndlZThSZ1p1cWhqaGxSWEx3UEx5dUExaHprcDF4YUYyN05RMFUxYjFtZmxEZGdrVHFNbEV6YUJLUGVLZWdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ5OTE2ODgxCWZpbGU6RkY3IFVsdGltYV8xLjYuMF94NjQtc2V0dXAuZXhlCllDUWhvVjk2dUZoQU5GSUNxYlZuWkJ6azhtd1NIOEo0TTdLVjUxQlJLb0ZwMUpjTDVHMDBvZmxqdk1EdFBoV0lTY2hLbzBlZTFTaUhJbUdXdTkyUUNnPT0K",
-      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.6.0/FF7.Ultima_1.6.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWktFU284d290TjZpWEd6aHJPV0VkMTcremtRaXpmWHpnbkxmUmpjNmFUcEJSRUdpcWtneVJtUVMzSHNWV2pJM040WVRJNk5SdEV2Yk1NLzh4bFd0b2d3UkI1YitGb1FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzU0MjQwOTA4CWZpbGU6RkY3IFVsdGltYV8xLjcuMF94NjQtc2V0dXAuZXhlCk5yNFpVMU5XNS9jcHZaT0ZQNyt6anRqZDVoR0FyV1FQTmtuNnhFQ0J5RmlPWUNoN1pVWS9RQ3E1VGVuVzFzU1k3SnlKSXRBNzRKeXFuOXQ5aTZsUkFRPT0K",
+      "url": "https://github.com/maciej-trebacz/ff7-ultima/releases/download/1.7.0/FF7.Ultima_1.7.0_x64-setup.exe"
     }
   }
 }

@@ -359,6 +359,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
             collision: modelData.collision ? 0 : 1,
             interaction: modelData.interaction ? 0 : 1,
             visible: modelData.visible,
+            lights: modelData.lights,
           } as FieldModel;
         }).filter((model: FieldModel | null): model is FieldModel => model !== null);
 

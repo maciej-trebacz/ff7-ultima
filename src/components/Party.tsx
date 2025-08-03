@@ -49,7 +49,7 @@ export function Party({ ff7 }: PartyProps) {
         onValueChange={v => ff7.setPartyMemberSlot(slot, parseInt(v))}
       >
         <SelectTrigger>
-          <span className="truncate w-[55px] text-right">
+          <span className="truncate text-right" style={{ width: 'calc(21vw - 64px)' }}>
             <SelectValue />
           </span>
         </SelectTrigger>

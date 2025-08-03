@@ -40,6 +40,20 @@ export enum RandomEncounters {
   Max = 2,
 }
 
+export interface Light {
+  color: [number, number, number]; // RGB
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface FieldLights {
+  global_light_color: [number, number, number]; // RGB
+  light1: Light;
+  light2: Light;
+  light3: Light;
+}
+
 export interface FieldModel {
   name: string,
   x: number,
@@ -50,6 +64,7 @@ export interface FieldModel {
   collision: number,
   interaction: number,
   visible: number,
+  lights: FieldLights,
 }
 
 export interface FieldLine {

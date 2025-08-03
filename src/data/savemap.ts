@@ -1234,14 +1234,19 @@ export const bank13Fields: SaveVarDefinition[] = [
   { offset: 96, length: 1, type: 'u8', label: 'Northern Cave progress 1' },
   { offset: 97, length: 1, type: 'u8', label: 'Northern Cave progress 2' },
   { offset: 104, length: 24, type: 'text', label: 'Location name', description: 'FF Text format' },
-  { offset: 133, length: 1, type: 'u8', label: 'World map tutorial seen', description: '0x3B: Seen, 0x33: Not seen' },
+  { offset: 133, length: 1, type: 'bitmask', label: 'World map flags', bits: [
+    { mask: 0x08, label: 'Tutorial about saving seen' },
+    { mask: 0x20, label: 'Buggy tutorial seen' },
+    { mask: 0x80, label: 'Chocobo is inside Highwind' },
+  ] },
   {
     offset: 134,
     length: 1,
     type: 'bitmask',
     label: 'Submarine tutorial flags',
     bits: [
-      { mask: 0x04, label: 'Red submarine tutorial' },
+      { mask: 0x01, label: 'Tiny Bronco tutorial seen' },
+      { mask: 0x04, label: 'Red submarine tutorial seen' },
     ],
   },
   { offset: 135, length: 1, type: 'u8', label: 'Ruby Weapon form', description: 'bit 0: Small (before encounter), bit 1: Big (after encounter)' },

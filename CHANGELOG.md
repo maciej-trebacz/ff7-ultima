@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.0 (2025-08-03)
+
+## Field
+
+* View and edit field model lights
+
 ## 1.6.0 (2025-06-14)
 
 ## General

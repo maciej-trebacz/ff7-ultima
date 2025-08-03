@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/tooltip";
 import { EditPopover } from "@/components/EditPopover";
 import { SaveStates } from "@/components/SaveStates";
-import { Box, Shield } from "lucide-react";
+import { Box, Shield, Lightbulb } from "lucide-react";
 import { Eye } from "lucide-react";
 import { MessageSquare } from "lucide-react";
+import { FieldLightsModal } from "@/components/modals/FieldLightsModal";
 
 export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
@@ -25,6 +26,8 @@ export function Field(props: { ff7: FF7 }) {
   const [editCoord, setEditCoord] = useState<"x" | "y" | "z" | "direction" | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
+  const [isLightsModalOpen, setIsLightsModalOpen] = useState(false);
+  const [currentLightsModelIndex, setCurrentLightsModelIndex] = useState<number | null>(null);
 
   const openWarpModal = () => {
     setIsWarpModalOpen(true);
@@ -49,6 +52,16 @@ export function Field(props: { ff7: FF7 }) {
     setEditCoord(coord ?? null);
     setPopoverOpen(true);
   }
+
+  const openLightsModal = (modelIndex: number) => {
+    setCurrentLightsModelIndex(modelIndex);
+    setIsLightsModalOpen(true);
+  };
+
+  const closeLightsModal = () => {
+    setIsLightsModalOpen(false);
+    setCurrentLightsModelIndex(null);
+  };
 
   const submitValue = () => {
     if (currentModelEditing !== null && editCoord) {
@@ -259,7 +272,7 @@ export function Field(props: { ff7: FF7 }) {
                 <th className="p-1 px-2">Z</th>
                 <th className="p-1">Dir.</th>
                 <th className="p-1">Tri.</th>
-                <th className="p-1">Flags</th>
+                <th className="p-1 w-[88px]">&nbsp;</th>
               </tr>
             </thead>
             <tbody>
@@ -358,7 +371,20 @@ export function Field(props: { ff7: FF7 }) {
                     <td className="p-1 text-nowrap">
                       {model.triangle}
                     </td>
-                    <td className="p-1 text-nowrap flex gap-1">
+                    <td className="p-1 pr-0 text-nowrap flex gap-1">
+                      <TooltipProvider>
+                        <Tooltip delayDuration={150}>
+                          <TooltipTrigger asChild>
+                            <Lightbulb
+                              className="h-4 w-4 cursor-pointer hover:text-primary transition-colors"
+                              onClick={() => openLightsModal(index)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Edit Lights</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <TooltipProvider>
                         <Tooltip delayDuration={150}>
                           <TooltipTrigger asChild>
@@ -413,6 +439,22 @@ export function Field(props: { ff7: FF7 }) {
             </tbody>
           </table>
         </>
+      )}
+
+      {currentLightsModelIndex !== null && (
+        <FieldLightsModal
+          open={isLightsModalOpen}
+          setOpen={setIsLightsModalOpen}
+          lights={state.fieldModels[currentLightsModelIndex]?.lights || {
+            global_light_color: [0, 0, 0],
+            light1: { color: [0, 0, 0], x: 0, y: 0, z: 0 },
+            light2: { color: [0, 0, 0], x: 0, y: 0, z: 0 },
+            light3: { color: [0, 0, 0], x: 0, y: 0, z: 0 },
+          }}
+          onChange={(lights) => ff7.setFieldModelLights(currentLightsModelIndex, lights)}
+          modelIndex={currentLightsModelIndex}
+          modelName={state.fieldModels[currentLightsModelIndex]?.name || 'Unknown'}
+        />
       )}
     </div>
   );

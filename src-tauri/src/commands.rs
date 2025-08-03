@@ -3,6 +3,7 @@
 use ff7_lib::ff7;
 use ff7_lib::ff7::addresses::FF7Addresses;
 use ff7_lib::ff7::types::{EnemyData, WorldFieldTblItem, ItemData, Scene, ChocoboData, ChocoboSlot};
+use ff7_lib::ff7::types::field::FieldLights;
 use ff7_lib::utils::memory;
 use ff7_lib::utils::process;
 use tauri::ipc::Invoke;
@@ -252,6 +253,11 @@ pub async fn read_battle_scenes() -> Result<Vec<Scene>, String> {
     ff7::data::battle::read_scene_bin()
 }
 
+#[tauri::command]
+pub fn write_field_lights(lights: FieldLights, model_index: u32) -> Result<(), String> {
+    ff7::data::field::write_field_lights(&lights, model_index, &FF7Addresses::new())
+}
+
 pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
     tauri::generate_handler![
         read_memory_byte,
@@ -299,5 +305,6 @@ pub fn generate_handler() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync {
         write_stables_owned,
         write_occupied_stables,
         set_chocobo_can_mate,
+        write_field_lights,
     ]
 }

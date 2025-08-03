@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { DataType, readMemory, writeMemory, setMemoryProtection, readMemoryBuffer } from "./memory";
 import { waitFor } from "./util";
 import { useFF7Context } from "./FF7Context";
-import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination, PartyMember } from "./types";
+import { EnemyData, GameModule, RandomEncounters, WorldFieldTblItem, Destination, PartyMember, FieldLights } from "./types";
 import { FF7Addresses } from "./ff7Addresses";
 import { PositiveStatuses, statuses } from "./ff7Statuses";
 import { battles } from "./ff7Battles";
@@ -964,6 +964,9 @@ export function useFF7(addresses: FF7Addresses) {
     },
     setFieldModelVisible: async (index: number, visible: boolean) => {
       await writeMemory(addresses.field_models_objs + index * 0x88 + 0x62, visible ? 1 : 0, DataType.Byte);
+    },
+    setFieldModelLights: async (index: number, lights: FieldLights) => {
+      await invoke("write_field_lights", { lights, modelIndex: index });
     },
     async saveFieldState(title?: string) {
       const memory = await readMemoryBuffer(addresses.savemap, 0x10F4)
