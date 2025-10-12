@@ -521,7 +521,7 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Render loading/error states based on address loading
   if (isLoadingAddresses) {
-    return <div className="flex items-center justify-center h-screen">Loading addresses...</div>; // Or a spinner
+    return <></>;
   }
 
   if (errorAddresses) {

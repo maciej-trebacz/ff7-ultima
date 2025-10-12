@@ -3,9 +3,9 @@
   "version": "1.7.0",
   "identifier": "org.m4v3r.ff7-ultima",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "bun --bun run dev-server",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "bun --bun run build-server",
     "frontendDist": "../dist"
   },
   "app": {
@@ -15,6 +15,7 @@
         "width": 720,
         "height": 635,
         "theme": "Dark",
+        "backgroundColor": "#111212",
         "visible": true,
         "resizable": true,
         "maximizable": true

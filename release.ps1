@@ -25,7 +25,7 @@ try {
     [System.IO.File]::WriteAllText($packageJsonPath, $jsonOutput, $Utf8NoBomEncoding)
     
     # Format with prettier
-    & npx prettier --write "package.json"
+    & bunx prettier --write "package.json"
     Write-Host "package.json updated and formatted successfully" -ForegroundColor Green
 } catch {
     Write-Error "Failed to update package.json: $_"
@@ -60,7 +60,7 @@ try {
     [System.IO.File]::WriteAllText($tauriConfigPath, $jsonOutput, $Utf8NoBomEncoding)
     
     # Format with prettier
-    & npx prettier --write $tauriConfigRelativePath
+    & bunx prettier --write $tauriConfigRelativePath
     Write-Host "tauri.conf.json updated and formatted successfully" -ForegroundColor Green
 } catch {
     Write-Error "Failed to update tauri.conf.json: $_"
@@ -113,7 +113,7 @@ try {
     [System.IO.File]::WriteAllText($updaterPath, $jsonOutput, $Utf8NoBomEncoding)
     
     # Format with prettier
-    & npx prettier --write $updaterRelativePath
+    & bunx prettier --write $updaterRelativePath
     Write-Host "updater.json updated and formatted successfully!" -ForegroundColor Green
 } catch {
     Write-Error "Failed to update updater.json: $_"
