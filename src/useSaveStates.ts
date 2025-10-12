@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Destination } from "./types";
-import { useSettings } from "./useSettings";
+import { useSettings, SaveStateBase } from "./useSettings";
 import { logger } from "./lib/logging";
 
 type RegionOffset = [number, number];
@@ -26,12 +26,6 @@ for (let i = 0; i < 16; i++) {
   const end = start + 0x80;
   SaveRegions.push([start, end]);
 }
-
-export type SaveStateBase = {
-  id: string;
-  timestamp: number;
-  title?: string;
-};
 
 export type SaveState = SaveStateBase & {
   regions: number[][];
@@ -144,6 +138,15 @@ export function useSaveStates() {
     logger.info('Removed field state', { id });
   };
 
+  const removeFieldStates = (ids: string[]) => {
+    const newFieldStates = saveStates.fieldStates.filter(state => !ids.includes(state.id));
+    updateSaveStates({ ...saveStates, fieldStates: newFieldStates });
+    if (lastLoadedFieldStateId && ids.includes(lastLoadedFieldStateId)) {
+      setLastLoadedFieldStateId(null);
+    }
+    logger.info('Removed field states', { ids, count: ids.length });
+  };
+
   const removeSnowboardState = (id: string) => {
     const newSnowboardStates = saveStates.snowboardStates.filter(state => state.id !== id);
     updateSaveStates({ ...saveStates, snowboardStates: newSnowboardStates });
@@ -173,6 +176,14 @@ export function useSaveStates() {
     );
     updateSaveStates({ ...saveStates, fieldStates: newFieldStates });
     logger.info('Updated field state title', { id, title });
+  };
+
+  const updateFieldStateCategory = (id: string, category: string) => {
+    const newFieldStates = saveStates.fieldStates.map(state =>
+      state.id === id ? { ...state, category } : state
+    );
+    updateSaveStates({ ...saveStates, fieldStates: newFieldStates });
+    logger.info('Updated field state category', { id, category });
   };
 
   const updateSnowboardStateTitle = (id: string, title: string) => {
@@ -273,11 +284,13 @@ export function useSaveStates() {
     getSnowboardState,
     getSnowboardStateById,
     removeFieldState,
+    removeFieldStates,
     removeSnowboardState,
     clearFieldStates,
     clearSnowboardStates,
     clearAllStates,
     updateFieldStateTitle,
+    updateFieldStateCategory,
     updateSnowboardStateTitle,
     reorderFieldStates,
     exportStates,

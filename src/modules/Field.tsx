@@ -11,7 +11,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EditPopover } from "@/components/EditPopover";
-import { SaveStates } from "@/components/SaveStates";
 import { Box, Shield, Lightbulb } from "lucide-react";
 import { Eye } from "lucide-react";
 import { MessageSquare } from "lucide-react";
@@ -265,8 +264,6 @@ export function Field(props: { ff7: FF7 }) {
         onSubmit={onWarpSubmit}
         ff7={ff7}
       />
-
-      <SaveStates ff7={ff7} />
 
       {state.fieldModels.length > 0 && state.fieldModels[0] && (
         <>

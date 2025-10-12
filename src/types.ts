@@ -8,6 +8,7 @@ export enum Tabs {
   Party = "party",
   Chocobos = "chocobos",
   Variables = "variables",
+  SaveStates = "save states",
 }
 
 export enum GameModule {

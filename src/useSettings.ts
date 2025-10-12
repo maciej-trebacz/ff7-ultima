@@ -14,6 +14,7 @@ export interface GeneralSettings {
   hasSeenSettingsHint: boolean;
   lastDismissedUpdateVersion: string | null;
   speedHackEnhancements: boolean;
+  selectedCategoryFilter: string;
   rememberedHacks: {
     speed: boolean;
     skipIntros: boolean;
@@ -54,6 +55,7 @@ export interface SaveStateBase {
   id: string;
   timestamp: number;
   title?: string;
+  category?: string;
 }
 
 export type SaveState = SaveStateBase & {
@@ -281,6 +283,7 @@ function getDefaultGeneralSettings(): GeneralSettings {
     hasSeenSettingsHint: false,
     lastDismissedUpdateVersion: null,
     speedHackEnhancements: true,
+    selectedCategoryFilter: 'all',
     rememberedHacks: {
       speed: true,
       skipIntros: true,

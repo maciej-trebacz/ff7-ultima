@@ -978,7 +978,7 @@ export function useFF7(addresses: FF7Addresses) {
     setFieldModelLights: async (index: number, lights: FieldLights) => {
       await invoke("write_field_lights", { lights, modelIndex: index });
     },
-    async saveFieldState(title?: string) {
+    async saveFieldState(title?: string, category?: string) {
       const memory = await readMemoryBuffer(addresses.savemap, 0x10F4)
       
       const regions = [];
@@ -1002,7 +1002,8 @@ export function useFF7(addresses: FF7Addresses) {
         fieldId: gameState.fieldId,
         fieldName: gameState.fieldName,
         destination,
-        title
+        title,
+        category
       });
     },
     async loadFieldState(stateId?: string) {
@@ -1074,9 +1075,9 @@ export function useFF7(addresses: FF7Addresses) {
       await writeMemory(0xdd83b8 + 0x64, 0, DataType.Int);
       await writeMemory(0xddaf98, state.entitiesData, DataType.Buffer);
     },
-    async saveState(title?: string) {
+    async saveState(title?: string, category?: string) {
       if (gameState.currentModule === GameModule.Field) {
-        await this.saveFieldState(title);
+        await this.saveFieldState(title, category);
       } else if (gameState.currentModule === GameModule.Snowboard2) {
         await this.saveSnowBoardState(title);
       }

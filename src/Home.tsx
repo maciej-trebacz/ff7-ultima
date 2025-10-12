@@ -1,6 +1,5 @@
 "use strict";
 
-import { register, unregister, isRegistered } from '@tauri-apps/plugin-global-shortcut';
 import { useEffect, useState } from "react";
 import { FF7, useFF7 } from "./useFF7";
 import { useFF7Context } from "./FF7Context";
@@ -16,7 +15,19 @@ import { Battle } from "./modules/Battle";
 import { Party } from "./modules/Party";
 import { Chocobos } from "./modules/Chocobos";
 import { Variables } from "./modules/Variables";
+import { SaveStatesModule } from "./modules/SaveStates";
 import { useShortcuts } from './useShortcuts';
+
+const TAB_TITLES: Record<Tabs, string> = {
+  [Tabs.General]: "General",
+  [Tabs.Field]: "Field",
+  [Tabs.World]: "World",
+  [Tabs.Battle]: "Battle",
+  [Tabs.Party]: "Party",
+  [Tabs.Chocobos]: "Chocobos",
+  [Tabs.Variables]: "Variables",
+  [Tabs.SaveStates]: "Save States",
+};
 
 function Home() {
   const [currentTab, setCurrentTab] = useState<Tabs>(Tabs.General);
@@ -53,6 +64,8 @@ function Home() {
         return <Chocobos ff7={ff7} />;
       case Tabs.Variables:
         return <Variables ff7={ff7} />;
+      case Tabs.SaveStates:
+        return <SaveStatesModule ff7={ff7} />;
       default:
         return <General ff7={ff7} />;
     }
@@ -67,10 +80,10 @@ function Home() {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {Object.keys(Tabs).map((item) => (
-                      <SidebarMenuItem key={item}>
-                        <SidebarMenuButton isActive={currentTab === Tabs[item as keyof typeof Tabs]} onClick={() => setCurrentTab(Tabs[item as keyof typeof Tabs])}>
-                          {item}
+                    {Object.values(Tabs).map((tab) => (
+                      <SidebarMenuItem key={tab}>
+                        <SidebarMenuButton isActive={currentTab === tab} onClick={() => setCurrentTab(tab)}>
+                          {TAB_TITLES[tab]}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
@@ -91,9 +104,11 @@ function Home() {
             </SidebarFooter>
           </Sidebar>
           <div className="p-2 overflow-y-auto flex-auto">
-            <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
-              {currentTab}
-            </h2>
+            {currentTab !== Tabs.SaveStates && (
+              <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+                {TAB_TITLES[currentTab]}
+              </h2>
+            )}
             {renderTabContent()}
           </div>
         </div>
