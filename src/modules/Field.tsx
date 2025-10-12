@@ -16,10 +16,12 @@ import { Box, Shield, Lightbulb } from "lucide-react";
 import { Eye } from "lucide-react";
 import { MessageSquare } from "lucide-react";
 import { FieldLightsModal } from "@/components/modals/FieldLightsModal";
+import { useSettings } from "@/useSettings";
 
 export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
+  const { generalSettings, hackSettings, updateHackSettings } = useSettings();
   const [isWarpModalOpen, setIsWarpModalOpen] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -244,7 +246,15 @@ export function Field(props: { ff7: FF7 }) {
       <div className="grid grid-cols-2 gap-x-1">
         <div className="flex-1">
           <Row label="Skip Dialogues">
-            <Switch checked={state.fieldSkipDialoguesEnabled} onCheckedChange={(enabled) => ff7.toggleSkipDialogues()} />
+            <Switch checked={state.fieldSkipDialoguesEnabled} onCheckedChange={async (enabled) => {
+              await ff7.toggleSkipDialogues();
+              if (generalSettings?.rememberedHacks.skipDialogues) {
+                updateHackSettings({
+                  ...(hackSettings || {}),
+                  skipDialogues: !state.fieldSkipDialoguesEnabled,
+                });
+              }
+            }} />
           </Row>
         </div>
       </div>

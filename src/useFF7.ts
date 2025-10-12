@@ -147,6 +147,9 @@ export function useFF7(addresses: FF7Addresses) {
         if (rememberedHacks.manualSlots && hackSettings.manualSlots !== undefined && hackSettings.manualSlots !== gameState.manualSlotsEnabled) {
           hackSettings.manualSlots ? ff7.enableManualSlots() : ff7.disableManualSlots();
         }
+        if (rememberedHacks.skipDialogues && hackSettings.skipDialogues !== undefined && hackSettings.skipDialogues !== gameState.fieldSkipDialoguesEnabled) {
+          await ff7.toggleSkipDialogues();
+        }
       }
     }
 

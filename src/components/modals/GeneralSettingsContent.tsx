@@ -40,7 +40,8 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     apMultiplier: true,
     invincibility: true,
     instantATB: true,
-    manualSlots: true
+    manualSlots: true,
+    skipDialogues: true
   });
 
   // Sync state when generalSettings changes
@@ -76,6 +77,8 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
         return ff7.gameState.instantATBEnabled;
       case 'manualSlots':
         return ff7.gameState.manualSlotsEnabled;
+      case 'skipDialogues':
+        return ff7.gameState.fieldSkipDialoguesEnabled;
     }
   };
 
@@ -258,6 +261,14 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
                 onCheckedChange={() => toggleHack('manualSlots')}
               />
               <label htmlFor="manualSlots" className="text-sm">Manual Slots</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="skipDialogues" 
+                checked={rememberedHacks.skipDialogues}
+                onCheckedChange={() => toggleHack('skipDialogues')}
+              />
+              <label htmlFor="skipDialogues" className="text-sm">Skip Dialogues</label>
             </div>
           </div>
         </div>

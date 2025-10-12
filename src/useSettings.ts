@@ -26,6 +26,7 @@ export interface GeneralSettings {
     invincibility: boolean;
     instantATB: boolean;
     manualSlots: boolean;
+    skipDialogues: boolean;
   };
 }
 
@@ -41,6 +42,7 @@ export interface HackSettings {
   gilMultiplier?: number;
   apMultiplier?: number;
   manualSlots?: boolean;
+  skipDialogues?: boolean;
 }
 
 export interface SaveStates {
@@ -291,6 +293,7 @@ function getDefaultGeneralSettings(): GeneralSettings {
       invincibility: true,
       instantATB: true,
       manualSlots: true,
+      skipDialogues: true,
     },
   };
 }
