@@ -277,10 +277,17 @@ export function useFF7(addresses: FF7Addresses) {
 
   // When speed hack is enabled disable temperature dropping on the Great Glacier climbing sections
   const snowFields = [689, 692, 694];
-  if (speedHackEnhancementsOn && parseFloat(gameState.speed) > 1 && snowFields.includes(gameState.fieldId) && gameState.fieldTmpVars[8] < 37) {
-    setTimeout(async () => {
-      await writeMemory(addresses.field_script_temp_vars + 8, 37, DataType.Byte);
-    }, 0);
+  if (speedHackEnhancementsOn && parseFloat(gameState.speed) > 1 && snowFields.includes(gameState.fieldId)) {
+    // First screen (gaia_1) stores temperature in temp var 9, other screens use temp var 8
+    if (gameState.fieldId === 689 && gameState.fieldTmpVars[9] < 37) {
+      setTimeout(async () => {
+        await writeMemory(addresses.field_script_temp_vars + 9, 37, DataType.Byte);
+      }, 0);
+    } else if (gameState.fieldTmpVars[8] < 37) {
+      setTimeout(async () => {
+        await writeMemory(addresses.field_script_temp_vars + 8, 37, DataType.Byte);
+      }, 0);
+    }
   }
 
   // Disable the lines that trigger battles in the Whirlwind Maze fields
