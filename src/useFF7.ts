@@ -150,6 +150,12 @@ export function useFF7(addresses: FF7Addresses) {
         if (rememberedHacks.skipDialogues && hackSettings.skipDialogues !== undefined && hackSettings.skipDialogues !== gameState.fieldSkipDialoguesEnabled) {
           await ff7.toggleSkipDialogues();
         }
+        if (rememberedHacks.runByDefault && hackSettings.runByDefault !== undefined && hackSettings.runByDefault !== gameState.fieldRunByDefaultEnabled) {
+          await ff7.toggleRunByDefault();
+        }
+        if (rememberedHacks.autoSense && hackSettings.autoSense !== undefined && hackSettings.autoSense !== gameState.autoSenseEnabled) {
+          await ff7.toggleAutoSense();
+        }
       }
     }
 
@@ -912,16 +918,34 @@ export function useFF7(addresses: FF7Addresses) {
       return await invoke("read_enemy_data", { id: enemyId }) as EnemyData;
     },
     setExpMultiplier: async (multiplier: number) => {
-      const value = multiplier.toString(16);
-      await writeMemory(addresses.battle_exp_calc, hex(`8b 88 38 B1 9A 00 6B C9 ${value} 01 0D C0 E2 99 00 90 90 90`), DataType.Buffer);
+      if (multiplier === 0 || multiplier >= 1) {
+        const value = multiplier.toString(16);
+        await writeMemory(addresses.battle_exp_calc, hex(`8b 88 38 B1 9A 00 6B C9 ${value} 01 0D C0 E2 99 00 90 90 90`), DataType.Buffer);
+      } else if (multiplier > 0 && multiplier < 1) {
+        const num = multiplier === 0.25 ? 2 : 1;
+        const value = num.toString(16);
+        await writeMemory(addresses.battle_exp_calc, hex(`8b 88 38 B1 9A 00 C1 E9 ${value} 01 0D C0 E2 99 00 90 90 90`), DataType.Buffer);
+      }
     },
     setGilMultiplier: async (multiplier: number) => {
-      const value = multiplier.toString(16);
-      await writeMemory(addresses.battle_exp_calc + 0x1B, hex(`8b 82 34 B1 9A 00 6B C0 ${value} 01 05 C8 E2 99 00 90`), DataType.Buffer);
+      if (multiplier === 0 || multiplier >= 1) {
+        const value = multiplier.toString(16);
+        await writeMemory(addresses.battle_exp_calc + 0x1B, hex(`8b 82 34 B1 9A 00 6B C0 ${value} 01 05 C8 E2 99 00 90`), DataType.Buffer);
+      } else if (multiplier > 0 && multiplier < 1) {
+        const num = multiplier === 0.25 ? 2 : 1;
+        const value = num.toString(16);
+        await writeMemory(addresses.battle_exp_calc + 0x1B, hex(`8b 82 34 B1 9A 00 C1 E8 ${value} 01 05 C8 E2 99 00 90`), DataType.Buffer);
+      }
     },
     setApMultiplier: async (multiplier: number) => {
-      const value = multiplier.toString(16);
-      await writeMemory(addresses.battle_ap_calc, hex(`6B D2 ${value} 01 15 C4 E2 99 00 90 90 90`), DataType.Buffer);
+      if (multiplier === 0 || multiplier >= 1) {
+        const value = multiplier.toString(16);
+        await writeMemory(addresses.battle_ap_calc, hex(`6B D2 ${value} 01 15 C4 E2 99 00 90 90 90`), DataType.Buffer);
+      } else if (multiplier > 0 && multiplier < 1) {
+        const num = multiplier === 0.25 ? 2 : 1;
+        const value = num.toString(16);
+        await writeMemory(addresses.battle_ap_calc, hex(`C1 EA ${value} 01 15 C4 E2 99 00 90 90 90`), DataType.Buffer);
+      }
     },
     gameOver: async () => {
       if (gameState.currentModule === GameModule.Battle) {
@@ -1145,6 +1169,9 @@ export function useFF7(addresses: FF7Addresses) {
         {address: 0x5cb127, params: []},
       ]);
 
+      // Copy the global party list into the field party list to avoid desyncs
+      const party = await readMemoryBuffer(addresses.party_member_ids, 3);
+      await writeMemory(addresses.party_member_ids + 0x7B5, party, DataType.Buffer);
     },
     async getItemNames() {
       return invoke("read_item_names");
@@ -1359,6 +1386,9 @@ export function useFF7(addresses: FF7Addresses) {
     async setFieldFormationIndex(value: number) {
       await writeMemory(addresses.formation_idx, value, DataType.Byte);
     },
+    async setFieldAltEncountersEnabled(enabled: boolean) {
+      await writeMemory(addresses.field_alt_encounters_enabled, enabled ? 1 : 0, DataType.Byte);
+    },
     async updatePartyMember(id: number, field: keyof PartyMember, value: number | string) {
       if (field === "name") {
         const name = Array.from(encodeText(value as string));
@@ -1410,7 +1440,16 @@ export function useFF7(addresses: FF7Addresses) {
 
       // Recalc the stats
       await callGameFn(0x61f739, []);
-    }
+    },
+    toggleAutoSense: async () => {
+      const newValue = gameState.autoSenseEnabled ? 0xBD : 0x00;
+      await writeMemory(addresses.auto_sense_check, newValue, DataType.Byte);
+    },
+    toggleRunByDefault: async () => {
+      const newValue = gameState.fieldRunByDefaultEnabled ? 0x74 : 0x75;
+      await writeMemory(addresses.field_run_by_default_1, newValue, DataType.Byte);
+      await writeMemory(addresses.field_run_by_default_2, newValue, DataType.Byte);
+    },
   };
 
   return ff7;

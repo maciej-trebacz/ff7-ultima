@@ -94,13 +94,13 @@ export function Battle(props: { ff7: FF7 }) {
   };
   
   const parseEnemyName = (enemy: BattleCharObj) => {
-    const enemies = ff7.gameState.battleEnemies.filter(e => e.name === enemy.name);
-    if (enemies.length === 1) {
+    const sameNameEnemies = enemies.filter(e => e.name === enemy.name);
+    if (sameNameEnemies.length === 1) {
       return enemy.name;
     } else {
 
       // Return name with a letter suffix at the end, eg. "Enemy A", "Enemy B", etc.
-      return enemy.name + " " + String.fromCharCode(65 + enemies.indexOf(enemy));
+      return enemy.name + " " + String.fromCharCode(65 + sameNameEnemies.indexOf(enemy));
     }
   }
 
@@ -143,7 +143,10 @@ export function Battle(props: { ff7: FF7 }) {
     ff7.setHP(0, index);
   }
 
-  const enemies = ff7.gameState.battleEnemies.sort((a, b) => a.scene_id - b.scene_id) || [];
+  const enemies = ff7.gameState.battleEnemies.filter(e => e.scene_id !== 255).map(e => ({
+    ...e,
+    name: e.name.trim() === "" ? "<Unnamed>" : e.name,
+  })).sort((a, b) => a.scene_id - b.scene_id) || [];
   const actors = currentAllyEditing !== null && currentAllyEditing > 3 ? ff7.gameState.battleEnemies : ff7.gameState.battleAllies;
   const actorIdx = currentAllyEditing !== null && currentAllyEditing > 3 ? currentAllyEditing - 4 : currentAllyEditing;
 
@@ -176,6 +179,8 @@ export function Battle(props: { ff7: FF7 }) {
             <Switch checked={ff7.gameState.instantATBEnabled} onClick={toggleInstantATB} />
           </Row>
         </div>
+      </div>
+      <div className="flex gap-1">
         <div className="flex-1">
           <Row label={
             <div className="flex items-center gap-1">
@@ -195,16 +200,45 @@ export function Battle(props: { ff7: FF7 }) {
             <Switch checked={ff7.gameState.manualSlotsEnabled} onClick={toggleManualSlots} />
           </Row>
         </div>
+        <div className="flex-1">
+          <Row label={
+            <div className="flex items-center gap-1">
+              <span>Auto Sense</span>
+              <TooltipProvider>
+                <Tooltip delayDuration={250}>
+                  <TooltipTrigger asChild>
+                    <Info size={14} className="cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Always displays enemy HP in battle help bar</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          } className="flex items-center">
+            <Switch checked={ff7.gameState.autoSenseEnabled} onClick={async () => {
+              await ff7.toggleAutoSense();
+              if (generalSettings?.rememberedHacks.autoSense) {
+                updateHackSettings({
+                  ...(hackSettings || {}),
+                  autoSense: !ff7.gameState.autoSenseEnabled,
+                });
+              }
+            }} />
+          </Row>
+        </div>
       </div>
       <div className="flex gap-1">
         <div className="flex-1">
           <Row label="EXP Multiplier">
-            <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => setExpMultiplier(parseInt(value))}>
+            <Select value={'' + ff7.gameState.expMultiplier} onValueChange={(value) => setExpMultiplier(parseFloat(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">0</SelectItem>
+                <SelectItem value="0.25">0.25</SelectItem>
+                <SelectItem value="0.5">0.5</SelectItem>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
                 <SelectItem value="3">3</SelectItem>
@@ -218,12 +252,14 @@ export function Battle(props: { ff7: FF7 }) {
         </div>
         <div className="flex-1">
           <Row label="AP Multiplier">
-            <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => setApMultiplier(parseInt(value))}>
+            <Select value={'' + ff7.gameState.apMultiplier} onValueChange={(value) => setApMultiplier(parseFloat(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">0</SelectItem>
+                <SelectItem value="0.25">0.25</SelectItem>
+                <SelectItem value="0.5">0.5</SelectItem>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
                 <SelectItem value="3">3</SelectItem>
@@ -237,12 +273,14 @@ export function Battle(props: { ff7: FF7 }) {
         </div>
         <div className="flex-1">
           <Row label="Gil Multiplier">
-            <Select value={'' + ff7.gameState.gilMultiplier} onValueChange={(value) => setGilMultiplier(parseInt(value))}>
+            <Select value={'' + ff7.gameState.gilMultiplier} onValueChange={(value) => setGilMultiplier(parseFloat(value))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">0</SelectItem>
+                <SelectItem value="0.25">0.25</SelectItem>
+                <SelectItem value="0.5">0.5</SelectItem>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
                 <SelectItem value="3">3</SelectItem>
@@ -414,7 +452,7 @@ export function Battle(props: { ff7: FF7 }) {
         </thead>
         <tbody className={ff7.gameState.currentModule === GameModule.Battle ? "" : "!text-zinc-400"}>
           {enemies.map((char, index) => {
-            if (!char.name.trim()) return null;
+            if (char.scene_id === 255) return null;
             return (
               <tr key={index} className="bg-zinc-800 text-xs group">
                 <td className="p-1 pl-2 text-nowrap w-[130px] font-bold cursor-pointer group-last:pb-2 hover:bg-zinc-700" onClick={() => { showEnemyInfoModal(char.scene_id, char.name) }}>

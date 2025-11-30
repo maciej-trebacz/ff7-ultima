@@ -104,6 +104,10 @@ export interface FF7Addresses {
   battle_points: number;
   battle_party_items: number;
   data_cave: number;
+  field_alt_encounters_enabled: number;
+  auto_sense_check: number;
+  field_run_by_default_1: number;
+  field_run_by_default_2: number;
 }
 
 export function useFF7Addresses() {

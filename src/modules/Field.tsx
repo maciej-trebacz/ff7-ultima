@@ -2,7 +2,7 @@ import Row from "@/components/Row";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { FF7 } from "@/useFF7";
-import { useState } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { WarpFieldModal } from "@/components/modals/WarpFieldModal";
 import {
   Tooltip,
@@ -16,10 +16,113 @@ import { Eye } from "lucide-react";
 import { MessageSquare } from "lucide-react";
 import { FieldLightsModal } from "@/components/modals/FieldLightsModal";
 import { useSettings } from "@/useSettings";
+import { useFF7Context } from "@/FF7Context";
+import { FieldEncounterSet, GameModule } from "@/types";
+
+const FieldEncounterRow = memo(
+  ({
+    type,
+    encounterId,
+    rate,
+    getEnemyNames,
+    onStartBattle,
+  }: {
+    type: string;
+    encounterId: number;
+    rate: number;
+    getEnemyNames: (encounterId: number) => string;
+    onStartBattle: (encounterId: number) => void;
+  }) => (
+    <tr className="bg-zinc-800 text-xs">
+      <td className="p-1">{type}</td>
+      <td className="p-1">{rate}</td>
+      <td className="p-1">{encounterId}</td>
+      <td className="p-1">{getEnemyNames(encounterId)}</td>
+      <td className="p-1">
+        <Button size="xs" variant="default" onClick={() => onStartBattle(encounterId)}>
+          Start Battle
+        </Button>
+      </td>
+    </tr>
+  ),
+  (prev, next) =>
+    prev.type === next.type &&
+    prev.encounterId === next.encounterId &&
+    prev.rate === next.rate
+);
+
+const FieldEncountersTable = memo(
+  ({
+    encounterSet,
+    getEnemyNames,
+    onStartBattle,
+  }: {
+    encounterSet: FieldEncounterSet;
+    getEnemyNames: (encounterId: number) => string;
+    onStartBattle: (encounterId: number) => void;
+  }) => (
+    <table className="w-full">
+      <thead className="bg-zinc-800 text-xs text-left">
+        <tr>
+          <th className="p-1">Type</th>
+          <th className="p-1">Rate</th>
+          <th className="p-1">Enc. ID</th>
+          <th className="p-1">Battle Scene</th>
+          <th className="p-1">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {encounterSet.normal_encounters.map((encounter, index) =>
+          encounter.encounter_id > 0 ? (
+            <FieldEncounterRow
+              key={`normal-${index}`}
+              type={`Normal ${index + 1}`}
+              encounterId={encounter.encounter_id}
+              rate={encounter.rate}
+              getEnemyNames={getEnemyNames}
+              onStartBattle={onStartBattle}
+            />
+          ) : null
+        )}
+        {encounterSet.back_attacks.map((encounter, index) =>
+          encounter.encounter_id > 0 ? (
+            <FieldEncounterRow
+              key={`back-${index}`}
+              type={`Back Attack ${index + 1}`}
+              encounterId={encounter.encounter_id}
+              rate={encounter.rate}
+              getEnemyNames={getEnemyNames}
+              onStartBattle={onStartBattle}
+            />
+          ) : null
+        )}
+        {encounterSet.side_attack.encounter_id > 0 && (
+          <FieldEncounterRow
+            type="Side Attack"
+            encounterId={encounterSet.side_attack.encounter_id}
+            rate={encounterSet.side_attack.rate}
+            getEnemyNames={getEnemyNames}
+            onStartBattle={onStartBattle}
+          />
+        )}
+        {encounterSet.pincer_attack.encounter_id > 0 && (
+          <FieldEncounterRow
+            type="Pincer Attack"
+            encounterId={encounterSet.pincer_attack.encounter_id}
+            rate={encounterSet.pincer_attack.rate}
+            getEnemyNames={getEnemyNames}
+            onStartBattle={onStartBattle}
+          />
+        )}
+      </tbody>
+    </table>
+  )
+);
 
 export function Field(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
+  const { gameData } = useFF7Context();
   const { generalSettings, hackSettings, updateHackSettings } = useSettings();
   const [isWarpModalOpen, setIsWarpModalOpen] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -29,6 +132,7 @@ export function Field(props: { ff7: FF7 }) {
   const [currentModelEditing, setCurrentModelEditing] = useState<number | null>(null);
   const [isLightsModalOpen, setIsLightsModalOpen] = useState(false);
   const [currentLightsModelIndex, setCurrentLightsModelIndex] = useState<number | null>(null);
+  const activeEncounterTable = state.fieldAltEncountersEnabled ? 2 : 1;
 
   const openWarpModal = () => {
     setIsWarpModalOpen(true);
@@ -63,6 +167,42 @@ export function Field(props: { ff7: FF7 }) {
     setIsLightsModalOpen(false);
     setCurrentLightsModelIndex(null);
   };
+
+  const getEnemyNamesFromEncounterId = useCallback((encounterId: number): string => {
+    if (!gameData.battleFormations || encounterId <= 0) {
+      return 'Unknown';
+    }
+
+    const formationItem = gameData.battleFormations.get(encounterId);
+    if (!formationItem) {
+      return 'Unknown';
+    }
+
+    const enemyCounts = new Map<string, number>();
+    formationItem.formation.enemies.forEach(entry => {
+      const enemy = formationItem.enemies.find(e => e.id === entry.enemy_id);
+      const enemyName = enemy && enemy.name ? enemy.name : "<Unnamed>";
+      enemyCounts.set(enemyName, (enemyCounts.get(enemyName) || 0) + 1);
+    });
+
+    const enemyList = Array.from(enemyCounts.entries()).map(([name, count]) => 
+      count > 1 ? `${name.trim()} (x${count})` : name.trim()
+    );
+    
+    return enemyList.join(', ') || 'Unknown';
+  }, [gameData.battleFormations]);
+
+  const onStartBattle = useCallback((encounterId: number) => {
+    if (ff7.gameState.currentModule === GameModule.Battle) return;
+    ff7.startBattle(encounterId, 0);
+  }, [ff7]);
+
+  const currentEncounterSet = useMemo(() => {
+    if (!state.fieldEncounters) return null;
+    return activeEncounterTable === 1 
+      ? state.fieldEncounters.table1 
+      : state.fieldEncounters.table2;
+  }, [state.fieldEncounters, activeEncounterTable]);
 
   const submitValue = () => {
     if (currentModelEditing !== null && editCoord) {
@@ -256,6 +396,19 @@ export function Field(props: { ff7: FF7 }) {
             }} />
           </Row>
         </div>
+        <div className="flex-1">
+          <Row label="Run by Default">
+            <Switch checked={state.fieldRunByDefaultEnabled} onCheckedChange={async () => {
+              await ff7.toggleRunByDefault();
+              if (generalSettings?.rememberedHacks.runByDefault) {
+                updateHackSettings({
+                  ...(hackSettings || {}),
+                  runByDefault: !state.fieldRunByDefaultEnabled,
+                });
+              }
+            }} />
+          </Row>
+        </div>
       </div>
 
       <WarpFieldModal
@@ -265,9 +418,49 @@ export function Field(props: { ff7: FF7 }) {
         ff7={ff7}
       />
 
+      {state.fieldEncounters && (
+        <>
+          <h2 className="uppercase mt-2 font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+            Encounters
+          </h2>
+          
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-zinc-400">Active Table:</span>
+              <Button 
+                size="xs" 
+                variant={activeEncounterTable === 1 ? "default" : "outline"}
+                onClick={() => ff7.setFieldAltEncountersEnabled(false)}
+              >
+                Table 1
+              </Button>
+              <Button 
+                size="xs" 
+                variant={activeEncounterTable === 2 ? "default" : "outline"}
+                onClick={() => ff7.setFieldAltEncountersEnabled(true)}
+              >
+                Table 2
+              </Button>
+            </div>
+          </div>
+
+          {currentEncounterSet && currentEncounterSet.active ? (
+            <FieldEncountersTable
+              encounterSet={currentEncounterSet}
+              getEnemyNames={getEnemyNamesFromEncounterId}
+              onStartBattle={onStartBattle}
+            />
+          ) : (
+            <div className="text-xs text-zinc-400 text-center py-4">
+              No encounters for this table
+            </div>
+          )}
+        </>
+      )}
+
       {state.fieldModels.length > 0 && state.fieldModels[0] && (
         <>
-          <h2 className="uppercase font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+          <h2 className="uppercase mt-2 font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
             Field Models
           </h2>
           <table className="w-full">

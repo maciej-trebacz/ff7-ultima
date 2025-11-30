@@ -41,7 +41,9 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
     invincibility: true,
     instantATB: true,
     manualSlots: true,
-    skipDialogues: true
+    skipDialogues: true,
+    runByDefault: true,
+    autoSense: true
   });
 
   // Sync state when generalSettings changes
@@ -79,6 +81,10 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
         return ff7.gameState.manualSlotsEnabled;
       case 'skipDialogues':
         return ff7.gameState.fieldSkipDialoguesEnabled;
+      case 'runByDefault':
+        return ff7.gameState.fieldRunByDefaultEnabled;
+      case 'autoSense':
+        return ff7.gameState.autoSenseEnabled;
     }
   };
 
@@ -220,6 +226,14 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
               />
               <label htmlFor="randomBattles" className="text-sm">Random Battles</label>
             </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="runByDefault" 
+                checked={rememberedHacks.runByDefault}
+                onCheckedChange={() => toggleHack('runByDefault')}
+              />
+              <label htmlFor="runByDefault" className="text-sm">Run by Default</label>
+            </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -269,6 +283,14 @@ export function GeneralSettingsContent({ ff7 }: GeneralSettingsContentProps) {
                 onCheckedChange={() => toggleHack('skipDialogues')}
               />
               <label htmlFor="skipDialogues" className="text-sm">Skip Dialogues</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="autoSense" 
+                checked={rememberedHacks.autoSense}
+                onCheckedChange={() => toggleHack('autoSense')}
+              />
+              <label htmlFor="autoSense" className="text-sm">Auto Sense</label>
             </div>
           </div>
         </div>

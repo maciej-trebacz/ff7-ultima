@@ -28,6 +28,8 @@ export interface GeneralSettings {
     instantATB: boolean;
     manualSlots: boolean;
     skipDialogues: boolean;
+    runByDefault: boolean;
+    autoSense: boolean;
   };
 }
 
@@ -44,6 +46,8 @@ export interface HackSettings {
   apMultiplier?: number;
   manualSlots?: boolean;
   skipDialogues?: boolean;
+  runByDefault?: boolean;
+  autoSense?: boolean;
 }
 
 export interface SaveStates {
@@ -297,6 +301,8 @@ function getDefaultGeneralSettings(): GeneralSettings {
       instantATB: true,
       manualSlots: true,
       skipDialogues: true,
+      runByDefault: true,
+      autoSense: true,
     },
   };
 }

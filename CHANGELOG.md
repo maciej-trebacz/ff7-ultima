@@ -1,5 +1,32 @@
 # Change Log
 
+## 1.8.0 (2025-11-30)
+
+## General
+
+* Added icons to tabs in the sidebar (first draft, will improve them later)
+
+## Field
+
+* Save states moved to their own brand new tab, see below
+* Run by Default option
+* Encounters table - shows encounters available on the current region & terrain and lets you start any of them immediately
+
+## World
+
+* Encounters table - shows encounters available on the current region & terrain and lets you start any of them immediately
+
+## Battle
+
+* Auto Sense option - always displays enemy HP in the battle help bar
+* Fractional multipliers (0.25x and 0.5x) for Exp, Gil and AP. You can use these in challenge runs to make levelling up slower
+* Enemies list now shows unnamed/dummy enemies
+
+## Save States
+
+* Brand new Save States manager tab
+* Added categories - you can now categorize your states and only display one category at a time
+
 ## 1.7.0 (2025-08-03)
 
 ## Field

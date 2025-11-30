@@ -10,10 +10,11 @@ import {
 import { Modal } from "@/components/Modal";
 import { EditPopover } from "@/components/EditPopover";
 import { Plus, Minus } from "lucide-react";
+import { ChocoboRating } from "@/types";
 
 // Types
 export interface ChocoboStats {
-  rating: FencedChocoboType;
+  rating: ChocoboRating;
   racesWon: number;
   personality: ChocoboPersonality;
   acceleration: number;
@@ -33,14 +34,6 @@ export enum ChocoboPersonality {
   RunType2 = "Type 2 (dashing)", 
 }
 
-export enum FencedChocoboType {
-  Wonderful = "Wonderful",
-  Great = "Great",
-  Good = "Good",
-  Average = "Average",
-  Poor = "Poor",
-  SoSo = "So-So"
-}
 
 // Helper components for editable fields
 const EditableStat = ({
@@ -188,9 +181,9 @@ export function ChocoboStatsModal({
         <div className="grid grid-cols-2 gap-2 items-center">
           <label className="whitespace-nowrap">Rating</label>
           <EditableSelect
-            value={stats.rating}
-            options={Object.values(FencedChocoboType)}
-            onSave={(val) => updateStat('rating', val as FencedChocoboType)}
+            value={Object.keys(ChocoboRating).find(key => ChocoboRating[key as keyof typeof ChocoboRating] === stats.rating) || 'wonderful'}
+            options={Object.keys(ChocoboRating).filter(key => isNaN(Number(key)))}
+            onSave={(val) => updateStat('rating', ChocoboRating[val as keyof typeof ChocoboRating])}
           />
 
           <label className="whitespace-nowrap">Races Won</label>

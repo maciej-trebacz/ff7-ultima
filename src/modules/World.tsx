@@ -1,9 +1,9 @@
 import Row from "@/components/Row";
-import { LocationName, WorldModelIds, WorldWalkmeshType } from "@/types";
+import { LocationName, WorldModelIds, WorldWalkmeshType, GameModule } from "@/types";
 import { FF7 } from "@/useFF7";
 import Worldmap from "@/assets/worldmap.png";
 import Chocobo from "@/assets/chocobo.png";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, memo } from "react";
 import { EditPopover } from "@/components/EditPopover";
 import {
   Tooltip,
@@ -16,15 +16,143 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Window } from "@tauri-apps/api/window"
 import { Webview } from "@tauri-apps/api/webview"
+import { useFF7Context } from "@/FF7Context";
+import { EncounterPair, EncounterSet } from "@/ff7/encwfile";
 
 export const WorldBounds = {
   x: { min: 0, max: 0x48000 },
   z: { min: 0, max: 0x38000 },
 };
 
+// Memoized row that only depends on its own props
+const EncounterRow = memo(
+  (
+    {
+      type,
+      encounterId,
+      rate,
+      getEnemyNames,
+      onStartBattle,
+    }: {
+      type: string;
+      encounterId: number;
+      rate: number;
+      getEnemyNames: (encounterId: number) => string;
+      onStartBattle: (encounterId: number) => void;
+    }
+  ) => (
+    <tr className="bg-zinc-800 text-xs">
+      <td className="p-1">{type}</td>
+      <td className="p-1">{rate}</td>
+      <td className="p-1">{encounterId}</td>
+      <td className="p-1">{getEnemyNames(encounterId)}</td>
+      <td className="p-1">
+        <Button size="xs" variant="default" onClick={() => onStartBattle(encounterId)}>
+          Start Battle
+        </Button>
+      </td>
+    </tr>
+  ),
+  (prev, next) =>
+    prev.type === next.type &&
+    prev.encounterId === next.encounterId &&
+    prev.rate === next.rate
+);
+
+// Memoized table - only re-renders when region or terrain change
+const EncountersTable = memo(
+  (
+    {
+      region,
+      terrain,
+      encounterSet,
+      getEnemyNames,
+      onStartBattle,
+    }: {
+      region: number;
+      terrain: number;
+      encounterSet: EncounterSet;
+      getEnemyNames: (encounterId: number) => string;
+      onStartBattle: (encounterId: number) => void;
+    }
+  ) => (
+    <>
+      <table className="w-full">
+        <thead className="bg-zinc-800 text-xs text-left">
+          <tr>
+            <th className="p-1">Type</th>
+            <th className="p-1">Rate</th>
+            <th className="p-1">Enc. ID</th>
+            <th className="p-1">Battle Scene</th>
+            <th className="p-1">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {encounterSet.normalEncounters.map((encounter, index) =>
+            encounter.encounterId > 0 ? (
+              <EncounterRow
+                key={`normal-${index}`}
+                type={`Normal ${index + 1}`}
+                encounterId={encounter.encounterId}
+                rate={encounter.rate}
+                getEnemyNames={getEnemyNames}
+                onStartBattle={onStartBattle}
+              />
+            ) : null
+          )}
+          {encounterSet.backAttacks.map((encounter, index) =>
+            encounter.encounterId > 0 ? (
+              <EncounterRow
+                key={`back-${index}`}
+                type={`Back Attack ${index + 1}`}
+                encounterId={encounter.encounterId}
+                rate={encounter.rate}
+                getEnemyNames={getEnemyNames}
+                onStartBattle={onStartBattle}
+              />
+            ) : null
+          )}
+          {encounterSet.sideAttack.encounterId > 0 && (
+            <EncounterRow
+              type="Side Attack"
+              encounterId={encounterSet.sideAttack.encounterId}
+              rate={encounterSet.sideAttack.rate}
+              getEnemyNames={getEnemyNames}
+              onStartBattle={onStartBattle}
+            />
+          )}
+          {encounterSet.pincerAttack.encounterId > 0 && (
+            <EncounterRow
+              type="Pincer Attack"
+              encounterId={encounterSet.pincerAttack.encounterId}
+              rate={encounterSet.pincerAttack.rate}
+              getEnemyNames={getEnemyNames}
+              onStartBattle={onStartBattle}
+            />
+          )}
+          {encounterSet.chocoboEncounters.map((encounter, index) =>
+            encounter.encounterId > 0 ? (
+              <EncounterRow
+                key={`chocobo-${index}`}
+                type={`Chocobo ${index + 1}`}
+                encounterId={encounter.encounterId}
+                rate={encounter.rate}
+                getEnemyNames={getEnemyNames}
+                onStartBattle={onStartBattle}
+              />
+            ) : null
+          )}
+        </tbody>
+      </table>
+    </>
+  ),
+  (prev, next) => prev.region === next.region && prev.terrain === next.terrain
+);
+
 export function World(props: { ff7: FF7 }) {
   const ff7 = props.ff7;
   const state = ff7.gameState;
+  const { gameData } = useFF7Context();
   const [coords, setCoords] = useState({ x: 0, z: 0 });
   const [zoom, setZoom] = useState(0);
   const [tilt, setTilt] = useState(0);
@@ -61,6 +189,83 @@ export function World(props: { ff7: FF7 }) {
   };
 
   const isUnderwater = state.worldCurrentModel.y < -1000;
+
+  // Get current region and terrain type for encounters
+  const getCurrentEncounterData = () => {
+    if (!gameData.worldEncounterData || !gameData.worldRegionSets) {
+      return null;
+    }
+
+    const currentRegion = state.worldCurrentModel.location_id;
+    if (currentRegion === undefined || currentRegion === 255) {
+      return null;
+    }
+
+    // Map region to terrain type using worldRegionSets
+    const regionSet = gameData.worldRegionSets[currentRegion];
+    if (!regionSet) {
+      return null;
+    }
+
+    // Find which terrain type (set index) matches the current walkmesh_type
+    const currentTerrain = state.worldCurrentModel.walkmesh_type;
+    const setIndex = regionSet.findIndex(terrain => terrain === currentTerrain);
+    
+    if (setIndex === -1) {
+      return null;
+    }
+
+    // Get the encounter set for this region and terrain type
+    const encounterSet = gameData.worldEncounterData.randomEncounters.regions[currentRegion].sets[setIndex];
+    
+    return {
+      region: currentRegion,
+      terrain: currentTerrain,
+      setIndex,
+      encounterSet
+    };
+  };
+
+  const currentEncounterData = useMemo(() => getCurrentEncounterData(), [
+    state.worldCurrentModel.location_id,
+    state.worldCurrentModel.walkmesh_type,
+    gameData.worldEncounterData,
+    gameData.worldRegionSets,
+  ]);
+
+  // Helper function to get enemy names from encounter ID using battleFormations map
+  const getEnemyNamesFromEncounterId = (encounterId: number): string => {
+    if (!gameData.battleFormations || encounterId <= 0) {
+      return 'Unknown';
+    }
+
+    const formationItem = gameData.battleFormations.get(encounterId);
+    if (!formationItem) {
+      return 'Unknown';
+    }
+
+    // Count occurrences of each enemy
+    debugger;
+    const enemyCounts = new Map<string, number>();
+    formationItem.formation.enemies.forEach(entry => {
+      const enemy = formationItem.enemies.find(e => e.id === entry.enemy_id);
+      const enemyName = enemy && enemy.name ? enemy.name : "<Unnamed>";
+      enemyCounts.set(enemyName, (enemyCounts.get(enemyName) || 0) + 1);
+    });
+
+    // Format enemy list with counts
+    const enemyList = Array.from(enemyCounts.entries()).map(([name, count]) => 
+      count > 1 ? `${name.trim()} (x${count})` : name.trim()
+    );
+    
+    return enemyList.join(', ') || 'Unknown';
+  };
+
+  const getEnemyNames = useCallback((id: number) => getEnemyNamesFromEncounterId(id), [gameData.battleFormations]);
+  const onStartBattle = useCallback((id: number) => {
+    if (ff7.gameState.currentModule === GameModule.Battle) return;
+    ff7.startBattle(id, 0);
+  }, [ff7]);
 
   const openEditPopover = (title: string, value: string, modelIndex: number, coord: "x" | "y" | "z" | "direction") => {
     setEditValue(value);
@@ -299,6 +504,24 @@ export function World(props: { ff7: FF7 }) {
         {icons}
         <div className="absolute z-50 w-2 h-2 bg-orange-600 border-2 border-white rounded-full animate-pulse" style={{ top: `${coords.z - 4}px`, left: `${coords.x - 4}px` }}></div>
       </div>
+
+      <h2 className="uppercase mt-3 font-medium text-sm border-b border-zinc-600 pb-0 mb-2 tracking-wide text-zinc-900 dark:text-zinc-100">
+        Encounters
+      </h2>
+      {(currentEncounterData && currentEncounterData.encounterSet.active) ? (
+        <EncountersTable
+          region={currentEncounterData.region}
+          terrain={currentEncounterData.terrain}
+          encounterSet={currentEncounterData.encounterSet}
+          getEnemyNames={getEnemyNames}
+          onStartBattle={onStartBattle}
+        />
+      ) : 
+      <div className="text-xs text-zinc-400 text-center mb-8">
+        No encounters for current region & terrain
+      </div>
+      
+      }
 
       {state.worldModels && state.worldModels.length > 0 && <>
         <h4 className="text-center mt-2 mb-1 font-medium">World Models</h4>

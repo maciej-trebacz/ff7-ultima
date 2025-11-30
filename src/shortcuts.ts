@@ -144,4 +144,22 @@ export const defaultShortcuts: Shortcut[] = [
       await ff7.showGameMessage("Instant ATB " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
     },
   },
+  {
+    key: "",
+    action: "Toggle Run by Default",
+    callback: async (ff7) => {
+      await ff7.toggleRunByDefault();
+      const enabled = !ff7.gameState.fieldRunByDefaultEnabled;
+      await ff7.showGameMessage("Run by Default " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
+    },
+  },
+  {
+    key: "",
+    action: "Toggle Auto Sense",
+    callback: async (ff7) => {
+      await ff7.toggleAutoSense();
+      const enabled = !ff7.gameState.autoSenseEnabled;
+      await ff7.showGameMessage("Auto Sense " + (enabled ? "Enabled" : "Disabled"), 2000, enabled ? 4 : 6);
+    },
+  },
 ]; 

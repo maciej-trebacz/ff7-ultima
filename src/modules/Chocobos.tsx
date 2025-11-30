@@ -17,10 +17,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { EditPopover } from "@/components/EditPopover";
-import { ChocoboStatsModal, ChocoboStats, ChocoboPersonality, FencedChocoboType } from "@/components/modals/ChocoboStatsModal";
+import { ChocoboStatsModal, ChocoboStats, ChocoboPersonality } from "@/components/modals/ChocoboStatsModal";
 import { FF7 } from "@/useFF7";
 import { Trash2, BarChart3, Plus } from "lucide-react";
-import { ChocoboSlot } from "@/types";
+import { ChocoboSlot, ChocoboRating } from "@/types";
 import { encodeText } from "@/ff7/fftext";
 import { useFF7Context } from "@/FF7Context";
 
@@ -47,7 +47,7 @@ interface StableChocobo {
 }
 
 interface LocalFencedChocobo {
-  type: FencedChocoboType;
+  type: ChocoboRating;
 }
 
 // Helper component for editable fields matching Party.tsx pattern
@@ -125,11 +125,11 @@ const makeDefaultStableChocobo = (): StableChocobo => ({
 });
 
 const makeDefaultFencedChocobo = (): LocalFencedChocobo => ({
-  type: FencedChocoboType.Average,
+  type: ChocoboRating.average,
 });
 
 const makeDefaultStats = (): ChocoboStats => ({
-  rating: FencedChocoboType.Average,
+  rating: ChocoboRating.average,
   racesWon: 0,
   personality: ChocoboPersonality.RunType0,
   acceleration: 50,
@@ -177,28 +177,15 @@ const getColorStyle = (color: ChocoboColor): string => {
   }
 };
 
-const ratingToNumber = (rating: FencedChocoboType): number => {
-  switch (rating) {
-    case FencedChocoboType.Wonderful: return 1;
-    case FencedChocoboType.Great: return 2;
-    case FencedChocoboType.Good: return 3;
-    case FencedChocoboType.Average: return 4;
-    case FencedChocoboType.Poor: return 5;
-    case FencedChocoboType.SoSo: return 6;
-    default: return 4;
-  }
+const ratingToNumber = (rating: ChocoboRating): number => {
+  return rating;
 };
 
-const numberToRating = (num: number): FencedChocoboType => {
-  switch (num) {
-    case 1: return FencedChocoboType.Wonderful;
-    case 2: return FencedChocoboType.Great;
-    case 3: return FencedChocoboType.Good;
-    case 4: return FencedChocoboType.Average;
-    case 5: return FencedChocoboType.Poor;
-    case 6: return FencedChocoboType.SoSo;
-    default: return FencedChocoboType.Average;
+const numberToRating = (num: number): ChocoboRating => {
+  if (num >= 1 && num <= 8) {
+    return num as ChocoboRating;
   }
+  return ChocoboRating.average;
 };
 
 const personalityToNumber = (personality: ChocoboPersonality): number => {
@@ -259,7 +246,7 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
         };
         
         newStableStats[index] = {
-          rating: numberToRating(1), // We'll derive this from other stats
+          rating: slot.rating,
           racesWon: slot.races_won,
           personality: numberToPersonality(slot.personality),
           acceleration: slot.acceleration,
@@ -295,6 +282,7 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
     try {
       if (chocobo && stats && chocoboData) {
         const slot: ChocoboSlot = {
+          rating: stats.rating,
           sprint_speed: stats.sprintSpeedMin,
           max_sprint_speed: stats.sprintSpeedMax,
           speed: stats.runSpeedMin,
@@ -628,16 +616,16 @@ export function Chocobos({ ff7 }: { ff7: FF7 }) {
                   <div className="flex items-center justify-between py-0.5">
                     <Label className="text-xs whitespace-nowrap mr-2">Type</Label>
                     <Select
-                      value={chocobo.type}
-                      onValueChange={(val) => updateFenced(index, { type: val as FencedChocoboType })}
+                      value={Object.keys(ChocoboRating).find(key => ChocoboRating[key as keyof typeof ChocoboRating] === chocobo.type) || 'average'}
+                      onValueChange={(val) => updateFenced(index, { type: ChocoboRating[val as keyof typeof ChocoboRating] })}
                     >
                       <SelectTrigger className="h-6 text-xs w-20">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.values(FencedChocoboType).map((t) => (
-                          <SelectItem key={t} value={t} className="text-xs">
-                            {t}
+                        {Object.keys(ChocoboRating).filter(key => isNaN(Number(key))).map((key) => (
+                          <SelectItem key={key} value={key} className="text-xs">
+                            {key}
                           </SelectItem>
                         ))}
                       </SelectContent>

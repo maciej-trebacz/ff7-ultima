@@ -52,7 +52,7 @@ const BattleFormationRow: React.FC<{ item: BattleFormationItem }> = ({ item }) =
   const enemyCounts = new Map<string, number>();
   formation.enemies.forEach(entry => {
     const enemy = enemies.find(e => e.id === entry.enemy_id);
-    const enemyName = enemy ? enemy.name : "Unknown";
+    const enemyName = enemy && enemy.name ? enemy.name : "<Unnamed>";
     enemyCounts.set(enemyName, (enemyCounts.get(enemyName) || 0) + 1);
   });
 

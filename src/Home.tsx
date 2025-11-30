@@ -17,6 +17,17 @@ import { Chocobos } from "./modules/Chocobos";
 import { Variables } from "./modules/Variables";
 import { SaveStatesModule } from "./modules/SaveStates";
 import { useShortcuts } from './useShortcuts';
+import { ChocoboHead } from "./components/icons/ChocoboHead";
+import { BinaryGrid } from "./components/icons/BinaryGrid";
+import { BusterSword } from "./components/icons/BusterSword";
+import { CloudParty } from "./components/icons/CloudParty";
+import { 
+  Settings2, 
+  Map as MapIcon, 
+  Globe, 
+  Save, 
+  LucideIcon 
+} from "lucide-react";
 
 const TAB_TITLES: Record<Tabs, string> = {
   [Tabs.General]: "General",
@@ -27,6 +38,17 @@ const TAB_TITLES: Record<Tabs, string> = {
   [Tabs.Chocobos]: "Chocobos",
   [Tabs.Variables]: "Variables",
   [Tabs.SaveStates]: "Save States",
+};
+
+const TAB_ICONS: Record<Tabs, LucideIcon> = {
+  [Tabs.General]: Settings2,
+  [Tabs.Field]: MapIcon,
+  [Tabs.World]: Globe,
+  [Tabs.Battle]: BusterSword,
+  [Tabs.Party]: CloudParty,
+  [Tabs.Chocobos]: ChocoboHead,
+  [Tabs.Variables]: BinaryGrid,
+  [Tabs.SaveStates]: Save,
 };
 
 function Home() {
@@ -80,13 +102,17 @@ function Home() {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {Object.values(Tabs).map((tab) => (
-                      <SidebarMenuItem key={tab}>
-                        <SidebarMenuButton isActive={currentTab === tab} onClick={() => setCurrentTab(tab)}>
-                          {TAB_TITLES[tab]}
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                    {Object.values(Tabs).map((tab) => {
+                      const Icon = TAB_ICONS[tab];
+                      return (
+                        <SidebarMenuItem key={tab}>
+                          <SidebarMenuButton isActive={currentTab === tab} onClick={() => setCurrentTab(tab)}>
+                            <Icon />
+                            <span>{TAB_TITLES[tab]}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>

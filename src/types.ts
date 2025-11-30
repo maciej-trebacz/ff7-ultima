@@ -79,6 +79,25 @@ export interface FieldLine {
   entity: number,
 }
 
+export interface FieldEncounterPair {
+  encounter_id: number;
+  rate: number;
+}
+
+export interface FieldEncounterSet {
+  active: boolean;
+  encounter_rate: number;
+  normal_encounters: FieldEncounterPair[];
+  back_attacks: FieldEncounterPair[];
+  side_attack: FieldEncounterPair;
+  pincer_attack: FieldEncounterPair;
+}
+
+export interface FieldEncounterTables {
+  table1: FieldEncounterSet;
+  table2: FieldEncounterSet;
+}
+
 
 export interface BattleCharObj {
   index: number,
@@ -430,6 +449,7 @@ export interface BattleScene {
 
 // Chocobo types
 export interface ChocoboSlot {
+  rating: number;
   sprint_speed: number;
   max_sprint_speed: number;
   speed: number;

@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useContext, createContext, ReactNode, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useFF7Addresses, FF7Addresses } from './ff7Addresses';
-import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType, BattleScene, ChocoboData } from "./types";
-import { DataType, readMemory } from "./memory";
+import { GameModule, FieldModel, BattleCharObj, WorldModel, RandomEncounters, PartyMember, FieldLine, ElementalType, BattleScene, ChocoboData, SceneFormation, SceneEnemy, FieldEncounterTables } from "./types";
+import { DataType, readMemory, readMemoryBuffer } from "./memory";
 import { StatusChange, BattleLogItem } from '@/hooks/useBattleLog';
 import { statuses as statusEnum } from '@/ff7Statuses';
 import { useSetAtom } from 'jotai';
 import { battleLogAtom } from '@/hooks/useBattleLog';
 import { readFile } from "@tauri-apps/plugin-fs"
+import { EncWFile, EncWData } from './ff7/encwfile';
 
 export enum SpecialAttackFlags {
   DamageMP = 1,
@@ -33,6 +34,12 @@ export interface ItemData {
   special_attack_flags: number
 }
 
+interface BattleFormationItem {
+  id: number;
+  formation: SceneFormation;
+  enemies: SceneEnemy[];
+}
+
 interface GameDataType {
   commandNames: string[];
   magicNames: string[];
@@ -43,6 +50,9 @@ interface GameDataType {
   itemNames: string[];
   materiaNames: string[];
   battleScenes: BattleScene[];
+  battleFormations: Map<number, BattleFormationItem>;
+  worldEncounterData: EncWData | null;
+  worldRegionSets: number[][] | null;
 }
 
 // Default state for game data
@@ -56,6 +66,9 @@ const defaultGameData: GameDataType = {
   itemNames: [],
   materiaNames: [],
   battleScenes: [],
+  battleFormations: new Map(),
+  worldEncounterData: null,
+  worldRegionSets: null,
 };
 
 // Default state for game state
@@ -120,11 +133,15 @@ const defaultGameState = {
   worldMapType: 0,
   fieldTmpVars: [] as number[],
   fieldLines: [] as FieldLine[],
+  fieldEncounters: null as FieldEncounterTables | null,
+  fieldAltEncountersEnabled: false,
   battleQueue: [] as number[],
   walkAnywhereEnabled: false,
   lovePoints: [] as number[],
   battlePoints: 0,
   chocoboData: null as ChocoboData | null,
+  autoSenseEnabled: false,
+  fieldRunByDefaultEnabled: false,
 };
 
 export type FF7State = typeof defaultGameState;
@@ -205,6 +222,47 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Function to load world encounter data
+  const loadWorldEncounterData = async (): Promise<{ worldEncounterData: EncWData | null; worldRegionSets: number[][] | null }> => {
+    let worldEncounterData: EncWData | null = null;
+    let worldRegionSets: number[][] | null = null;
+
+    // Load World Encounter data
+    try {
+      const encounterMemoryData = await readMemoryBuffer(0xde6b78, 0x8a0);
+      const encounterBytes = new Uint8Array(encounterMemoryData);
+      const encWFile = new EncWFile(encounterBytes);
+      worldEncounterData = encWFile.data;
+      console.debug("World Encounter data loaded successfully", worldEncounterData);
+    } catch (error) {
+      console.warn("Failed to load World Encounter data:", error);
+    }
+
+    // Load World Region Sets data
+    try {
+      const regionSetsData: number[] = [];
+      for (let i = 0; i < 16; i++) {
+        const value = await readMemory(0x96dea0 + (i * 4), DataType.Int);
+        regionSetsData.push(value);
+      }
+      
+      // Parse as 16 sets of four numbers
+      worldRegionSets = [];
+      for (let i = 0; i < 16; i++) {
+        const set: number[] = [];
+        for (let j = 0; j < 4; j++) {
+          set.push((regionSetsData[i] >> (j * 8)) & 0xFF);
+        }
+        worldRegionSets.push(set);
+      }
+      console.debug("World Region Sets data loaded successfully", worldRegionSets);
+    } catch (error) {
+      console.warn("Failed to load World Region Sets data:", error);
+    }
+
+    return { worldEncounterData, worldRegionSets };
+  };
+
   // Function to load core game data (commands, items, magic, summon, e.skill)
   const loadCoreGameData = async () => {
     if (!connected || gameState.currentModule === GameModule.None) return; // Don't load if not connected
@@ -223,6 +281,22 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
       const fetchedSummonNames = fetchedAttackNames.slice(56, 72);
       const fetchedEnemySkillNames = fetchedAttackNames.slice(72, 96);
 
+      // Create battle formations map indexed by computed ID
+      const battleFormations = new Map<number, BattleFormationItem>();
+      fetchedBattleScenes.forEach((scene, sceneIndex) => {
+        scene.formations.forEach((formation, formationIndex) => {
+          const computedId = (sceneIndex * 4) + formationIndex; // Each scene has 4 formations
+          battleFormations.set(computedId, {
+            id: computedId,
+            formation,
+            enemies: scene.enemies
+          });
+        });
+      });
+
+      // Load world encounter data
+      const { worldEncounterData, worldRegionSets } = await loadWorldEncounterData();
+
       setGameData(prevData => ({
         ...prevData,
         commandNames: fetchedCommandNames,
@@ -233,6 +307,9 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
         itemNames: fetchedItemNames,
         materiaNames: fetchedMateriaNames,
         battleScenes: fetchedBattleScenes,
+        battleFormations,
+        worldEncounterData,
+        worldRegionSets,
       }));
       setGameDataError(null);
       console.debug("Core game data loaded.");
@@ -384,6 +461,12 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.warn("Failed to load chocobo data:", error);
         }
 
+        const parseMultiplier = (value: number, mode: number, defaultValue: number): number => {
+          if (value === defaultValue) return 1;
+          if (mode === 0xC1) return value === 2 ? 0.25 : 0.5;
+          return value;
+        };
+
         setGameState(prevState => ({
           ...prevState,
           currentModule: basic.current_module as number,
@@ -429,9 +512,9 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           battleEnemies: ff7Data.battle_enemies as BattleCharObj[],
           invincibilityEnabled: !(basic.invincibility_check === 0x4ee8),
           worldCurrentModel,
-          expMultiplier: !(basic.exp_multiplier === 0x38) ? basic.exp_multiplier as number : 1,
-          gilMultiplier: !(basic.gil_multiplier === 0xB1) ? basic.gil_multiplier as number : 1,
-          apMultiplier: !(basic.ap_multiplier === 0xe2) ? basic.ap_multiplier as number : 1,
+          expMultiplier: parseMultiplier(basic.exp_multiplier, basic.exp_multiplier_mode, 0x38),
+          gilMultiplier: parseMultiplier(basic.gil_multiplier, basic.gil_multiplier_mode, 0xB1),
+          apMultiplier: parseMultiplier(basic.ap_multiplier, basic.ap_multiplier_mode, 0xe2),
           worldModels,
           battleChocoboRating: basic.battle_chocobo_rating as number,
           menuAlwaysEnabled: basic.menu_always_enabled === 0xc7,
@@ -446,11 +529,15 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
           worldMapType: basic.world_map_type as number,
           fieldTmpVars: basic.field_tmp_vars as number[],
           fieldLines: ff7Data.field_lines as FieldLine[],
+          fieldEncounters: ff7Data.field_encounters as FieldEncounterTables | null,
+          fieldAltEncountersEnabled: basic.field_alt_encounters_enabled === 1,
           battleQueue: basic.battle_queue as number[],
           walkAnywhereEnabled: basic.walk_anywhere_check === 0xe9,
           lovePoints: basic.love_points as number[],
           battlePoints: basic.battle_points as number,
           chocoboData,
+          autoSenseEnabled: basic.auto_sense_check === 0x00,
+          fieldRunByDefaultEnabled: basic.field_run_by_default_check === 0x75,
         }));
 
         // Status Change Detection Logic - wait 50ms to ensure battle log was updated before
@@ -518,6 +605,19 @@ export const FF7Provider: React.FC<{ children: React.ReactNode }> = ({ children 
       loadEnemyAttackNames();
     }
   }, [connected, gameState.currentModule, gameState.battleId]);
+
+  useEffect(() => {
+    if (connected && gameState.currentModule === GameModule.World) {
+      console.debug("Loading world encounter data...");
+      loadWorldEncounterData().then(({ worldEncounterData, worldRegionSets }) => {
+        setGameData(prevData => ({
+          ...prevData,
+          worldEncounterData,
+          worldRegionSets,
+        }));
+      });
+    }
+  }, [connected, gameState.currentModule]);
 
   // Render loading/error states based on address loading
   if (isLoadingAddresses) {
