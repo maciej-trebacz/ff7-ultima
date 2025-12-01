@@ -2,7 +2,7 @@
 
 Real-time editor for Final Fantasy VII PC. Currently supports English Steam version only, contact me if you need to support other versions.
 
-[![Screenshot](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.0-screenshot.png)
+[![Screenshot](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.8-screenshot.png)](https://raw.githubusercontent.com/maciej-trebacz/ff7-ultima/main/ultima-1.8-screenshot.png)
 
 ## Having issues? Want other features?
 
