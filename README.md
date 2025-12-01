@@ -30,46 +30,40 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
 * Start an arbitrary battle both from the field and the world map, optionally setting the music
 * Skip FMVs
 * Game over from anywhere
-* Global hotkeys
+* Global hotkeys (keyboard shortcuts)
 * Remembers last used hacks, auto-applies hacks on game start
 * Field module
   - show current field ID, step ID, step fraction, danger value
   - enable/disable character movement
   - view a list of all loaded field models and edit the coordinates
   - warp to any field, optionally setting the destination coordinates
+  - view a list of encounters for current field, start any battle with one click
   - save states: create multiple save states and access them from any field
+  - skip dialogues - removes all blocking dialogue windows (keeps the ask prompts)
+  - run by default
 * World module
   - show current model's position and triangle information, and current region name
   - show an indicator when walking over chocobo tracks
   - view the world map with all relevant models marked on it
   - ability to click on the world map to teleport to that position
   - view a list of all loaded world models and edit the coordinates
+  - view a list of encounters for current region & terrain, start any battle with one click
   - custom zoom/tilt camera controls
+  - walk/land anywhere option
 * Battle module
   - show current battle ID
   - invincibility mode (sets physical and magic immunity)
   - instant ATB mode
-  - EXP/AP multipliers
+  - EXP/AP/Gil multipliers
   - show and edit ally and enemy information (HP, MP, statuses, ATB), instant kill
   - show enemy stats, elemental affinities and item drop/steal rates
   - view chocobo rating during battle
-
-## Planned features
-* Field
-  - Random encounter table
-  - Countdown timer
-  - Love points
-  - Fort condor - battles fought, won, lost, rank, funds
-  - Great Glacier step counter
-* World map
-  - zoomed-in version of the world map
-  - encounter table for current region/triangle type
-* Chocobos
-  - fenced chocobos (with their rating: wonderful, great, good, etc.)
-  - chocobos at the stable - gender, color, rating, races won
-  - indicate whether you can breed a chocobo
-* RNG info (seed, joker, animation index, etc.)
-* Battle log (display a log of attacks, status changes, etc.)
+  - auto sense - always show enemy HP in the battle help bar
+  - battle log - shows all actions performed by any battle entity
+* Party module (view & edit stats, equipment and status flags)
+* Chocobo module (manage your stables and chocobos, view & edit their stats)
+* Save States manager
+* ... and more that I probably forgot about
 
 ## Acknowledgements
 
@@ -80,3 +74,4 @@ Or come and chat with me [live on Twitch](https://twitch.tv/m4v3k) where I often
 * **myst6re** - for creating and open sourcing Makou Reactor
 * **NFITC1** - for creating WallMarket and ProudClod which I use extensively for research
 * **FF7 Wiki authors** - invaluable resource for learning about FF7 internals
+* **AI coding tools** - most of the code was written with the help of AI (Claude, GPT-5, Cursor Composer and others)
